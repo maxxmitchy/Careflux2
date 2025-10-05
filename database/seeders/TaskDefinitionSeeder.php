@@ -1,0 +1,31 @@
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use Src\Gamification\Domain\Models\TaskDefinition;
+
+class TaskDefinitionSeeder extends Seeder
+{
+    public function run(): void
+    {
+        TaskDefinition::updateOrCreate(
+            ['key' => 'PATIENT_FOLLOW_UP_REFILL'],
+            [
+                'name' => 'Patient Refill Reminder Follow-up',
+                'description' => 'Points awarded for contacting a patient about an upcoming prescription refill.',
+                'points' => 10,
+                'is_active' => true,
+            ]
+        );
+
+        TaskDefinition::updateOrCreate(['key' => 'TECHNICIAN_PRICE_VERIFY'], [
+            'name' => 'Verify Product Price', 'points' => 5,
+        ]);
+        TaskDefinition::updateOrCreate(['key' => 'TECHNICIAN_EXPIRY_LOG'], [
+            'name' => 'Log Product Expiry Date', 'points' => 10,
+        ]);
+
+        // We can add more tasks here in the future
+    }
+}

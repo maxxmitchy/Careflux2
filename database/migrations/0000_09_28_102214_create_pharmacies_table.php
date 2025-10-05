@@ -1,0 +1,32 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('pharmacies', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->string('address')->nullable();
+            $table->string('phone')->nullable();
+            $table->string('logo')->nullable();
+            $table->boolean('is_approved')->default(false)->index();
+
+            // locator fields
+            $table->foreignId('country_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('state_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('city_id')->nullable()->constrained()->nullOnDelete();
+
+            $table->timestamps();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('pharmacies');
+    }
+};

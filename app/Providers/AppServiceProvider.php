@@ -1,0 +1,39 @@
+<?php
+
+namespace App\Providers;
+
+use App\Observers\MarketingAssetObserver;
+use App\Observers\MedicationObserver;
+use App\Observers\PatientInteractionObserver;
+use App\Observers\PharmacyProductObserver;
+use App\Observers\ScrapedProductObserver;
+use Illuminate\Support\ServiceProvider;
+use Src\Marketing\Domain\Models\MarketingAsset;
+use Src\Medication\Domain\Models\Medication;
+use Src\Patient\Domain\Models\PatientInteraction;
+use Src\Pharmacy\Domain\Models\PharmacyProduct;
+use Src\Scraping\Domain\Models\ScrapedProduct;
+
+class AppServiceProvider extends ServiceProvider
+{
+    /**
+     * Register any application services.
+     */
+    public function register(): void
+    {
+        //
+    }
+
+    /**
+     * Bootstrap any application services.
+     */
+    public function boot(): void
+    {
+        PharmacyProduct::observe(PharmacyProductObserver::class);
+        MarketingAsset::observe(MarketingAssetObserver::class);
+        PatientInteraction::observe(PatientInteractionObserver::class);
+
+        ScrapedProduct::observe(ScrapedProductObserver::class);
+        Medication::observe(MedicationObserver::class);
+    }
+}
