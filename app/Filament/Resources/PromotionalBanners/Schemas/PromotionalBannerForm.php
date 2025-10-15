@@ -24,6 +24,7 @@ class PromotionalBannerForm
                     'search_results' => 'Search Results Feed',
                     'browse_page_top' => 'Browse Page (Top)',
                     'empty_state_promo' => 'Empty Results Search',
+                    'most_purchased_fallback' => 'Most Purchased',
                 ])->required(),
                 TextInput::make('display_after_item')->numeric()->default(5),
                 Toggle::make('is_active')->helperText('Activating this will deactivate others in the same placement.'),

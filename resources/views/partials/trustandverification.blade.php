@@ -54,7 +54,7 @@
                 <!-- Center Node -->
                 <div class="flex flex-col items-center space-y-2 z-30">
                     <div class="p-5 bg-emerald-500/10 rounded-full border border-emerald-400/30">
-                        <img src="/logo.jpg" alt="Careflux Engine" class="rounded-full h-9 w-9">
+                        <img src="/logobg.png" alt="Careflux Engine" class="rounded h-15 w-15">
                     </div>
                     <p class="text-xs font-semibold text-emerald-400">Careflux Engine</p>
                 </div>

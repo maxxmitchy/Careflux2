@@ -43,7 +43,8 @@
                             </p>
                         </div>
 
-                        @if($benefits->isNotEmpty())
+                        {{-- @if($benefits->isNotEmpty()) --}}
+                        @if([])
                             {{-- Mobile View (2-column grid) --}}
                             <div class="sm:hidden mt-16">
                                 <div class="flex justify-between items-center">
@@ -110,102 +111,6 @@
             </div>
         </section>
 
-        {{-- trust and verification --}}
-        @include('partials.trustandverification')
-
-        <!-- Pharmacist Earning Showcase -->
-        @if($earningShowcase)
-        <section class="py-20 bg-white">
-                <small class="text-xs flex justify-center mb-4 font-extrabold bg-gradient-to-r from-emerald-600 to-emerald-500 bg-clip-text text-transparent uppercase">
-                FOR PHARMACISTS & CUSTOMERS
-                </small>
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                        <!-- Animation Column -->
-                        <div x-data="{
-                                steps: {{ json_encode($earningShowcase->steps) }},
-                                currentIndex: 0,
-                                totalPoints: 0,
-                                showCoin: false,
-                                startAnimation() {
-                                    setInterval(() => {
-                                        this.showCoin = true;
-                                        setTimeout(() => {
-                                            this.totalPoints += this.steps[this.currentIndex].points_example;
-                                            this.currentIndex = (this.currentIndex + 1) % this.steps.length;
-                                            this.showCoin = false;
-                                        }, 500); // Coin animation duration
-                                    }, 4000); // Time per step
-                                }
-                            }"
-                            x-init="startAnimation()"
-                            class="relative bg-gray-900 rounded-2xl p-6 h-[24rem] flex flex-col justify-between border border-gray-700 shadow-2xl"
-                        >
-                            <!-- Header with Wallet -->
-                            <div class="flex justify-between items-center">
-                                <h3 class="text-sm font-semibold text-white">Your Task Rewards</h3>
-                                <div class="flex items-center gap-2 text-amber-400 bg-gray-800/50 px-3 py-1 rounded-full">
-                                    <x-heroicon-s-wallet class="h-5 w-5"/>
-                                    <span class="font-bold font-mono" x-text="totalPoints + ' pts'"></span>
-                                </div>
-                            </div>
-
-                            <!-- The Animated Coin -->
-                            <div x-show="showCoin" x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0 scale-50" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-500" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-50 translate-x-24 -translate-y-24" x-cloak class="absolute inset-0 flex items-center justify-center">
-                                <div class="flex items-center justify-center h-20 w-20 bg-amber-400/10 rounded-full">
-                                    <div class="flex items-center justify-center h-16 w-16 bg-amber-400/20 rounded-full">
-                                        <span class="text-3xl font-bold text-amber-400">₦</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- The Steps -->
-                            <div class="relative w-full h-20 overflow-hidden">
-                                <template x-for="(step, index) in steps" :key="index">
-                                    <div x-show="currentIndex === index"
-                                        x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0"
-                                        x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
-                                        class="absolute inset-0 flex items-center gap-4">
-                                        <div class="flex-shrink-0 h-10 w-10 bg-gray-800 rounded-full flex items-center justify-center border border-gray-700">
-                                            <x-heroicon-o-sparkles class="h-5 w-5 text-emerald-400" />
-                                        </div>
-                                        <div>
-                                            <h4 class="text-sm font-bold text-white" x-text="step.title + ' (+' + step.points_example + ' pts)'"></h4>
-                                            <p class="text-xs text-gray-400" x-text="step.description"></p>
-                                        </div>
-                                    </div>
-                                </template>
-                            </div>
-                        </div>
-
-                        <!-- Content Column -->
-                        <div class="text-center lg:text-left">
-                            <h2 class="text-2xl font-extrabold tracking-tight text-gray-900">{{ $earningShowcase->headline }}</h2>
-                            <p class="mt-4 text-sm sm:text-base text-gray-600 max-w-lg mx-auto lg:mx-0">{{ $earningShowcase->description }}</p>
-                        </div>
-
-                        <div class="mt-2 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                            {{-- Primary CTA (For Pharmacists) --}}
-                            <a href="{{ $earningShowcase->cta_url }}"
-                            class="inline-flex items-center justify-center gap-2 px-6 py-3 text-sm font-semibold text-white bg-emerald-600 rounded shadow-md hover:bg-emerald-700 transition">
-                                @svg('heroicon-o-briefcase', 'h-5 w-5')
-                                {{ $earningShowcase->cta_text }}
-                            </a>
-
-                            {{-- Secondary CTA (For Patients/Customers) --}}
-                            @if($earningShowcase->secondary_cta_text && $earningShowcase->secondary_cta_url)
-                                <a href="{{ $earningShowcase->secondary_cta_url }}"
-                                class="inline-flex items-center justify-center gap-2 px-6 py-3 text-sm font-semibold text-gray-700 bg-gray-100 rounded border border-gray-200 hover:bg-gray-200 transition">
-                                    @svg('heroicon-o-shopping-cart', 'h-5 w-5')
-                                    {{ $earningShowcase->secondary_cta_text }}
-                                </a>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-            </section>
-        @endif
-
         <!-- Features Section -->
         <section id="features" class="py-20 bg-gray-50">
             <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -232,6 +137,76 @@
                 </div>
             </div>
         </section>
+
+        {{-- trust and verification --}}
+        @include('partials.trustandverification')
+
+        <livewire:most-purchased-products />
+
+        <!-- Care Packages Showcase -->
+        @if($featuredPackages->isNotEmpty())
+            <section class="pb-16 pt-24 bg-white">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center mb-10">
+                        <h2 class="text-2xl font-bold text-gray-900">Shop Curated Care Packages</h2>
+                        <p class="mt-2 text-sm text-gray-600">Solution-focused bundles, designed by pharmacists for your health goals.</p>
+                    </div>
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                        @foreach($featuredPackages as $asset)
+                            <x-marketing-asset-card :asset="$asset" />
+                        @endforeach
+                    </div>
+                </div>
+            </section>
+        @endif
+
+
+        <!-- DYNAMIC DELIVERY ANIMATION SECTION -->
+        @if($deliveryAnimation)
+            <section class="relative py-24 overflow-hidden bg-white">
+                <div class="max-w-7xl mx-auto px-6">
+                    <div class="grid items-center gap-12 lg:grid-cols-2">
+                        <!-- Content -->
+                        <div>
+                            <h2 class="text-2xl font-extrabold tracking-tight text-gray-900 md:text-3xl">
+                                <span class="block">{{ $deliveryAnimation->headline }}</span>
+                                <span class="block text-emerald-600">{{ $deliveryAnimation->subheadline }}</span>
+                            </h2>
+                            <p class="mt-4 max-w-2xl text-sm text-gray-600 md:text-base">{{ $deliveryAnimation->description }}</p>
+                            <a href="{{ $deliveryAnimation->cta_url }}" class="mt-8 inline-block px-6 py-3 text-sm font-semibold text-white bg-emerald-600 rounded shadow hover:bg-emerald-700">
+                                {{ $deliveryAnimation->cta_text }}
+                            </a>
+                        </div>
+
+                        <!-- Animation Container -->
+                        <div x-data="{
+                                steps: {{ json_encode($deliveryAnimation->steps->map(fn($s) => ['status' => $s->status_text, 'location' => $s->location_text])) }},
+                                currentIndex: 0
+                            }"
+                             x-init="setInterval(() => { currentIndex = (currentIndex + 1) % steps.length }, 3000)"
+                             class="relative mt-4"
+                        >
+                            <img src="{{ asset('storage/' . $deliveryAnimation->image_path) }}" alt="Medication package" class="relative z-10 w-full max-w-sm mx-auto">
+                            <div class="z-20 absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-xs bg-white/80 backdrop-blur-md rounded-xl shadow-2xl p-4 border border-gray-100">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
+                                        <x-heroicon-s-check-circle class="w-5 h-5 text-green-600" />
+                                    </div>
+                                    <div class="relative w-full h-8 overflow-hidden">
+                                        <template x-for="(step, index) in steps" :key="index">
+                                            <div x-show="currentIndex === index" x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0 translate-y-full" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-500" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-full" class="absolute inset-0">
+                                                <p class="text-xs font-bold text-gray-800" x-text="step.status"></p>
+                                                <p class="text-xs text-gray-500" x-text="step.location"></p>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        @endif
 
         @if($pharmacyShowcase)
             <section class="py-20 bg-gray-800 text-white overflow-hidden">
@@ -331,64 +306,94 @@
             </section>
         @endif
 
-        <!-- Care Packages Showcase -->
-        @if($featuredPackages->isNotEmpty())
-            <section class="pb-16 pt-24 bg-white">
+
+        <!-- Pharmacist Earning Showcase -->
+        @if($earningShowcase)
+        <section class="py-20 bg-white">
+                <small class="text-xs flex justify-center mb-4 font-extrabold bg-gradient-to-r from-emerald-600 to-emerald-500 bg-clip-text text-transparent uppercase">
+                FOR PHARMACISTS & CUSTOMERS
+                </small>
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div class="text-center mb-10">
-                        <h2 class="text-2xl font-bold text-gray-900">Shop Curated Care Packages</h2>
-                        <p class="mt-2 text-sm text-gray-600">Solution-focused bundles, designed by pharmacists for your health goals.</p>
-                    </div>
-                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-                        @foreach($featuredPackages as $asset)
-                            <x-marketing-asset-card :asset="$asset" />
-                        @endforeach
-                    </div>
-                </div>
-            </section>
-        @endif
-
-        <!-- DYNAMIC DELIVERY ANIMATION SECTION -->
-        @if($deliveryAnimation)
-            <section class="relative py-24 overflow-hidden bg-white">
-                <div class="max-w-7xl mx-auto px-6">
-                    <div class="grid items-center gap-12 lg:grid-cols-2">
-                        <!-- Content -->
-                        <div>
-                            <h2 class="text-2xl font-extrabold tracking-tight text-gray-900 md:text-3xl">
-                                <span class="block">{{ $deliveryAnimation->headline }}</span>
-                                <span class="block text-emerald-600">{{ $deliveryAnimation->subheadline }}</span>
-                            </h2>
-                            <p class="mt-4 max-w-2xl text-sm text-gray-600 md:text-base">{{ $deliveryAnimation->description }}</p>
-                            <a href="{{ $deliveryAnimation->cta_url }}" class="mt-8 inline-block px-6 py-3 text-sm font-semibold text-white bg-emerald-600 rounded shadow hover:bg-emerald-700">
-                                {{ $deliveryAnimation->cta_text }}
-                            </a>
-                        </div>
-
-                        <!-- Animation Container -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                        <!-- Animation Column -->
                         <div x-data="{
-                                steps: {{ json_encode($deliveryAnimation->steps->map(fn($s) => ['status' => $s->status_text, 'location' => $s->location_text])) }},
-                                currentIndex: 0
+                                steps: {{ json_encode($earningShowcase->steps) }},
+                                currentIndex: 0,
+                                totalPoints: 0,
+                                showCoin: false,
+                                startAnimation() {
+                                    setInterval(() => {
+                                        this.showCoin = true;
+                                        setTimeout(() => {
+                                            this.totalPoints += this.steps[this.currentIndex].points_example;
+                                            this.currentIndex = (this.currentIndex + 1) % this.steps.length;
+                                            this.showCoin = false;
+                                        }, 500); // Coin animation duration
+                                    }, 4000); // Time per step
+                                }
                             }"
-                             x-init="setInterval(() => { currentIndex = (currentIndex + 1) % steps.length }, 3000)"
-                             class="relative mt-4"
+                            x-init="startAnimation()"
+                            class="relative bg-gray-900 rounded-2xl p-6 h-[24rem] flex flex-col justify-between border border-gray-700 shadow-2xl"
                         >
-                            <img src="{{ asset('storage/' . $deliveryAnimation->image_path) }}" alt="Medication package" class="relative z-10 w-full max-w-sm mx-auto">
-                            <div class="z-20 absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-xs bg-white/80 backdrop-blur-md rounded-xl shadow-2xl p-4 border border-gray-100">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
-                                        <x-heroicon-s-check-circle class="w-5 h-5 text-green-600" />
-                                    </div>
-                                    <div class="relative w-full h-8 overflow-hidden">
-                                        <template x-for="(step, index) in steps" :key="index">
-                                            <div x-show="currentIndex === index" x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0 translate-y-full" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-500" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-full" class="absolute inset-0">
-                                                <p class="text-xs font-bold text-gray-800" x-text="step.status"></p>
-                                                <p class="text-xs text-gray-500" x-text="step.location"></p>
-                                            </div>
-                                        </template>
+                            <!-- Header with Wallet -->
+                            <div class="flex justify-between items-center">
+                                <h3 class="text-sm font-semibold text-white">Your Task Rewards</h3>
+                                <div class="flex items-center gap-2 text-amber-400 bg-gray-800/50 px-3 py-1 rounded-full">
+                                    <x-heroicon-s-wallet class="h-5 w-5"/>
+                                    <span class="font-bold font-mono" x-text="totalPoints + ' pts'"></span>
+                                </div>
+                            </div>
+
+                            <!-- The Animated Coin -->
+                            <div x-show="showCoin" x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0 scale-50" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-500" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-50 translate-x-24 -translate-y-24" x-cloak class="absolute inset-0 flex items-center justify-center">
+                                <div class="flex items-center justify-center h-20 w-20 bg-amber-400/10 rounded-full">
+                                    <div class="flex items-center justify-center h-16 w-16 bg-amber-400/20 rounded-full">
+                                        <span class="text-3xl font-bold text-amber-400">₦</span>
                                     </div>
                                 </div>
                             </div>
+
+                            <!-- The Steps -->
+                            <div class="relative w-full h-20 overflow-hidden">
+                                <template x-for="(step, index) in steps" :key="index">
+                                    <div x-show="currentIndex === index"
+                                        x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0"
+                                        x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+                                        class="absolute inset-0 flex items-center gap-4">
+                                        <div class="flex-shrink-0 h-10 w-10 bg-gray-800 rounded-full flex items-center justify-center border border-gray-700">
+                                            <x-heroicon-o-sparkles class="h-5 w-5 text-emerald-400" />
+                                        </div>
+                                        <div>
+                                            <h4 class="text-sm font-bold text-white" x-text="step.title + ' (+' + step.points_example + ' pts)'"></h4>
+                                            <p class="text-xs text-gray-400" x-text="step.description"></p>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+
+                        <!-- Content Column -->
+                        <div class="text-center lg:text-left">
+                            <h2 class="text-2xl font-extrabold tracking-tight text-gray-900">{{ $earningShowcase->headline }}</h2>
+                            <p class="mt-4 text-sm sm:text-base text-gray-600 max-w-lg mx-auto lg:mx-0">{{ $earningShowcase->description }}</p>
+                        </div>
+
+                        <div class="mt-2 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                            {{-- Primary CTA (For Pharmacists) --}}
+                            <a href="{{ $earningShowcase->cta_url }}"
+                            class="inline-flex items-center justify-center gap-2 px-6 py-3 text-sm font-semibold text-white bg-emerald-600 rounded shadow-md hover:bg-emerald-700 transition">
+                                @svg('heroicon-o-briefcase', 'h-5 w-5')
+                                {{ $earningShowcase->cta_text }}
+                            </a>
+
+                            {{-- Secondary CTA (For Patients/Customers) --}}
+                            @if($earningShowcase->secondary_cta_text && $earningShowcase->secondary_cta_url)
+                                <a href="{{ $earningShowcase->secondary_cta_url }}"
+                                class="inline-flex items-center justify-center gap-2 px-6 py-3 text-sm font-semibold text-gray-700 bg-gray-100 rounded border border-gray-200 hover:bg-gray-200 transition">
+                                    @svg('heroicon-o-shopping-cart', 'h-5 w-5')
+                                    {{ $earningShowcase->secondary_cta_text }}
+                                </a>
+                            @endif
                         </div>
                     </div>
                 </div>
