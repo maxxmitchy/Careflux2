@@ -1,70 +1,45 @@
 @props(['product'])
 
 @php
-    $cartService = app(\Src\Order\Domain\Contracts\CartServiceInterface::class);
-    $inCart = $cartService->getItems()->firstWhere('uniqueId', $product->uniqueId);
+    $quoteService = app(\Src\Order\Application\Services\QuoteRequestService::class);
+    $isRequested = $product->type === 'scraped' && !empty($product->productUrl) && $quoteService->isRecentlyRequested($product->productUrl);
 @endphp
 
-<div x-data="{ added: {{ $inCart ? 'true' : 'false' }} }">
-
-    {{-- ======================================================= --}}
-    {{-- SCENARIO 1: The product is a Prescription (Rx) item. --}}
-    {{-- ======================================================= --}}
+<div x-data="{ isRequested: {{ $isRequested ? 'true' : 'false' }} }">
     @if($product->isPrescription)
         <button
             @auth
-                {{-- If user is logged in, dispatch a Livewire event to the parent component --}}
-                wire:click="$dispatch('redirect-to-verify', { productSlug: '{{ $product->slug ?? '' }}' })"
+                wire:click="redirectToVerification('{{ $product->slug ?? '' }}')"
             @else
-                {{-- If user is a guest, use Alpine to open the login/register modal --}}
                 x-on:click.prevent="$dispatch('open-modal', { id: 'auth-required-modal' })"
             @endauth
-            class="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-semibold rounded text-white bg-red-700 hover:bg-red-800 transition-colors duration-200"
+            class="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-semibold rounded text-white bg-blue-600 hover:bg-blue-700 transition"
         >
             <x-heroicon-s-shield-check class="h-4 w-4" />
-            <span>Verify Prescription</span>
+            Verify Prescription
         </button>
-
-    {{-- ======================================================= --}}
-    {{-- SCENARIO 2: The product is an OTC item from a Partner Pharmacy. --}}
-    {{-- ======================================================= --}}
     @elseif($product->type === 'pharmacy')
         <button
-            {{-- Use wire:click on the parent component, not a dispatched event, for simplicity here --}}
-            x-on:click="added = true; setTimeout(() => added = false, 2500)"
             wire:click="addToCart({{ json_encode($product) }})"
-            :disabled="added"
-            wire:loading.attr="disabled"
-            :class="{
-                'bg-green-600 hover:bg-green-700 cursor-default': added,
-                'bg-emerald-600 hover:bg-emerald-700': !added
-            }"
-            class="w-full flex items-center justify-center px-4 py-2.5 text-xs font-semibold rounded-lg text-white transition-colors duration-200"
+            class="w-full flex items-center justify-center px-4 py-2.5 text-xs font-semibold rounded-lg text-white bg-emerald-600 hover:bg-emerald-700 transition"
         >
-            {{-- Loading State --}}
-            <span wire:loading wire:target="addToCart({{ json_encode($product) }})">
-                Adding...
-            </span>
-
-            {{-- Added State --}}
-            <span x-show="added" x-cloak class="flex items-center gap-2">
-                <x-heroicon-s-check-circle class="h-4 w-4" /> Added!
-            </span>
-
-            {{-- Default State --}}
-            <span x-show="!added" wire:loading.remove wire:target="addToCart({{ json_encode($product) }})">
-                Add to Cart
-            </span>
+            Add to Cart
         </button>
-
-    {{-- ======================================================= --}}
-    {{-- SCENARIO 3: The product is from a Scraped (non-partner) store. --}}
-    {{-- ======================================================= --}}
-    @else
+    @else {{-- Scraped Product --}}
         <button
-            class="w-full flex items-center justify-center px-4 py-2.5 text-xs font-semibold rounded text-amber-900 bg-amber-400 hover:bg-amber-500 transition"
+            wire:click="toggleQuoteRequest({{ json_encode($product) }})"
+            x-on:click="isRequested = !isRequested"
+            :class="{
+                'bg-green-100 text-green-800 border-green-200 hover:bg-red-50 hover:text-red-700 hover:border-red-200': isRequested,
+                'bg-amber-400 text-amber-900 hover:bg-amber-500': !isRequested
+            }"
+            class="w-full flex items-center justify-center gap-2 px-4 py-2 text-xs font-semibold rounded-md border transition-colors duration-200 group"
         >
-            Request Availability
+            <span x-show="isRequested" x-cloak class="flex items-center gap-2">
+                <span class="group-hover:hidden flex items-center gap-2"><x-heroicon-s-check-circle class="h-4 w-4 text-green-600"/> Requested</span>
+                <span class="hidden group-hover:flex items-center gap-2"><x-heroicon-s-x-circle class="h-4 w-4 text-red-600"/> Remove</span>
+            </span>
+            <span x-show="!isRequested">Request Availability</span>
         </button>
     @endif
 </div>

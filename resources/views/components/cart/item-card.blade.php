@@ -1,6 +1,6 @@
 @props(['item', 'coupons']) {{-- Expects a CartItemDTO --}}
 
-<div wire:key="cart-item-{{ $item->cartKey }}" class="flex items-start gap-4 p-4 bg-white rounded-xl border border-gray-200">
+<div wire:key="cart-item-{{ $item->cartKey }}" class="flex items-start gap-4 p-4 bg-white rounded border border-gray-200">
     <!-- Image -->
     <div class="flex-shrink-0">
         @php
@@ -22,10 +22,10 @@
             }
         @endphp
 
-        <img 
-            src="{{ $imageUrl }}" 
-            alt="{{ $item->productName }}" 
-            class="w-16 h-16 sm:w-20 sm:h-20 rounded-lg object-contain border border-gray-100"
+        <img
+            src="{{ $imageUrl }}"
+            alt="{{ $item->productName }}"
+            class="w-16 h-16 sm:w-20 sm:h-20 rounded object-contain border border-gray-100"
             onerror="this.onerror=null;this.src='{{ asset('/images/placeholderimg.jpeg') }}';"
         />
     </div>
@@ -46,7 +46,7 @@
     <!-- Actions: Quantity & Remove -->
     <div class="flex flex-col items-end justify-between self-stretch">
         {{-- Quantity Selector --}}
-        <div class="flex items-center rounded-lg border border-gray-300">
+        <div class="flex items-center rounded border border-gray-300">
             <button wire:click="decreaseQuantity('{{ $item->cartKey }}')"
                     class="px-2 py-1 text-gray-500 hover:bg-gray-100 rounded-l-lg text-sm">-</button>
             <span class="w-8 text-center text-xs font-medium">{{ $item->quantity }}</span>

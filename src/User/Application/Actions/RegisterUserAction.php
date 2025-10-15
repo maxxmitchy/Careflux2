@@ -2,8 +2,10 @@
 
 namespace Src\User\Application\Actions;
 
+use App\Mail\PatientWelcomeMail;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Src\Shared\Domain\Models\User;
 
 class RegisterUserAction
@@ -26,6 +28,11 @@ class RegisterUserAction
                 'full_name' => $user->name,
                 'phone' => $user->phone,
             ]);
+        }
+
+        if ($user->is_patient) {
+            $token = ''; // Provide the appropriate token value here
+            Mail::to($user)->send(new PatientWelcomeMail($user, $token)); // Send welcome email with token
         }
 
         Auth::login($user);

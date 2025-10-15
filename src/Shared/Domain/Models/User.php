@@ -6,6 +6,8 @@ namespace Src\Shared\Domain\Models;
 
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
+use Illuminate\Auth\Passwords\CanResetPassword as CanResetPasswordTrait;
+use Illuminate\Contracts\Auth\CanResetPassword;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -21,11 +23,14 @@ use Src\Pharmacy\Domain\Models\Community;
 use Src\Pharmacy\Domain\Models\Pharmacy;
 use Src\Questionnaire\Domain\Models\Questionnaire;
 use Src\Subscription\Domain\Concerns\HasSubscription;
+use Src\User\Domain\Notifications\ResetPasswordNotification;
 use Src\Wallet\Domain\Concerns\HasWallet;
 use Src\Wallet\Domain\Models\Wallet;
 
-class User extends Authenticatable implements FilamentUser
+class User extends Authenticatable implements CanResetPassword, FilamentUser
 {
+    use CanResetPasswordTrait;
+
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, HasSubscription, HasWallet, Notifiable;
 
@@ -61,6 +66,17 @@ class User extends Authenticatable implements FilamentUser
         'password',
         'remember_token',
     ];
+
+    /**
+     * Send the password reset notification.
+     *
+     * This method overrides the default Laravel behavior to send our custom,
+     * branded mailable.
+     */
+    public function sendPasswordResetNotification($token): void
+    {
+        $this->notify(new ResetPasswordNotification($token));
+    }
 
     /**
      * Get the attributes that should be cast.

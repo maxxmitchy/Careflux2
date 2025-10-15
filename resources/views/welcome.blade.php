@@ -48,7 +48,7 @@
                             <div class="sm:hidden mt-16">
                                 <div class="flex justify-between items-center">
                                     <h4 class="text-sm font-bold">Benefits of Careflux</h4>
-                                    <a href="#" class="inline-flex items-center text-xs text-emerald-600 font-medium">See all <x-heroicon-o-plus class="ml-1 h-3 w-3"/></a>
+                                    <a href="#" class="hidden items-center text-xs text-emerald-600 font-medium">See all <x-heroicon-o-plus class="ml-1 h-3 w-3"/></a>
                                 </div>
                                 <div class="sm:hidden flex flex-wrap gap-2 mt-5">
                                     @foreach($benefits as $benefit)
@@ -110,11 +110,14 @@
             </div>
         </section>
 
+        {{-- trust and verification --}}
+        @include('partials.trustandverification')
+
         <!-- Pharmacist Earning Showcase -->
         @if($earningShowcase)
         <section class="py-20 bg-white">
-                <small class="text-xs flex justify-center mb-4 font-extrabold bg-gradient-to-r from-emerald-600 to-teal-500 bg-clip-text text-transparent uppercase">
-                FOR PHARMACISTS
+                <small class="text-xs flex justify-center mb-4 font-extrabold bg-gradient-to-r from-emerald-600 to-emerald-500 bg-clip-text text-transparent uppercase">
+                FOR PHARMACISTS & CUSTOMERS
                 </small>
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -184,7 +187,7 @@
                         <div class="mt-2 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                             {{-- Primary CTA (For Pharmacists) --}}
                             <a href="{{ $earningShowcase->cta_url }}"
-                            class="inline-flex items-center justify-center gap-2 px-6 py-3 text-sm font-semibold text-white bg-emerald-500 rounded shadow-md hover:bg-emerald-600 transition">
+                            class="inline-flex items-center justify-center gap-2 px-6 py-3 text-sm font-semibold text-white bg-emerald-600 rounded shadow-md hover:bg-emerald-700 transition">
                                 @svg('heroicon-o-briefcase', 'h-5 w-5')
                                 {{ $earningShowcase->cta_text }}
                             </a>
@@ -407,12 +410,12 @@
                     </div>
                     <div class="flex flex-col sm:flex-row gap-4 lg:justify-end">
                         <a href="{{ route('register') }}"
-                        class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 rounded-lg bg-emerald-600 text-sm sm:text-base font-semibold text-white hover:bg-emerald-700 transition duration-300 ease-in-out">
+                        class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 rounded bg-emerald-600 text-sm sm:text-base font-semibold text-white hover:bg-emerald-700 transition duration-300 ease-in-out">
                             <x-heroicon-o-user-circle class="w-5 h-5 mr-2" />
                             I need a Pharmacist
                         </a>
                         <a href="{{ route('filament.pharmacy.auth.register') }}"
-                        class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 rounded-lg bg-gray-700 text-sm sm:text-base font-semibold text-white hover:bg-gray-800 transition duration-300 ease-in-out">
+                        class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 rounded bg-gray-700 text-sm sm:text-base font-semibold text-white hover:bg-gray-800 transition duration-300 ease-in-out">
                             <x-heroicon-o-briefcase class="w-5 h-5 mr-2" />
                             I'm a Pharmacist
                         </a>

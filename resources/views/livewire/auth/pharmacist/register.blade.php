@@ -129,7 +129,7 @@
                 <p class="text-xs text-gray-600 mb-4">Choose a secure password (minimum 8 characters).</p>
                 <div class="space-y-4">
                     <input wire:model.lazy="password" type="password" placeholder="Password" required class="w-full focus:outline-teal-600 border p-3 rounded border-gray-300 text-sm focus:border-emerald-500 focus:ring-emerald-500">
-                    <input wire:model.lazy="password_confirmation" type="password" placeholder="Confirm Password" required class="w-full focus:outline-teal-600 border p-3 rounded-lg border-gray-300 text-sm focus:border-emerald-500 focus:ring-emerald-500">
+                    <input wire:model.lazy="password_confirmation" type="password" placeholder="Confirm Password" required class="w-full focus:outline-teal-600 border p-3 rounded border-gray-300 text-sm focus:border-emerald-500 focus:ring-emerald-500">
                     @error('password') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                 </div>
             </div>

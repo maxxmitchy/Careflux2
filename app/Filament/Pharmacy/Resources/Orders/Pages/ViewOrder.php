@@ -56,16 +56,20 @@ class ViewOrder extends ViewRecord
                     $this->updateStatus('cancelled', $logAction, ['reason' => $data['cancellation_reason']]);
                 })
                 ->visible(fn (Invoice $record): bool => ! in_array($record->status, ['delivered', 'cancelled'])),
-            Action::make('download_invoice')
-                ->label('Download PDF')
-                ->icon('heroicon-o-arrow-down-tray')
-                ->color('gray')
-                ->action(fn (DownloadInvoiceAction $action) => $action->execute($this->record)),
+            // Action::make('download_invoice')
+            //     ->label('Download PDF')
+            //     ->icon('heroicon-o-arrow-down-tray')
+            //     ->color('gray')
+            //     ->action(function (Invoice $record) {
+            //         return app(DownloadInvoiceAction::class)->execute($record);
+            //     }),
             Action::make('download_invoice_fpdf')
                 ->label('Download PDF (Fast)')
                 ->icon('heroicon-o-document')
                 ->color('gray')
-                ->action(fn (DownloadInvoiceAsFpdfAction $action) => $action->execute($this->record)),
+                ->action(function (Invoice $record) {
+                    return app(DownloadInvoiceAsFpdfAction::class)->execute($record);
+                }),
         ];
     }
 

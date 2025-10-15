@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Livewire\Concerns\WithQuoteActions;
 use App\Models\MedicationInformation;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -12,8 +13,8 @@ use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\On;
 use Livewire\Component;
-use Src\Order\Application\Services\QuoteRequestService;
 use Src\Order\Domain\Contracts\CartServiceInterface;
+use Src\Order\Domain\Exceptions\InvalidCartQuantityException;
 use Src\Pharmacy\Domain\Models\PharmacyProduct;
 use Src\Product\Domain\Services\ProductSearchService;
 use Src\Scraping\Domain\Models\ScrapedProduct;
@@ -21,6 +22,8 @@ use Src\Scraping\Domain\Models\ScrapedProduct;
 #[Layout('components.layouts.guest')]
 class ProductDetailPage extends Component
 {
+    use WithQuoteActions;
+
     public string $identifier;
 
     private ?Collection $allOtherOffers = null;
@@ -100,7 +103,6 @@ class ProductDetailPage extends Component
             ->inRandomOrder()->limit(4)->get();
     }
 
-    // --- THIS IS THE MISSING METHOD ---
     public function getGuestCartContext(?object $productOnPage = null): array
     {
         if (auth()->check()) {
@@ -149,12 +151,24 @@ class ProductDetailPage extends Component
 
     #[On('redirect-to-verify')]
     public function redirectToVerification(string $productSlug)
-    { /* ... */
+    {
+        if (empty($productSlug)) {
+            return;
+        }
+
+        return $this->redirect(route('prescription.verify', ['pharmacyProduct' => $productSlug]));
     }
 
     #[On('add-to-cart')]
     public function addToCart(array $productData, CartServiceInterface $cartService)
-    { /* ... */
+    {
+        try {
+            $cartService->add($productData, 'ready_to_pay');
+            $this->dispatch('cart-updated');
+            $this->dispatch('toast', message: 'Item added to cart!', type: 'success');
+        } catch (InvalidCartQuantityException $e) {
+            $this->dispatch('toast', message: $e->getMessage(), type: 'error');
+        }
     }
 
     private function transformProduct(Model $product): object
@@ -190,16 +204,6 @@ class ProductDetailPage extends Component
             ];
         }
         throw new \InvalidArgumentException('Unsupported product type.');
-    }
-
-    // --- THIS IS THE NEW, MISSING METHOD ---
-    #[On('request-quote')]
-    public function requestQuote(array $productData, CartServiceInterface $cartService, QuoteRequestService $quoteService)
-    {
-        $cartService->add($productData, 'pending_quote');
-        $quoteService->markAsRequested($productData['productUrl']);
-        $this->dispatch('cart-updated');
-        $this->dispatch('toast', message: 'Item added to quote request list!', type: 'info');
     }
 
     public function render()

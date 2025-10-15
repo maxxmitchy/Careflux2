@@ -3,12 +3,13 @@
 namespace App\Filament\Resources\Tasks\Schemas;
 
 use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\MorphToSelect;
-use Filament\Forms\Components\MorphToSelect\Type;
 use Filament\Forms\Components\Select;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Builder;
+use Src\Gamification\Domain\Models\TaskDefinition;
+use Src\Pharmacy\Domain\Models\PharmacyProduct;
 
 class TaskForm
 {
@@ -21,7 +22,7 @@ class TaskForm
                         Select::make('task_definition_id')
                             ->label('Task Type')
                             ->relationship('taskDefinition', 'name')
-                            ->required(),
+                            ->required()->reactive(),
 
                         Select::make('assigned_to_user_id')
                             ->label('Assign To User')
@@ -29,13 +30,16 @@ class TaskForm
                             ->searchable()
                             ->required(),
 
-                        MorphToSelect::make('subjectable')
-                            ->label('Subject of Task (Optional)')
-                            ->types([
-                                Type::make(\Src\Patient\Domain\Models\Patient::class)->titleAttribute('full_name'),
-                                Type::make(\Src\Pharmacy\Domain\Models\PharmacyProduct::class)->titleAttribute('name'),
-                            ])
-                            ->searchable(),
+                        Select::make('product_ids') // Use a simple array key
+                            ->label('Products to Check')
+                            ->multiple()
+                            ->options(PharmacyProduct::query()->with('medicationVariant.medication')->get()->pluck('name', 'id'))
+                            ->preload()->searchable()->required()
+                            ->visible(function (Get $get): bool {
+                                $taskDef = TaskDefinition::find($get('task_definition_id'));
+
+                                return $taskDef?->key === 'TECHNICIAN_PRICE_VERIFY' || $taskDef?->key === 'TECHNICIAN_EXPIRY_LOG';
+                            }),
 
                         Select::make('status')
                             ->options([

@@ -29,7 +29,7 @@ class FindAndScrapeProductsAction
         // --- 2. THE CRITICAL GUARD CLAUSE ---
         // If the user has explicitly requested "Verified Partners Only", or if they are not in a
         // local environment, completely skip the entire live scraping block.
-        if ($verifiedOnly || !app()->environment('local')) {
+        if ($verifiedOnly || ! app()->environment('local')) {
             return $localResults;
         }
         // --- END OF GUARD CLAUSE ---
@@ -40,12 +40,12 @@ class FindAndScrapeProductsAction
             $productForStore = $localResults->firstWhere('storeId', $storeId);
             $store = Store::find($storeId);
 
-            if ($store && (!$productForStore || $productForStore->updated_at < now()->subHours(self::STALENESS_THRESHOLD_HOURS))) {
+            if ($store && (! $productForStore || $productForStore->updated_at < now()->subHours(self::STALENESS_THRESHOLD_HOURS))) {
                 $storesToScrape[] = $storeId;
             }
         }
 
-        if (!empty($storesToScrape)) {
+        if (! empty($storesToScrape)) {
             foreach ($storesToScrape as $storeId) {
                 $this->scrapeAction->execute($storeId, $keyword, $userId);
             }
@@ -55,7 +55,7 @@ class FindAndScrapeProductsAction
             // (which is false at this point), but now it will find the new results.
             return $this->searchService->search($keyword, $locationFilters, $otherFilters);
         }
-        
+
         // If no scraping was needed, just return the initial local results.
         return $localResults;
     }

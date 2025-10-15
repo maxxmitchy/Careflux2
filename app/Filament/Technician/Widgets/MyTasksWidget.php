@@ -4,21 +4,28 @@ namespace App\Filament\Technician\Widgets;
 
 use Filament\Actions\Action;
 use Filament\Facades\Filament;
-use Filament\Forms\Components\Textarea;
+use Filament\Forms;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\TextInput;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Src\Gamification\Application\Actions\AwardPointsAction;
-use Src\Gamification\Domain\Models\Task;
-use Src\Pharmacy\Domain\Models\PharmacyProduct;
-use Src\Pharmacy\Domain\Models\PriceHistory;
+use Src\Gamification\Domain\Models\Task; // <-- Import the Forms namespace
+use Src\Patient\Domain\Models\Patient;
+use Src\Pharmacy\Domain\Models\PharmacyProduct; // <-- Import Builder
+use Src\Pharmacy\Domain\Models\ProductExpiry; // <-- Import DB for transaction
 
 class MyTasksWidget extends BaseWidget
 {
-    protected static ?int $sort = 0; // Make this the top widget
+    protected static ?int $sort = 0;
 
     protected int|string|array $columnSpan = 'full';
 
@@ -31,109 +38,162 @@ class MyTasksWidget extends BaseWidget
                 Task::query()
                     ->where('assigned_to_user_id', Filament::auth()->id())
                     ->where('status', 'pending')
-                    ->with(['taskDefinition', 'subjectable'])
+                    // --- 1. THE FIX: Eager-load all necessary relationships ---
+                    ->with([
+                        'taskDefinition',
+                        'subjectable',
+                        'pharmacyProducts.medicationVariant.medication',
+                    ])
             )
             ->columns([
-                Tables\Columns\TextColumn::make('taskDefinition.name')->label('Task'),
-                Tables\Columns\TextColumn::make('subjectable_text')->label('Subject')
-                    ->default(function (Task $record): string {
-                        if ($record->subjectable instanceof PharmacyProduct) {
-                            return 'Product: '.$record->subjectable->name;
-                        }
+                Tables\Columns\TextColumn::make('taskDefinition.name')
+                    ->label('Task'),
 
-                        return 'System Task';
-                    }),
-                Tables\Columns\TextColumn::make('due_at')->label('Due')->since()->sortable(),
+                // --- 2. THE FIX: Use the robust accessor for subject display ---
+                Tables\Columns\TextColumn::make('subjects_description')
+                    ->label('Subject(s)')
+                    ->wrap(),
+
+                Tables\Columns\TextColumn::make('due_at')
+                    ->label('Due')
+                    ->since()
+                    ->sortable(),
             ])
             ->recordActions([
-                // --- DYNAMIC ACTION: UPDATE PRICE ---
-                Action::make('update_price')
-                    ->label('Update Price')
-                    ->icon('heroicon-o-currency-naira')
-                    ->schema([
-                        TextInput::make('new_price')
-                            ->label('New Price (in Naira)')
-                            ->numeric()->required()->prefix('₦'),
-                    ])
-                    ->action(function (Task $record, array $data, AwardPointsAction $awardPoints) {
-                        /** @var PharmacyProduct $product */
-                        $product = $record->subjectable;
-                        $newPriceInKobo = (int) ($data['new_price'] * 100);
-
-                        // Update the product price
-                        $product->update(['price' => $newPriceInKobo]);
-
-                        // Log the price history
-                        PriceHistory::create([
-                            'pharmacy_product_id' => $product->id,
-                            'price' => $newPriceInKobo,
-                            'updated_by_user_id' => Auth::id(),
-                        ]);
-
-                        // Mark task as complete and award points
-                        $record->update(['completed_at' => now(), 'status' => 'completed']);
-                        $awardPoints->execute(Auth::user(), $record->taskDefinition->key, $record);
-
-                        Notification::make()->title('Price updated and task completed!')->success()->send();
-                    })
-                    // This action is ONLY visible for "Verify Price" tasks
-                    ->visible(fn (Task $record) => $record->taskDefinition->key === 'TECHNICIAN_PRICE_VERIFY'),
-
+                // --- 3. THE FIX: Replace all old actions with the single, intelligent action ---
                 Action::make('complete_task')
                     ->label('Complete')
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
-                    // This action is only visible for pending tasks
                     ->visible(fn (Task $record): bool => $record->status === 'pending')
-                    ->schema(function (Task $record) {
-                        // Dynamically generate the form based on the task type
-                        if (str_starts_with($record->taskDefinition->key, 'PATIENT_FOLLOW_UP')) {
+
+                    // --- DYNAMIC FORM LOGIC ---
+                    ->schema(function (Task $record): array {
+                        $taskKey = $record->taskDefinition->key;
+
+                        if (str_starts_with($taskKey, 'PATIENT_FOLLOW_UP')) {
                             return [
-                                Textarea::make('notes')->required()->label('Follow-up Notes'),
-                            ];
-                        }
-                        if ($record->taskDefinition->key === 'TECHNICIAN_PRICE_VERIFY') {
-                            return [
-                                TextInput::make('new_price')->numeric()->required()->prefix('₦'),
+                                Forms\Components\Textarea::make('notes')
+                                    ->required()
+                                    ->label('Follow-up Notes')
+                                    ->rows(4),
                             ];
                         }
 
-                        // Default form is just a confirmation
-                        return [];
+                        if ($taskKey === 'TECHNICIAN_PRICE_VERIFY') {
+                            // Preload products for batch editing
+                            $products = $record->pharmacyProducts()
+                                ->with('medicationVariant.medication')
+                                ->get();
+
+                            return [
+                                Forms\Components\Repeater::make('products')
+                                    ->schema([
+                                        Hidden::make('id'),
+                                        TextEntry::make('name')->label('Product'),
+                                        Forms\Components\TextInput::make('new_price')
+                                            ->numeric()
+                                            ->required()
+                                            ->prefix('₦')
+                                            ->label('New Price'),
+                                    ])
+                                    ->columns(2)
+                                    ->addable(false)
+                                    ->deletable(false)
+                                    ->default(
+                                        $products->map(fn ($p) => [
+                                            'id' => $p->id,
+                                            'name' => $p->name,
+                                        ])->all()
+                                    ),
+                            ];
+                        }
+
+                        if (str_starts_with($record->taskDefinition->key, 'TECHNICIAN_EXPIRY_LOG')) {
+                            $products = $record->pharmacyProducts()->with('medicationVariant.medication')->get();
+
+                            return [
+                                Repeater::make('products')
+                                    ->label('Products to Check for Expiry')
+                                    ->schema([
+                                        Hidden::make('id'),
+                                        TextEntry::make('name'),
+                                        DatePicker::make('expiry_date')
+                                            ->label('Expiry Date')
+                                            ->required()
+                                            ->native(false),
+                                        TextInput::make('quantity')
+                                            ->numeric()->integer()->required()->minValue(1)
+                                            ->helperText('Number of units with this date.'),
+                                    ])
+                                    ->columns(3)
+                                    ->addable(false)->deletable(false)
+                                    ->default($products->map(fn ($p) => ['id' => $p->id, 'name' => $p->name])->all()),
+                            ];
+                        }
+
+                        return []; // Default for simple tasks
                     })
-                    ->action(function (Task $record, array $data, AwardPointsAction $awardPoints) {
-                        // --- Core Action Logic ---
 
-                        // 1. Perform the task's specific action (e.g., log interaction)
-                        if (str_starts_with($record->taskDefinition->key, 'PATIENT_FOLLOW_UP')) {
-                            $record->subjectable->interactions()->create([
-                                'user_id' => Auth::id(),
-                                'type' => $record->taskDefinition->name,
-                                'notes' => $data['notes'],
+                    // Confirmation modal only for manual tasks
+                    ->requiresConfirmation(fn (Task $record) => ! in_array(
+                        $record->taskDefinition->key,
+                        ['PATIENT_FOLLOW_UP_48HR', 'PATIENT_FOLLOW_UP_7DAY', 'TECHNICIAN_PRICE_VERIFY']
+                    )
+                    )
+
+                    ->action(function (Task $record, array $data, AwardPointsAction $awardPoints) {
+                        $taskKey = $record->taskDefinition->key;
+                        $user = Auth::user();
+
+                        if (str_starts_with($taskKey, 'PATIENT_FOLLOW_UP')) {
+                            if ($record->subjectable instanceof Patient) {
+                                $record->subjectable->interactions()->create([
+                                    'user_id' => $user->id,
+                                    'type' => $record->taskDefinition->name,
+                                    'notes' => $data['notes'],
+                                ]);
+                            }
+                        } elseif ($taskKey === 'TECHNICIAN_EXPIRY_LOG') {
+                            DB::transaction(function () use ($data, $user) {
+                                foreach ($data['products'] as $productData) {
+                                    $product = PharmacyProduct::find($productData['id']);
+                                    if ($product) {
+                                        // Create a new expiry record for this batch
+                                        ProductExpiry::create([
+                                            'pharmacy_product_id' => $product->id,
+                                            'expiry_date' => $productData['expiry_date'],
+                                            'quantity' => $productData['quantity'],
+                                            'logged_by_user_id' => $user->id,
+                                        ]);
+                                    }
+                                }
+                            });
+                        } elseif ($taskKey === 'TECHNICIAN_EXPIRY_LOG') {
+                            // Example: expiry log could save remarks to ProductExpiry model
+                            ProductExpiry::create([
+                                'remarks' => $data['remarks'] ?? '',
+                                'logged_by_user_id' => $user->id,
                             ]);
                         }
-                        // Add more `if` blocks here for other task types...
 
-                        // 2. Mark the task as complete
-                        $record->update(['status' => 'completed', 'completed_at' => now()]);
+                        // --- UNIVERSAL COMPLETION LOGIC ---
+                        $record->update([
+                            'status' => 'completed',
+                            'completed_at' => now(),
+                        ]);
 
-                        // 3. Award points
-                        $awardPoints->execute(Auth::user(), $record->taskDefinition->key, $record);
+                        $awardPoints->execute($user, $taskKey, $record);
 
-                        // 4. Send success notification
                         Notification::make()
                             ->title('Task Completed!')
-                            ->body("You have been awarded {$record->taskDefinition->points} points.")
+                            ->body("You earned {$record->taskDefinition->points} points.")
                             ->success()
                             ->send();
-
-                        // 5. Refresh the component to remove the task from the list
-                        $this->dispatch('update-stats');
                     })
-                    ->modalHeading(fn (Task $record) => 'Complete Task: '.$record->taskDefinition->name)
+                    ->modalHeading(fn (Task $record) => $record->taskDefinition->name)
                     ->modalWidth('lg'),
-
-                // We can add other actions for other task types here...
+                // --- END OF FIX ---
             ])
             ->defaultSort('due_at', 'asc');
     }

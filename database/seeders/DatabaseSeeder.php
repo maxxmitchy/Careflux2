@@ -37,6 +37,11 @@ class DatabaseSeeder extends Seeder
             SourcingPharmacySeeder::class,
 
             TrustShowcaseSeeder::class,
+
+            DeliveryZoneSeeder::class,
+            DeliveryRateSeeder::class,
+
+            KnowledgeBaseSeeder::class,
         ]);
 
     }

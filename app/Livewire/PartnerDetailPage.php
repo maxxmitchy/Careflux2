@@ -44,6 +44,7 @@ class PartnerDetailPage extends Component
         return $this->redirect(route('prescription.verify', ['pharmacyProduct' => $productSlug]));
     }
 
+    #[On('add-to-cart')]
     public function addToCart(array $productData, CartServiceInterface $cartService)
     {
         try {

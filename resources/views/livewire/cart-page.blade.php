@@ -27,16 +27,20 @@
                             @endforeach
                         </div>
                         <aside class="lg:col-span-1 mt-8 lg:mt-0">
-                            <div class="bg-white rounded-lg shadow-sm border p-4 sticky top-24">
+                            <div class="bg-white rounded shadow-sm border p-4 sticky top-24">
                                 <h3 class="text-base font-semibold">Order Summary</h3>
                                 <div class="mt-4 space-y-2 text-xs border-t pt-4">
                                     <div class="flex justify-between"><span>Subtotal</span><span class="font-medium">₦{{ number_format($subtotal / 100, 2) }}</span></div>
                                     <div class="flex justify-between"><span>Delivery</span><span class="font-medium">₦{{ number_format($deliveryFee / 100, 2) }}</span></div>
                                     <div class="flex justify-between font-bold text-sm pt-2 mt-2 border-t"><span>Total</span><span>₦{{ number_format($this->total / 100, 2) }}</span></div>
                                 </div>
-                                <a href="{{ route('checkout') }}" class="block w-full mt-4 text-center bg-emerald-600 text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-emerald-700 transition">
+                                <a href="{{ route('checkout') }}" class="block w-full mt-4 text-center bg-emerald-600 text-white py-2.5 rounded text-sm font-semibold hover:bg-emerald-700 transition">
                                     Proceed to Checkout
                                 </a>
+                                <p class="flex items-center justify-center gap-2 text-center text-xs text-gray-500 mt-4">
+                                    Secure payment via
+                                    <a href="https://www.transactpay.ai/"><img src="/images/transactpay_logo.png" alt="TransactPay" class="h-4 inline-block"></a>
+                                </p>
                             </div>
                         </aside>
                     </div>

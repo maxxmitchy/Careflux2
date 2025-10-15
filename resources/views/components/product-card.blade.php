@@ -2,10 +2,12 @@
 
 @php
     $quoteService = app(\Src\Order\Application\Services\QuoteRequestService::class);
+    // Determine the initial state on render
+    $isRequested = $product->type === 'scraped' && $quoteService->isRecentlyRequested($product->productUrl);
 @endphp
 
-<div class="group flex h-full flex-col rounded border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-    
+<div x-data="{ isRequested: {{ $isRequested ? 'true' : 'false' }} }" class="group flex h-full flex-col rounded border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+
     <!-- Clickable Details Area -->
     <a href="{{ route('public.product.detail', ['identifier' => $product->uniqueId]) }}" wire:navigate class="p-3 flex-grow flex flex-col">
         <div class="relative w-full aspect-square rounded overflow-hidden">
@@ -28,9 +30,9 @@
                 }
             @endphp
 
-            <img 
-                src="{{ $imageUrl }}" 
-                alt="{{ $product->productName }}" 
+            <img
+                src="{{ $imageUrl }}"
+                alt="{{ $product->productName }}"
                 class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
                 onerror="this.onerror=null;this.src='{{ asset('/images/placeholderimg.jpeg') }}';"
             />
@@ -56,7 +58,7 @@
     <!-- Action Button Footer -->
     <div class="p-3 border-t border-gray-100 mt-auto">
         {{-- --- THIS IS THE DEFINITIVE, COMPLETE ACTION LOGIC --- --}}
-        
+
         @if($product->isPrescription)
             {{-- Case 1: The product is a prescription item --}}
             <button
@@ -68,7 +70,7 @@
                 class="w-full flex items-center justify-center gap-2 px-4 py-2 text-xs font-semibold rounded text-white bg-red-600 hover:bg-red-700 transition"
             >
                 <x-heroicon-s-shield-check class="h-4 w-4" />
-                Verify Prescription
+                Get Prescription
             </button>
 
         @elseif($product->type === 'pharmacy')
@@ -86,21 +88,31 @@
             </div>
 
         @elseif($product->type === 'scraped')
-            {{-- Case 3: The product is from a scraped, non-partner store --}}
-            @if($quoteService->isRecentlyRequested($product->productUrl))
-                <button disabled class="w-full flex items-center justify-center gap-2 px-4 py-2 text-xs font-medium text-gray-500 bg-gray-100 rounded-md cursor-not-allowed">
-                    <x-heroicon-s-check-circle class="h-4 w-4 text-green-500"/>
-                    Requested
-                </button>
-            @else
-                <button
-                    wire:click="$dispatch('request-quote', { productData: {{ json_encode($product) }} })"
-                    class="w-full text-center px-4 py-2 text-xs font-semibold text-amber-900 bg-amber-400 hover:bg-amber-500 rounded transition"
-                >
+            {{-- --- THIS IS THE DEFINITIVE TOGGLE BUTTON --- --}}
+            <button
+                x-on:click="
+                    $wire.dispatch('toggle-quote-request', { productData: {{ json_encode($product) }} });
+                    isRequested = !isRequested;
+                "
+                :class="{
+                    'bg-green-100 text-green-800 border-green-200 hover:bg-red-50 hover:text-red-700 hover:border-red-200': isRequested,
+                    'bg-amber-400 text-amber-900 hover:bg-amber-500': !isRequested
+                }"
+                class="w-full flex items-center justify-center gap-2 px-4 py-2 text-xs font-semibold rounded-md transition-colors duration-200 group"
+            >
+                <span x-show="isRequested" x-cloak>
+                    <span class="flex items-center gap-2 group-hover:hidden">
+                        <x-heroicon-s-check-circle class="h-4 w-4 text-green-600"/> Requested
+                    </span>
+                    <span class="hidden items-center gap-2 group-hover:flex">
+                        <x-heroicon-s-x-circle class="h-4 w-4 text-red-600"/> Remove
+                    </span>
+                </span>
+                <span x-show="!isRequested">
                     Request Availability
-                </button>
-            @endif
-            
+                </span>
+            </button>
+            {{-- --- END OF TOGGLE BUTTON --- --}}
         @endif
         {{-- --- END OF LOGIC --- --}}
     </div>

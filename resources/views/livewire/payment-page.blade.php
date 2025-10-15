@@ -15,13 +15,13 @@
             <x-breadcrumbs :crumbs="['Cart' => route('cart'), 'Checkout' => route('checkout'), 'Payment' => '#']" />
         </div>
 
-        <div class="bg-white rounded-xl shadow-lg border border-gray-100 p-6 sm:p-8">
+        <div class="bg-white rounded shadow-lg border border-gray-100 p-6 sm:p-8">
             <div class="text-center mb-6">
                 <h1 class="text-xl font-bold text-gray-800">Final Step: Complete Payment</h1>
                 <p class="text-xs text-gray-500 mt-1">You are about to pay for your Careflux order.</p>
             </div>
 
-            <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-4 mb-6">
+            <div class="bg-emerald-50 border border-emerald-200 rounded p-4 mb-6">
                 <div class="flex items-center justify-between">
                     <span class="text-sm font-semibold text-emerald-800">Total Amount Due</span>
                     <span class="text-xl font-bold text-emerald-900">
@@ -33,7 +33,7 @@
             <button
                 wire:click="triggerPayment"
                 wire:loading.attr="disabled"
-                class="w-full flex items-center justify-center py-3 px-4 bg-emerald-600 text-white text-sm font-semibold rounded-lg hover:bg-emerald-700 disabled:opacity-75"
+                class="w-full flex items-center justify-center py-3 px-4 bg-emerald-600 text-white text-sm font-semibold rounded hover:bg-emerald-700 disabled:opacity-75"
             >
                 <span wire:loading.remove wire:target="triggerPayment">Pay Now</span>
                 <span wire:loading wire:target="triggerPayment">Connecting...</span>

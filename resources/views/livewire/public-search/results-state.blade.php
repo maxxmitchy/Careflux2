@@ -3,7 +3,7 @@
     @if($results->total() > 0)
         <div class="pb-4 mb-4 border-gray-200">
             <p class="text-xs text-gray-600">
-                Showing <span class="font-bold">{{ $results->count() }}</span> of <span class="font-bold">{{ $results->total() }}</span> results for "<span class="font-bold">{{ $search }}</span>".
+                Showing <span class="font-bold">{{ $results->count() }}</span> of <span class="font-bold">{{ $results->total() }}</span> results for <span class="font-bold">{{ $search }}</span>.
             </p>
         </div>
     @endif

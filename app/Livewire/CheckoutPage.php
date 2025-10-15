@@ -7,10 +7,13 @@ use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
+use Src\Location\Domain\Models\City;
+use Src\Location\Domain\Models\State;
+use Src\Order\Application\Actions\CreateTransactionFromInvoicesAction;
+use Src\Order\Application\Services\DeliveryCostService;
 use Src\Order\Domain\Contracts\CartServiceInterface;
 use Src\Order\Domain\Contracts\PlaceOrderActionInterface;
 use Src\Order\Domain\DTOs\CartItemDTO;
-use Src\Subscription\Application\Actions\LogTransactionAction;
 use Src\User\Domain\DTOs\CustomerDataDTO;
 use Src\User\Domain\DTOs\ShippingDataDTO;
 
@@ -22,7 +25,7 @@ class CheckoutPage extends Component
 
     public int $subtotal = 0;
 
-    public int $deliveryFee = 50000; // ₦500 in kobo
+    public int $deliveryFee = 0;
 
     // Form Properties
     public string $full_name = '';
@@ -30,6 +33,14 @@ class CheckoutPage extends Component
     public string $email = '';
 
     public string $phone = '';
+
+    public ?string $state_id = '';
+
+    public ?string $city_id = '';
+
+    public ?string $shipping_state_id = '';
+
+    public ?string $shipping_city_id = '';
 
     public string $location_area = '';
 
@@ -72,6 +83,51 @@ class CheckoutPage extends Component
             $this->mobileFormExpanded = true;
             session(['url.intended' => route('checkout')]);
         }
+
+        $this->recalculateDeliveryFee();
+    }
+
+    /**
+     * This is a "hook" method that Livewire calls automatically
+     * whenever a public property is updated.
+     */
+    public function updated($property): void
+    {
+        // When a state is changed, reset the city
+        if ($property === 'state_id') {
+            $this->city_id = '';
+        }
+        if ($property === 'shipping_state_id') {
+            $this->shipping_city_id = '';
+        }
+
+        // Recalculate delivery fee whenever any part of the address changes
+        if (in_array($property, ['city_id', 'shipping_city_id', 'shipToDifferentAddress'])) {
+            $this->recalculateDeliveryFee();
+        }
+    }
+
+    public function recalculateDeliveryFee()
+    {
+        $deliveryService = app(DeliveryCostService::class);
+        $destination = $this->getDestinationString();
+
+        $this->deliveryFee = $deliveryService->calculateForCart(collect($this->cartItemsArray), $destination);
+    }
+
+    private function getDestinationString(): string
+    {
+        $cityId = $this->shipToDifferentAddress ? $this->shipping_city_id : $this->city_id;
+        $stateId = $this->shipToDifferentAddress ? $this->shipping_state_id : $this->state_id;
+
+        if (! $cityId || ! $stateId) {
+            return '';
+        }
+
+        $city = City::find($cityId);
+        $state = State::find($stateId);
+
+        return $city && $state ? "{$city->name}, {$state->name}" : '';
     }
 
     #[Computed]
@@ -104,8 +160,10 @@ class CheckoutPage extends Component
     public function placeOrder(
         PlaceOrderActionInterface $placeOrderAction,
         CartServiceInterface $cartService,
-        LogTransactionAction $logTransactionAction
+        CreateTransactionFromInvoicesAction $createTransactionAction // <-- Inject the new action
     ) {
+        $this->location_area = $this->getDestinationString();
+
         $this->validate();
 
         $customerData = CustomerDataDTO::from($this->only(['full_name', 'email', 'phone', 'location_area']));
@@ -124,25 +182,35 @@ class CheckoutPage extends Component
         $cartService->clear();
         $this->dispatch('cart-updated');
 
-        // --- THIS IS THE DEFINITIVE FIX ---
-        $totalAmount = $invoices->sum('total');
-        $actingUser = Auth::user() ?? $invoices->first()->patient->user;
-        $customer = $invoices->first()->pharmacy; // The pharmacy is the customer in this context
-
-        // 3. Use the robust, architecturally correct Action to create the transaction
-        $transaction = $logTransactionAction->execute(
-            actingUser: $actingUser,
-            customer: $customer,
-            transactionable: $actingUser, // Or another relevant model if needed
-            amountInKobo: $totalAmount,
-            gateway: 'transactpay'
-        );
-
-        // Add the invoice IDs to the metadata after creation
-        $transaction->update(['metadata' => ['invoice_ids' => $invoices->pluck('id')->all()]]);
-        // --- END OF FIX ---
+        $transaction = $createTransactionAction->execute($invoices);
 
         return redirect()->route('payment.page', ['reference' => $transaction->reference]);
+    }
+
+    #[Computed]
+    public function states(): Collection
+    {
+        return State::where('country_id', 1)->get();
+    }
+
+    #[Computed]
+    public function cities(): Collection
+    {
+        if (! $this->state_id) {
+            return collect();
+        }
+
+        return City::where('state_id', $this->state_id)->get();
+    }
+
+    #[Computed]
+    public function shippingCities(): Collection
+    {
+        if (! $this->shipping_state_id) {
+            return collect();
+        }
+
+        return City::where('state_id', $this->shipping_state_id)->get();
     }
 
     public function getTotalProperty(): int

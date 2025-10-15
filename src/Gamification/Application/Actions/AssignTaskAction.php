@@ -2,6 +2,7 @@
 
 namespace Src\Gamification\Application\Actions;
 
+use App\Events\TaskAssigned;
 use App\Models\PharmacistReport;
 use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Model;
@@ -54,6 +55,8 @@ class AssignTaskAction
                    'This task was assigned to you by an administrator and requires your attention.';
 
         $this->telegramService->sendMessageToUser($assignee, $message);
+
+        TaskAssigned::dispatch($task);
 
         return $task;
     }

@@ -12,6 +12,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Src\Gamification\Domain\Models\Task;
 use UnitEnum;
 
@@ -51,5 +52,20 @@ class TaskResource extends Resource
             'create' => CreateTask::route('/create'),
             'edit' => EditTask::route('/{record}/edit'),
         ];
+    }
+
+    /**
+     * This is the base query for the entire resource. Eager-loading here
+     * benefits the table, actions, and any other part of the resource.
+     */
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->with([
+            'assignee',
+            'taskDefinition',
+            'subjectable',
+            // Eager-load the multi-subject relationship and its nested dependencies
+            'pharmacyProducts.medicationVariant.medication',
+        ]);
     }
 }

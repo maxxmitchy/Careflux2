@@ -94,6 +94,7 @@
                                         'price' => $item->price,
                                         'sourceName' => $item->pharmacy->name,
                                         'pharmacyId' => $item->pharmacy->id,
+                                        'pharmacistId' => $item->user->id
                                     ];
                                 @endphp
                                 <x-product-card :product="$productData" />
@@ -106,11 +107,59 @@
                             @endif
                         @endforeach
                     </div>
-                    <div class="mt-10">
-                        {{ $this->products->links() }}
+
+                    <!-- Custom Pagination -->
+                    <div class="mt-16 flex justify-center">
+                        @if ($this->products->hasPages())
+                            <div class="flex items-center gap-2 text-sm">
+
+                                {{-- Previous Button --}}
+                                @if ($this->products->onFirstPage())
+                                    <span class="px-3 py-2 text-gray-400 bg-gray-800 rounded cursor-not-allowed border border-gray-700">
+                                        Prev
+                                    </span>
+                                @else
+                                    <button
+                                        wire:click="previousPage"
+                                        class="px-3 py-2 text-gray-100 bg-gray-900 rounded border border-gray-700 hover:bg-gray-800 hover:text-white transition">
+                                        Prev
+                                    </button>
+                                @endif
+
+                                {{-- Page Numbers --}}
+                                @foreach ($this->products->getUrlRange(1, $this->products->lastPage()) as $page => $url)
+                                    @if ($page == $this->products->currentPage())
+                                        <span class="px-3 py-2 text-white bg-emerald-600 rounded font-semibold shadow-md border border-emerald-700">
+                                            {{ $page }}
+                                        </span>
+                                    @else
+                                        <button
+                                            wire:click="gotoPage({{ $page }})"
+                                            class="px-3 py-2 text-gray-300 bg-gray-800 rounded border border-gray-700 hover:bg-emerald-700 hover:text-white transition">
+                                            {{ $page }}
+                                        </button>
+                                    @endif
+                                @endforeach
+
+                                {{-- Next Button --}}
+                                @if ($this->products->hasMorePages())
+                                    <button
+                                        wire:click="nextPage"
+                                        class="px-3 py-2 text-gray-100 bg-gray-900 rounded border border-gray-700 hover:bg-gray-800 hover:text-white transition">
+                                        Next
+                                    </button>
+                                @else
+                                    <span class="px-3 py-2 text-gray-400 bg-gray-800 rounded cursor-not-allowed border border-gray-700">
+                                        Next
+                                    </span>
+                                @endif
+
+                            </div>
+                        @endif
                     </div>
+
                 @else
-                    <div class="text-center py-16 px-4 bg-white rounded-xl border">
+                    <div class="text-center py-16 px-4 bg-white rounded border">
                         <x-heroicon-o-archive-box-x-mark class="mx-auto h-12 w-12 text-gray-400" />
                         <h3 class="mt-2 text-base font-semibold text-gray-900">No Products Found</h3>
                         <p class="mt-1 text-xs text-gray-600">

@@ -24,7 +24,7 @@
 
             {{-- <div class="mt-6 bg-gray-50 border rounded-lg p-3 sm:p-4">
                 <div class="flex flex-wrap items-center justify-between text-xs sm:text-sm gap-y-2">
-                    
+
                     <div class="flex flex-wrap items-center gap-2">
                         <span class="inline-flex items-center px-2 py-1 rounded bg-green-100 text-green-800 font-medium">
                             Available: {{ $available }}
@@ -49,7 +49,7 @@
                             Good news! Some of your items are available for purchase.
                         </p>
 
-                        <button 
+                        <button
                             wire:click="addAllAvailableToCart"
                             wire:loading.attr="disabled"
                             class="w-full sm:w-auto flex items-center justify-center gap-2 bg-gray-600 text-white font-semibold py-2 px-4 rounded text-xs hover:bg-gray-700 transition disabled:opacity-75"
@@ -87,7 +87,7 @@
                         }
                     @endphp
 
-                    <div 
+                    <div
                         @class([
                             'p-4 rounded-lg border flex items-start gap-4',
                             'bg-yellow-50 border-yellow-200' => $item->status === 'pending',
@@ -96,8 +96,8 @@
                             'bg-red-50 border-red-200' => $item->status === 'unavailable',
                         ])
                     >
-                        <img 
-                            src="{{ $item->productable->image_url ?? asset('/images/placeholderimg.jpeg') }}" 
+                        <img
+                            src="{{ $item->productable->image_url ?? asset('/images/placeholderimg.jpeg') }}"
                             class="w-16 h-16 rounded object-contain border bg-white"
                             alt="{{ $item->productable->product_name }}"
                         >
@@ -125,8 +125,8 @@
                                         </span>
                                     </div>
 
-                                    <button 
-                                        wire:click="addItemToCart({{ $item->id }})" 
+                                    <button
+                                        wire:click="addItemToCart({{ $item->id }})"
                                         wire:loading.attr="disabled"
                                         class="mt-2 flex items-center gap-1.5 text-xs font-semibold bg-emerald-600 text-white px-3 py-1 rounded hover:bg-emerald-700 transition disabled:opacity-75"
                                     >
@@ -143,8 +143,8 @@
                                 @elseif($item->status === 'completed')
                                     <div class="flex sm:items-center gap-2">
                                         <p class="text-xs sm:text-sm font-semibold text-blue-700">Added to Cart</p>
-                                        <button 
-                                            wire:click="removeFromCart({{ $item->id }})" 
+                                        <button
+                                            wire:click="removeFromCart({{ $item->id }})"
                                             class="inline-flex items-center gap-1 text-xs text-red-500 hover:text-red-600 font-medium transition"
                                         >
                                             <x-heroicon-o-trash class="size-3 sm:size-4" />
@@ -153,10 +153,10 @@
                                     </div>
 
                                 @elseif($item->status === 'unavailable')
-                                    <p class="text-sm font-semibold text-red-700">Currently Unavailable</p>
+                                    <p class="text-xs sm:text-sm font-semibold text-red-700">Currently Unavailable</p>
 
                                 @else {{-- Pending --}}
-                                    <p class="text-sm font-semibold text-yellow-800 animate-pulse">Verification in Progress...</p>
+                                    <p class="text-xs sm:text-sm font-semibold text-yellow-800 animate-pulse">Verification in Progress...</p>
                                 @endif
                             </div>
                         </div>

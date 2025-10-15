@@ -133,7 +133,7 @@
                     @if($otherOptions->isNotEmpty())
                         <section class="mt-8">
                             <h2 class="text-base font-semibold text-gray-700">Other Available Products ({{ $this->totalOtherOptions }})</h2>
-                            
+
                             {{-- We now use a responsive grid to display the product cards --}}
                             <div class="mt-4 grid grid-cols-2 md:grid-cols-3 gap-4">
                                 @foreach($otherOptions as $option)
@@ -152,16 +152,30 @@
                     @endif
                 </div>
             </div>
-            
+
             <!-- Related Products Section -->
             @if($relatedProducts->isNotEmpty())
-                <div class="mt-16 pt-8 border-t">
+                <div class="mt-16 pt-8 border-t border-gray-100">
                     <h2 class="text-base font-bold text-gray-900">You Might Also Like</h2>
-                    <div class="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
                         @foreach($relatedProducts as $related)
                             @php
-                                // Re-create the standardized object for the product card
-                                $productData = (object) [ /* ... */ ];
+                                // Transform the PharmacyProduct Eloquent model into the
+                                // standardized stdClass object that our reusable
+                                // product card component expects.
+                                $productData = (object) [
+                                    'productId' => $related->id,
+                                    'uniqueId' => 'pharmacy::' . $related->id,
+                                    'type' => 'pharmacy',
+                                    'productName' => $related->name,
+                                    'isPrescription' => $related->is_prescription,
+                                    'slug' => $related->slug,
+                                    'imageUrl' => $related->image,
+                                    'price' => $related->price,
+                                    'sourceName' => $related->pharmacy->name,
+                                    'pharmacistPhone' => $related->user?->phone,
+                                    'pharmacistName' => $related->user?->name,
+                                ];
                             @endphp
                             <x-product-card :product="$productData" />
                         @endforeach

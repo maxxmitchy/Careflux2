@@ -9,7 +9,7 @@
 
 <div>
     <a href="{{ route('auth.social.redirect', ['provider' => 'google', 'panel' => $panel]) }}"
-       class="inline-flex w-full items-center justify-center gap-2 rounded-md bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:outline-offset-0">
+       class="inline-flex w-full items-center justify-center gap-2 rounded bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:outline-offset-0">
 
         <svg class="h-5 w-5" aria-hidden="true" viewBox="0 0 24 24">
             <path d="M12.0003 4.75C13.7703 4.75 15.2403 5.37 16.3603 6.45L19.6303 3.18C17.5103 1.2 14.9303 0 12.0003 0C7.3103 0 3.4403 2.73 1.4303 6.58L5.0703 9.42C6.0103 6.77 8.7603 4.75 12.0003 4.75Z" fill="#EA4335"></path>

@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use App\Livewire\Auth\Register;
+use Filament\Actions\Action;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -54,6 +55,16 @@ class PatientPanelProvider extends PanelProvider
             ->widgets([
                 AccountWidget::class,
                 // FilamentInfoWidget::class,
+            ])
+            ->userMenuItems([
+                // This is the default "Profile" link, we can keep it.
+                // 'profile' => Action::make()->label('My Profile'),
+
+                // This is our new, custom menu item.
+                Action::make('back_home')
+                    ->label('Back to Homepage')
+                    ->icon('heroicon-o-home')
+                    ->url('/'),
             ])
             ->middleware([
                 EncryptCookies::class,

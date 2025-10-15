@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Livewire\Concerns\WithQuoteActions;
 use App\Models\PromotionalBanner;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -13,7 +14,6 @@ use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Src\Marketing\Domain\Models\MarketingAsset;
-use Src\Order\Application\Services\QuoteRequestService;
 use Src\Order\Domain\Contracts\CartServiceInterface;
 use Src\Order\Domain\Exceptions\InvalidCartQuantityException;
 use Src\Pharmacy\Domain\Models\PharmacyProduct;
@@ -25,7 +25,7 @@ use Src\Store\Domain\Contracts\StoreRepositoryInterface;
 #[Layout('components.layouts.guest')]
 class PublicProductSearch extends Component
 {
-    use WithPagination;
+    use WithPagination, WithQuoteActions;
 
     #[Url(as: 'q', except: '')]
     public string $search = '';
@@ -70,13 +70,13 @@ class PublicProductSearch extends Component
     public function mount(FindAndScrapeProductsAction $action)
     {
         $banners = PromotionalBanner::where('is_active', true)
-    ->whereIn('placement', ['search_results', 'empty_state_promo'])
-    ->get()
-    ->groupBy('placement');
+            ->whereIn('placement', ['search_results', 'empty_state_promo'])
+            ->get()
+            ->groupBy('placement');
 
-// This gives you collections per placement:
-$this->inFeedBanner = $banners->get('search_results')?->first(); // keep first, or choose randomly
-$this->emptyStateBanners = $banners->get('empty_state_promo') ?? collect(); // all banners for empty state
+        // This gives you collections per placement:
+        $this->inFeedBanner = $banners->get('search_results')?->first(); // keep first, or choose randomly
+        $this->emptyStateBanners = $banners->get('empty_state_promo') ?? collect(); // all banners for empty state
 
         if (! empty($this->search)) {
             $this->runSearch($action);
@@ -250,21 +250,6 @@ $this->emptyStateBanners = $banners->get('empty_state_promo') ?? collect(); // a
         }
 
         return $showcase;
-    }
-
-    // --- THIS IS THE NEW, MISSING METHOD ---
-    #[On('request-quote')]
-    public function requestQuote(array $productData, CartServiceInterface $cartService, QuoteRequestService $quoteService)
-    {
-        // Add the item to the 'pending_quote' partition of the cart.
-        $cartService->add($productData, 'pending_quote');
-
-        // Mark the product as "requested" to change the button state.
-        $quoteService->markAsRequested($productData['productUrl']);
-
-        // Notify the UI.
-        $this->dispatch('cart-updated');
-        $this->dispatch('toast', message: 'Item added to your quote request list!', type: 'info');
     }
 
     public function updated(string $property): void

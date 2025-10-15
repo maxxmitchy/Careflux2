@@ -2,56 +2,48 @@
 
 namespace Src\Scraping\Infrastructure\Scrapers;
 
+use GuzzleHttp\Client;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
-use Src\Scraping\Application\BaseScraper;
+use Src\Scraping\Domain\Contracts\HttpScrapingInterface; // <-- Implement the new interface
 use Src\Scraping\Domain\DTOs\NafdacProductDTO;
-use Src\Shared\Domain\Contracts\UpsertActionInterface; // Import the interface
-use Src\Shared\Infrastructure\Services\PuppeteerService;
-use Src\Shared\Infrastructure\Services\RetryService;
-use Src\Shared\Domain\Contracts\DelayStrategyInterface;
-use Src\Store\Domain\Models\Store;
 use Symfony\Component\DomCrawler\Crawler;
 use Throwable;
 
-// This scraper is specialized and does not need to extend BaseScraper
-// as it handles a different data type and upsert action.
-class NafdacScraper extends BaseScraper
+class NafdacScraper implements HttpScrapingInterface
 {
-    // We override the constructor to accept the specific NAFDAC upsert action
-    public function __construct(
-        Store $store,
-        PuppeteerService $puppeteerService,
-        RetryService $retryService,
-        // The key difference: it uses its own UpsertAction
-        UpsertActionInterface $upsertAction, 
-        DelayStrategyInterface $delayStrategy
-    ) {
-        parent::__construct(
-            $store,
-            $puppeteerService,
-            $retryService,
-            $upsertAction,
-            $delayStrategy
-        );
-    }
-    
-    public static function getDisplayName(): string
+    private Client $httpClient;
+
+    public function __construct()
     {
-        return 'NAFDAC Green Book';
+        $this->httpClient = new Client([
+            'timeout' => 30,
+            'headers' => ['User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'],
+        ]);
     }
 
-    public function extractProducts(string $html): Collection
+    public function scrapeUrl(string $url): Collection
+    {
+        try {
+            $response = $this->httpClient->get($url);
+            $html = (string) $response->getBody();
+        } catch (Throwable $e) {
+            Log::error("Failed to fetch NAFDAC URL: {$url}", ['error' => $e->getMessage()]);
+
+            return collect(); // Return an empty collection on failure
+        }
+
+        return $this->extractProducts($html);
+    }
+
+    private function extractProducts(string $html): Collection
     {
         $crawler = new Crawler($html);
-
-        // Selector based on the provided HTML snippet
         $selector = 'div.col-md-4 div.naf-card';
 
         return collect($crawler->filter($selector)->each(function (Crawler $node) {
             try {
-                // Extracting based on the structure: <h5>, <span>, <span>, <span>
-                $h5 = $node->filter('h5')->html(); // Use html() to get content with <span>
+                $h5 = $node->filter('h5')->html();
                 preg_match('/(.*?)<span/s', $h5, $nameMatches);
                 $name = trim($nameMatches[1] ?? '');
 
@@ -67,13 +59,14 @@ class NafdacScraper extends BaseScraper
                 return new NafdacProductDTO(
                     name: $name,
                     nafdac_number: $nafdacNumber,
-                    manufacturer: null // The manufacturer is not available in this simple view
+                    manufacturer: null
                 );
             } catch (Throwable $e) {
                 Log::warning('Failed to parse a NAFDAC product.', [
                     'exception' => $e->getMessage(),
                     'html_node' => mb_substr($node->outerHtml(), 0, 500),
                 ]);
+
                 return null;
             }
         }))->filter();

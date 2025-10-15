@@ -15,6 +15,7 @@ return new class extends Migration
             $table->foreignId('patient_id')->nullable()->constrained()->onDelete('set null');
             $table->string('patient_name'); // Denormalized for quick access
             $table->string('patient_phone'); // Denormalized for quick access
+            $table->string('patient_email'); // Denormalized for quick access
             $table->string('status')->default('pending')->index(); // e.g., pending, available, completed
             $table->timestamps();
         });

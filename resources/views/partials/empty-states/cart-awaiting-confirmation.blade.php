@@ -1,4 +1,4 @@
-<div class="text-center py-16 px-4 bg-white rounded-xl shadow-sm border border-gray-100">
+<div class="text-center py-16 px-4 bg-white rounded shadow-sm border border-gray-100">
     <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 mb-4">
         <x-heroicon-o-document-magnifying-glass class="h-6 w-6 text-amber-600" />
     </div>

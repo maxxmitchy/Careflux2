@@ -29,6 +29,7 @@ class PlaceOrderAction implements PlaceOrderActionInterface
             $createdInvoices = collect();
 
             foreach ($itemsByPharmacy as $pharmacyId => $pharmacyCartItems) {
+
                 if (is_null($pharmacyId)) {
                     continue;
                 }

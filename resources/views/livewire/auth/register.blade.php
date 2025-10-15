@@ -4,7 +4,7 @@
             <x-breadcrumbs :crumbs="['Register' => '#']" />
         </div>
 
-        <div class="grid lg:grid-cols-2 bg-white rounded-2xl shadow-2xl shadow-emerald-200/50 overflow-hidden">
+        <div class="grid lg:grid-cols-2 bg-white rounded shadow-2xl shadow-emerald-200/50 overflow-hidden">
 
             <!-- Left Panel: Brand Showcase -->
             <div class="hidden lg:block relative p-8 bg-gray-900">
@@ -34,14 +34,14 @@
                 <h2 class="text-2xl font-bold text-gray-800">Create Your Account</h2>
 
                 <!-- Role Selector -->
-                <div class="grid grid-cols-2 gap-2 p-1 bg-gray-100 rounded-xl mt-6 text-sm font-medium">
+                <div class="grid grid-cols-2 gap-2 p-1 bg-gray-100 rounded mt-6 text-sm font-medium">
                     <!-- Patient Button -->
                     <button
                         @click="role = 'patient'"
                         :class="role === 'patient'
                             ? 'bg-white shadow text-emerald-600'
                             : 'text-gray-500 hover:text-gray-700'"
-                        class="text-xs sm:text-sm flex items-center justify-center gap-2 px-4 py-3 rounded-lg transition-all duration-200"
+                        class="text-xs sm:text-sm flex items-center justify-center gap-2 px-4 py-3 rounded transition-all duration-200"
                     >
                         <!-- Icon -->
                         <svg xmlns="http://www.w3.org/2000/svg" class="flex-shrink-0 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -57,7 +57,7 @@
                         :class="role === 'technician'
                             ? 'bg-white shadow text-emerald-600'
                             : 'text-gray-500 hover:text-gray-700'"
-                        class="text-xs sm:text-sm flex items-center justify-center gap-2 px-4 py-3 rounded-lg transition-all duration-200"
+                        class="text-xs sm:text-sm flex items-center justify-center gap-2 px-4 py-3 rounded transition-all duration-200"
                     >
                         <!-- Icon -->
                         <svg xmlns="http://www.w3.org/2000/svg" class="flex-shrink-0 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -83,13 +83,22 @@
                 <form wire:submit.prevent="register" class="mt-4 space-y-4">
                     {{-- Common Fields --}}
                     <div>
-                        <input wire:model="name" type="text" placeholder="Full Name" class="w-full p-3 border border-gray-300 text-sm rounded-lg focus:outline-emerald-600">
+                        <input wire:model="name" type="text" placeholder="Full Name" class="w-full p-3 border border-gray-300 text-sm rounded focus:outline-emerald-600">
+                        @error('name')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
                     </div>
                     <div>
-                        <input wire:model="email" type="email" placeholder="Email Address" class="w-full p-3 border border-gray-300 text-sm rounded-lg focus:outline-emerald-600">
+                        <input wire:model="email" type="email" placeholder="Email Address" class="w-full p-3 border border-gray-300 text-sm rounded focus:outline-emerald-600">
+                        @error('email')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
                     </div>
                     <div>
-                        <input wire:model="phone" type="tel" placeholder="Phone Number" class="w-full p-3 border border-gray-300 text-sm rounded-lg focus:outline-emerald-600">
+                        <input wire:model="phone" type="tel" placeholder="Phone Number" class="w-full p-3 border border-gray-300 text-sm rounded focus:outline-emerald-600">
+                        @error('phone')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <!-- Password Field -->
@@ -98,7 +107,7 @@
                                 wire:model="password"
                                 :type="show ? 'text' : 'password'"
                                 placeholder="Password"
-                                class="w-full p-3 border border-gray-300 text-sm rounded-lg focus:outline-emerald-600 pr-10"
+                                class="w-full p-3 border border-gray-300 text-sm rounded focus:outline-emerald-600 pr-10"
                             >
                             <button type="button"
                                 @click="show = !show"
@@ -130,7 +139,7 @@
                                 wire:model="password_confirmation"
                                 :type="show ? 'text' : 'password'"
                                 placeholder="Confirm Password"
-                                class="w-full p-3 border border-gray-300 text-sm rounded-lg focus:outline-emerald-600 pr-10"
+                                class="w-full p-3 border border-gray-300 text-sm rounded focus:outline-emerald-600 pr-10"
                             >
                             <button type="button"
                                 @click="show = !show"
@@ -163,7 +172,7 @@
                     <div x-show="role === 'technician'" x-collapse class="relative">
                         <select
                             wire:model="pharmacy_id"
-                            class="text-gray-400 w-full appearance-none p-3 pr-10 border border-gray-300 text-sm rounded-lg focus:outline-emerald-600"
+                            class="text-gray-400 w-full appearance-none p-3 pr-10 border border-gray-300 text-sm rounded focus:outline-emerald-600"
                         >
                             <option value="">Select your pharmacy...</option>
                             @foreach($pharmacies as $pharmacy)
@@ -178,7 +187,7 @@
                         </svg>
                     </div>
 
-                    <button type="submit" class="w-full bg-emerald-600 text-white py-3 rounded-lg text-sm font-semibold hover:bg-emerald-700 focus:ring-2 focus:ring-emerald-500">
+                    <button type="submit" class="w-full bg-emerald-600 text-white py-3 rounded text-sm font-semibold hover:bg-emerald-700 focus:ring-2 focus:ring-emerald-500">
                         Create Account
                     </button>
                 </form>

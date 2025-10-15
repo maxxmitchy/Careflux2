@@ -11,24 +11,29 @@ class DownloadInvoiceAction
 {
     public function execute(Invoice $invoice): StreamedResponse
     {
-        $html = view('pdf.invoice', ['invoice' => $invoice])->render();
+        $paymentDetails = "Please make payment to:\nCareflux LCO\nProvidus - 9648958313";
+        // --- END OF FIX ---
+
+        $html = view('pdf.invoice', [
+            'invoice' => $invoice,
+            'paymentDetails' => $paymentDetails,
+        ])->render();
 
         $fileName = "Invoice-{$invoice->invoice_number}.pdf";
 
-        // Vite::asset gives us the raw content of the compiled CSS file.
-        $cssContent = file_get_contents(Vite::asset('resources/css/app.css'));
+        $nodePath = '/home/ubuntu/.config/nvm/versions/node/v22.18.0/bin/node';
+        $npmPath = '/home/ubuntu/.config/nvm/versions/node/v22.18.0/bin/npm';
 
         $fileContents = Browsershot::html($html)
-            ->noSandbox() // Required for most server environments
+            ->setNodeBinary($nodePath) // Explicitly set the Node binary path
+            ->setNpmBinary($npmPath)   // Explicitly set the NPM binary path
+            ->noSandbox()
             ->format('A4')
-            ->showBackground()
-            // The most reliable method is to inject the styles directly into the head.
+            ->printBackground()
+            // 2. We inject the styles directly. This is the most reliable method.
             ->setExtraHttpHeaders(['Content-Type' => 'text/html; charset=utf-8'])
-            ->newHeadless() // Use the new headless mode
-            ->setNodeBinary(config('browsershot.node_binary', '/usr/bin/node')) // Use configurable paths
-            ->setNpmBinary(config('browsershot.npm_binary', '/usr/bin/npm'))
             ->pdf([
-                'extraHtmlHead' => "<style>{$cssContent}</style>",
+                'extraHtmlHead' => '<style>'.Vite::asset('resources/css/app.css').'</style>',
             ]);
 
         return response()->streamDownload(fn () => print ($fileContents), $fileName);

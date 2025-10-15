@@ -1,4 +1,4 @@
-<x-layouts.app title="Access Denied (403)">
+<x-layouts.guest title="Access Denied (403)">
     <div class="min-h-[50vh] flex flex-col items-center justify-center text-center py-16 px-4">
         <div class="max-w-md">
              <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100 mb-4">
@@ -15,4 +15,4 @@
             </div>
         </div>
     </div>
-</x-layouts.app>
+</x-layouts.guest>

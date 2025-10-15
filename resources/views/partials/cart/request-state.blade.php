@@ -12,19 +12,24 @@
 
     <!-- Right Column: Contact Form -->
     <aside class="lg:col-span-1 mt-8 lg:mt-0">
-        <div class="bg-white rounded-lg shadow-sm border p-4 sticky top-24">
+        <div class="bg-white rounded shadow-sm border p-4 sticky top-24">
             <h3 class="text-base font-semibold">Confirm Your Request</h3>
             <p class="mt-1 text-xs text-gray-500">Confirm your contact details so we can send you the finalized quote and payment link.</p>
             <form wire:submit.prevent="submitQuoteRequest" class="mt-4 space-y-4">
                 <div>
                     <label for="quote_name" class="block text-xs font-medium text-gray-700">Full Name</label>
-                    <input id="quote_name" wire:model.lazy="quote_name" type="text" required class="mt-1 w-full p-3 border text-sm border-gray-300 rounded-lg">
+                    <input id="quote_name" wire:model.lazy="quote_name" type="text" required class="mt-1 w-full p-3 border text-sm border-gray-300 rounded">
                     @error('quote_name') <span class="text-xs text-red-500 mt-1">{{ $message }}</span> @enderror
                 </div>
                 <div>
                     <label for="quote_phone" class="block text-xs font-medium text-gray-700">Phone / WhatsApp</label>
-                    <input id="quote_phone" wire:model.lazy="quote_phone" type="tel" required class="mt-1 w-full p-3 border text-sm border-gray-300 rounded-lg">
+                    <input id="quote_phone" wire:model.lazy="quote_phone" type="tel" required class="mt-1 w-full p-3 border text-sm border-gray-300 rounded">
                     @error('quote_phone') <span class="text-xs text-red-500 mt-1">{{ $message }}</span> @enderror
+                </div>
+                <div>
+                    <label for="quote_email" class="block text-xs font-medium text-gray-700">Email Address</label>
+                    <input id="quote_email" wire:model.lazy="quote_email" type="email" required class="mt-1 w-full p-3 border text-sm border-gray-300 rounded">
+                    @error('quote_email') <span class="text-xs text-red-500 mt-1">{{ $message }}</span> @enderror
                 </div>
                 <div class="pt-2">
                     <label for="quote_consent" class="flex items-start gap-3">
@@ -34,10 +39,10 @@
                     @error('quote_consent') <span class="text-xs text-red-500 mt-1">{{ $message }}</span> @enderror
                 </div>
                 <div class="pt-2">
-                    <button 
-                        type="submit" 
-                        class="w-full bg-emerald-600 text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-emerald-700 flex items-center justify-center gap-2"
-                        wire:loading.attr="disabled" 
+                    <button
+                        type="submit"
+                        class="w-full bg-emerald-600 text-white py-2.5 rounded text-sm font-semibold hover:bg-emerald-700 flex items-center justify-center gap-2"
+                        wire:loading.attr="disabled"
                         wire:target="submitQuoteRequest"
                     >
                         <span wire:loading wire:target="submitQuoteRequest">

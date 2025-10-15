@@ -3,31 +3,43 @@
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
-use Src\Shared\Domain\Models\User;
+use Src\Shared\Domain\Models\User; // <-- Implement ShouldQueue
 
-class PatientWelcomeMail extends Mailable
+class PatientWelcomeMail extends Mailable implements ShouldQueue // <-- Implement ShouldQueue
 {
     use Queueable, SerializesModels;
 
-    public function __construct(public User $user, public string $token) {}
+    public function __construct(
+        public User $user,
+        public ?string $token = null // Token is optional
+    ) {}
 
     public function envelope(): Envelope
     {
-        return new Envelope(subject: 'Welcome to Careflux - Set Your Password');
+        $subject = $this->token
+            ? 'Welcome to Careflux - Please Set Your Password'
+            : 'Welcome to the Careflux Family!';
+
+        return new Envelope(subject: $subject);
     }
 
     public function content(): Content
     {
-        // We pass the user and token to the Blade view
-        return new Content(view: 'emails.patient-welcome', with: [
-            'url' => route('filament.patient.auth.password.reset', [
-                'token' => $this->token,
-                'email' => $this->user->getEmailForPasswordReset(),
-            ]),
-        ]);
+        return new Content(
+            markdown: 'emails.patient-welcome', // Use Markdown for beautiful, responsive emails
+            with: [
+                'url' => $this->token
+                    ? route('filament.patient.auth.password.reset', [
+                        'token' => $this->token,
+                        'email' => $this->user->getEmailForPasswordReset(),
+                    ])
+                    : route('filament.patient.auth.login'),
+            ]
+        );
     }
 }

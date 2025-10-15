@@ -4,11 +4,14 @@ namespace Src\Order\Application\Actions;
 
 use App\Events\TransactionCompleted;
 use App\Jobs\NotifyPharmacistOfNewOrderJob;
+use App\Mail\OrderConfirmationMail; // <-- Import the Mailable
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail; // <-- Import the Mail facade
 use Src\Order\Domain\Models\Invoice;
 use Src\Order\Domain\Models\PaymentAttempt;
+use Src\Order\Domain\Models\Transaction; // <-- Import Transaction
 use Throwable;
 
 class VerifyTransactionAction
@@ -34,11 +37,10 @@ class VerifyTransactionAction
 
         $parentTransaction = $attempt->transaction;
         if ($parentTransaction->status === 'completed') {
-            return true; // Idempotency: Already processed successfully.
+            return true;
         }
 
         try {
-            // --- REAL TRANSACTPAY API INTEGRATION ---
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer '.$this->secretKey,
                 'Accept' => 'application/json',
@@ -46,31 +48,25 @@ class VerifyTransactionAction
                 'reference' => $attemptReference,
             ]);
 
-            $response->throw(); // Throw an exception for 4xx/5xx responses
+            $response->throw();
             $data = $response->json('data');
-            // --- END OF API INTEGRATION ---
 
             if ($response->successful() && isset($data['status']) && $data['status'] === 'successful') {
                 return $this->handleSuccessfulPayment($attempt, $parentTransaction, $data);
             }
 
-            // If payment was not successful according to the API
             $this->handleFailedPayment($attempt, $parentTransaction, $data ?? ['message' => 'Payment not successful']);
 
             return false;
-
         } catch (Throwable $e) {
-            Log::critical('Transactpay verification API call failed.', [
-                'reference' => $attemptReference,
-                'error' => $e->getMessage(),
-            ]);
+            Log::critical('Transactpay verification API call failed.', ['reference' => $attemptReference, 'error' => $e->getMessage()]);
             $this->handleFailedPayment($attempt, $parentTransaction, ['error' => $e->getMessage()]);
 
             return false;
         }
     }
 
-    private function handleSuccessfulPayment(PaymentAttempt $attempt, $parentTransaction, array $gatewayResponse): bool
+    private function handleSuccessfulPayment(PaymentAttempt $attempt, Transaction $parentTransaction, array $gatewayResponse): bool
     {
         DB::transaction(function () use ($attempt, $parentTransaction, $gatewayResponse) {
             $attempt->update(['status' => 'successful', 'gateway_response' => $gatewayResponse]);
@@ -83,22 +79,30 @@ class VerifyTransactionAction
             $invoiceIds = $parentTransaction->metadata['invoice_ids'] ?? [];
             Invoice::whereIn('id', $invoiceIds)->update(['status' => 'paid']);
 
-            TransactionCompleted::dispatch($parentTransaction);
+            $invoices = Invoice::with(['pharmacy', 'patient', 'items'])->findMany($invoiceIds);
 
-            // Dispatch jobs to notify pharmacists
-            foreach (Invoice::findMany($invoiceIds) as $invoice) {
-                NotifyPharmacistOfNewOrderJob::dispatch($invoice);
+            // --- EMAIL & NOTIFICATION INTEGRATION ---
+            if ($invoices->isNotEmpty()) {
+                // 1. Send email confirmation to the patient.
+                Mail::to($parentTransaction->user)->queue(new OrderConfirmationMail($parentTransaction->user, $invoices));
+
+                // 2. Dispatch jobs to notify each relevant pharmacist.
+                foreach ($invoices as $invoice) {
+                    NotifyPharmacistOfNewOrderJob::dispatch($invoice);
+                }
             }
+            // --- END INTEGRATION ---
+
+            // Dispatch event for other listeners (e.g., coupon redemption, subscription activation).
+            TransactionCompleted::dispatch($parentTransaction);
         });
 
         return true;
     }
 
-    private function handleFailedPayment(PaymentAttempt $attempt, $parentTransaction, array $gatewayResponse): void
+    private function handleFailedPayment(PaymentAttempt $attempt, Transaction $parentTransaction, array $gatewayResponse): void
     {
         $attempt->update(['status' => 'failed', 'gateway_response' => $gatewayResponse]);
-
-        // Only mark the parent transaction as failed if there are no other successful attempts.
         if (! $parentTransaction->paymentAttempts()->where('status', 'successful')->exists()) {
             $parentTransaction->update(['status' => 'failed', 'failed_at' => now()]);
         }

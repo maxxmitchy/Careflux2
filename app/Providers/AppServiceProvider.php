@@ -2,12 +2,14 @@
 
 namespace App\Providers;
 
+use App\Http\Responses\LoginViewResponse;
 use App\Observers\MarketingAssetObserver;
 use App\Observers\MedicationObserver;
 use App\Observers\PatientInteractionObserver;
 use App\Observers\PharmacyProductObserver;
 use App\Observers\ScrapedProductObserver;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Fortify\Contracts\LoginViewResponse as LoginViewResponseContract;
 use Src\Marketing\Domain\Models\MarketingAsset;
 use Src\Medication\Domain\Models\Medication;
 use Src\Patient\Domain\Models\PatientInteraction;
@@ -21,7 +23,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton(LoginViewResponseContract::class, LoginViewResponse::class);
     }
 
     /**

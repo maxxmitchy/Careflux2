@@ -38,7 +38,7 @@ class TrustShowcaseResource extends Resource
     public static function getRelations(): array
     {
         return [
-            RelationManagers\StepsRelationManager::class
+            RelationManagers\StepsRelationManager::class,
         ];
     }
 

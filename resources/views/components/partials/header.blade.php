@@ -3,7 +3,7 @@
         <div class="flex justify-between items-center h-16">
             <!-- Logo -->
             <a href="{{ route('landing') }}" class="flex-shrink-0 flex items-center gap-2">
-                <img class="h-8 w-auto" src="/favicon.svg" alt="Careflux Logo">
+                <img class="h-10 w-auto" src="/logo.jpg" alt="Careflux Logo">
                 <span class="text-xl font-bold text-teal-600">Careflux</span>
             </a>
 

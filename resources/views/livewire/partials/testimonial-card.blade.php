@@ -1,4 +1,4 @@
-<div class="bg-white border border-gray-200 shadow-md rounded-xl flex-shrink-0 w-80 mx-2 p-6">
+<div class="bg-white border border-gray-200 rounded flex-shrink-0 w-80 mx-2 p-6">
     <div class="flex items-start gap-4">
         <img src="{{ asset('storage/' . $testimonial->author_image) }}" alt="{{ $testimonial->author_name }}"
              class="w-12 h-12 rounded-full object-cover border-2 border-gray-200">

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pharmacy\Resources\PharmacyProducts\Pages;
 
+use App\Events\ProductUpdated;
 use App\Filament\Pharmacy\Resources\PharmacyProducts\PharmacyProductResource;
 use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\TextInput;
@@ -13,6 +14,8 @@ use Src\Pharmacy\Domain\Models\PharmacyProduct;
 
 class EditPharmacyProduct extends EditRecord
 {
+    private array $originalData = [];
+
     protected static string $resource = PharmacyProductResource::class;
 
     public function form(Schema $form): Schema
@@ -76,5 +79,17 @@ class EditPharmacyProduct extends EditRecord
         return [
             DeleteAction::make(),
         ];
+    }
+
+    protected function beforeSave(): void
+    {
+        // Capture the "before" state of the data
+        $this->originalData = $this->getRecord()->getOriginal();
+    }
+
+    protected function afterSave(): void
+    {
+        // Dispatch an event with the updated product and its original state
+        ProductUpdated::dispatch($this->getRecord(), $this->originalData);
     }
 }

@@ -23,6 +23,7 @@ class SubmitQuoteRequestAction
                 'patient_id' => $patient?->id,
                 'patient_name' => $quoteData['quote_name'],
                 'patient_phone' => $quoteData['quote_phone'],
+                'patient_email' => $quoteData['quote_email'],
                 'status' => 'pending',
             ]);
 

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pharmacy\Resources\QuoteRequests\RelationManagers;
 
+use App\Events\QuoteProcessed;
 use Filament\Actions\AssociateAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
@@ -47,8 +48,8 @@ class ItemsRelationManager extends RelationManager
                 //
             ])
             ->headerActions([
-                CreateAction::make(),
-                AssociateAction::make(),
+                // CreateAction::make(),
+                // AssociateAction::make(),
             ])
             ->recordActions([
                 EditAction::make('verify')
@@ -64,12 +65,23 @@ class ItemsRelationManager extends RelationManager
                         Textarea::make('admin_notes')->label('Internal Notes'),
                     ])
                     ->action(function (Model $record, array $data) {
+
                         $record->update([
                             'status' => $data['status'],
                             'negotiated_price' => isset($data['negotiated_price']) ? (int) ($data['negotiated_price'] * 100) : null,
                             'admin_notes' => $data['admin_notes'],
                         ]);
-                        Notification::make()->title('Item status updated.')->success()->send();
+
+                        // 2. Check if the parent QuoteRequest is now fully processed
+                        $quoteRequest = $record->quoteRequest;
+                        if ($quoteRequest->items()->where('status', 'pending')->doesntExist()) {
+                            // If no pending items remain, dispatch the event
+                            $quoteRequest->update(['status' => 'available']); // Update parent status
+                            QuoteProcessed::dispatch($quoteRequest);
+                            Notification::make()->title('Item updated & Patient has been notified!')->success()->send();
+                        } else {
+                            Notification::make()->title('Item status updated.')->success()->send();
+                        }
                     }),
                 DissociateAction::make(),
                 DeleteAction::make(),

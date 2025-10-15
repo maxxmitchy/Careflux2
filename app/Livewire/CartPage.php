@@ -28,12 +28,14 @@ class CartPage extends Component
 
     public int $subtotal = 0;
 
-    public int $deliveryFee = 50000; // ₦500 in kobo
+    public int $deliveryFee = 0;
 
     // Quote Form Properties
     public string $quote_name = '';
 
     public string $quote_phone = '';
+
+    public string $quote_email = '';
 
     public bool $quote_consent = false;
 
@@ -48,6 +50,7 @@ class CartPage extends Component
         if ($user = Auth::user()) {
             $this->quote_name = $user->name;
             $this->quote_phone = $user->phone ?? '';
+            $this->quote_email = $user->email ?? '';
         }
 
         // Default to the tab with more items
@@ -133,6 +136,7 @@ class CartPage extends Component
         $this->validate([
             'quote_name' => 'required|string',
             'quote_phone' => 'required|string',
+            'quote_email' => 'required|email',
             'quote_consent' => 'accepted',
         ]);
 

@@ -22,7 +22,8 @@ class Settings extends SettingsPage
     protected static ?int $navigationSort = 100;
 
     // We register both settings classes that this page will manage.
-    protected static string $settings = GeneralSettings::class;
+    // protected static string $settings = GeneralSettings::class;
+    protected static string $settings = GamificationSettings::class;
 
     public function form(Schema $form): Schema
     {
@@ -51,41 +52,41 @@ class Settings extends SettingsPage
                                     ->columnSpanFull(),
                             ]),
 
-                        Tab::make('Gamification Settings')
-                            ->schema([
-                                Forms\Components\TextInput::make('point_to_ngn_conversion_rate')
-                                    ->label('Points to Naira Conversion Rate')
-                                    ->numeric()
-                                    ->required()
-                                    ->step(1)
-                                    ->helperText('The value of 1 point in Naira. (e.g., enter 60 for 1 point = ₦60)'),
-                            ]),
-
                         // Tab::make('Gamification Settings')
                         //     ->schema([
                         //         Forms\Components\TextInput::make('point_to_ngn_conversion_rate')
                         //             ->label('Points to Naira Conversion Rate')
-                        //             ->helperText('The value of 1 point in Naira. (e.g., enter 60 for 1 point = ₦60)')
                         //             ->numeric()
-                        //             ->required(),
-
-                        //         Grid::make(2)
-                        //             ->schema([
-                        //                 Forms\Components\TextInput::make('level_silver_threshold')
-                        //                     ->label('Silver Level Threshold')
-                        //                     ->numeric()
-                        //                     ->required()
-                        //                     ->default(500)
-                        //                     ->helperText('Points required to reach Silver level.'),
-
-                        //                 Forms\Components\TextInput::make('level_gold_threshold')
-                        //                     ->label('Gold Level Threshold')
-                        //                     ->numeric()
-                        //                     ->required()
-                        //                     ->default(2000)
-                        //                     ->helperText('Points required to reach Gold level.'),
-                        //             ]),
+                        //             ->required()
+                        //             ->step(1)
+                        //             ->helperText('The value of 1 point in Naira. (e.g., enter 60 for 1 point = ₦60)'),
                         //     ]),
+
+                        Tab::make('Gamification Settings')
+                            ->schema([
+                                Forms\Components\TextInput::make('point_to_ngn_conversion_rate')
+                                    ->label('Points to Naira Conversion Rate')
+                                    ->helperText('The value of 1 point in Naira. (e.g., enter 60 for 1 point = ₦60)')
+                                    ->numeric()
+                                    ->required(),
+
+                                Grid::make(2)
+                                    ->schema([
+                                        Forms\Components\TextInput::make('level_silver_threshold')
+                                            ->label('Silver Level Threshold')
+                                            ->numeric()
+                                            ->required()
+                                            ->default(500)
+                                            ->helperText('Points required to reach Silver level.'),
+
+                                        Forms\Components\TextInput::make('level_gold_threshold')
+                                            ->label('Gold Level Threshold')
+                                            ->numeric()
+                                            ->required()
+                                            ->default(2000)
+                                            ->helperText('Points required to reach Gold level.'),
+                                    ]),
+                            ]),
                     ]),
             ]);
     }

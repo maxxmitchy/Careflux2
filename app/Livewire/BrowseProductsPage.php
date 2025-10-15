@@ -117,11 +117,9 @@ class BrowseProductsPage extends Component
 
         $paginator = ArrayPaginator::paginate($itemsForPagination, 24);
 
-        // --- THIS IS THE DEFINITIVE FIX ---
         $productIdsOnPage = collect($paginator->items())->filter(function ($value) {
             return is_numeric($value);
         })->all();
-        // --- END OF FIX ---
 
         $productModels = PharmacyProduct::find($productIdsOnPage)->keyBy('id');
 

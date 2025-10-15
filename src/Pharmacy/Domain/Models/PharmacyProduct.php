@@ -3,14 +3,16 @@
 namespace Src\Pharmacy\Domain\Models;
 
 use App\Models\Category;
-use Src\Shared\Domain\Models\User;
 use App\Models\MedicationInformation;
-use Illuminate\Database\Eloquent\Model;
-use Src\Medication\Domain\Models\MedicationVariant;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Src\Pharmacy\Domain\Enums\NafdacVerificationStatus;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Src\Gamification\Domain\Models\Task;
+use Src\Medication\Domain\Models\MedicationVariant;
+use Src\Pharmacy\Domain\Enums\NafdacVerificationStatus;
+use Src\Shared\Domain\Models\User;
 
 class PharmacyProduct extends Model
 {
@@ -71,5 +73,10 @@ class PharmacyProduct extends Model
     public function categories()
     {
         return $this->belongsToMany(Category::class, 'category_pharmacy_product');
+    }
+
+    public function tasks(): MorphToMany
+    {
+        return $this->morphToMany(Task::class, 'subjectable', 'task_subjectables');
     }
 }

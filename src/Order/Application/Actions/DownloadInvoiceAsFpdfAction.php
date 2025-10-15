@@ -37,13 +37,33 @@ class DownloadInvoiceAsFpdfAction
         $pdf->Cell(95, 5, 'FROM:', 0, 0, 'L');
         $pdf->Cell(95, 5, 'BILL TO:', 0, 1, 'L');
         $pdf->SetFont('Arial', '', 9);
-        $pdf->Cell(95, 5, $invoice->pharmacy->name, 0, 0, 'L');
+        // $pdf->Cell(95, 5, $invoice->pharmacy->name, 0, 0, 'L');
+        // $pdf->Cell(95, 5, $invoice->patient->full_name, 0, 1, 'L');
+        // $pdf->Cell(95, 5, $invoice->pharmacy->address, 0, 0, 'L');
+        // $pdf->Cell(95, 5, $invoice->shipping_location_area ?? $invoice->patient->location_area, 0, 1, 'L');
+        // $pdf->Cell(95, 5, $invoice->pharmacy->phone, 0, 0, 'L');
+        // $pdf->Cell(95, 5, $invoice->shipping_phone ?? $invoice->patient->phone, 0, 1, 'L');
+        // $pdf->Ln(10);
+        $pdf->SetFont('Arial', '', 9);
+        // "From" is now Careflux
+        $pdf->Cell(95, 5, 'Careflux', 0, 0, 'L');
         $pdf->Cell(95, 5, $invoice->patient->full_name, 0, 1, 'L');
-        $pdf->Cell(95, 5, $invoice->pharmacy->address, 0, 0, 'L');
+
+        // Add Careflux's address
+        $pdf->Cell(95, 5, '26B Jasmine Ikota GRA, Lekki, Lagos', 0, 0, 'L');
         $pdf->Cell(95, 5, $invoice->shipping_location_area ?? $invoice->patient->location_area, 0, 1, 'L');
-        $pdf->Cell(95, 5, $invoice->pharmacy->phone, 0, 0, 'L');
-        $pdf->Cell(95, 5, $invoice->shipping_phone ?? $invoice->patient->phone, 0, 1, 'L');
-        $pdf->Ln(10);
+
+        // Add Careflux's contact
+        $pdf->Cell(95, 5, 'support@careflux.com', 0, 0, 'L');
+        $pdf->Cell(95, 5, $invoice->shipping_phone ?? $invoice->patient->phone ?? '', 0, 1, 'L');
+        $pdf->Ln(5);
+
+        // Add a new section for the fulfillment partner
+        $pdf->SetFont('Arial', 'I', 8); // Italic and smaller font
+        $pdf->SetTextColor(100, 100, 100);
+        $pdf->Cell(0, 5, 'Fulfilled by Partner Pharmacy: '.$invoice->pharmacy->name, 0, 1, 'L');
+        $pdf->SetTextColor(0, 0, 0); // Reset text color
+        $pdf->Ln(5);
 
         // --- Items Table ---
         $pdf->SetFont('Arial', 'B', 10);

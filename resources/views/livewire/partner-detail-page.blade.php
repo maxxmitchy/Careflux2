@@ -61,8 +61,8 @@
             </div>
 
             @if($products->isNotEmpty())
-                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-                    @foreach($products as $product)
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+                @foreach($products as $product)
                         @php
                             $productData = (object) [
                                 'productId' => $product->id,
@@ -74,6 +74,8 @@
                                 'imageUrl' => $product->image,
                                 'price' => $product->price,
                                 'sourceName' => $product->pharmacy->name,
+                                'pharmacyId' => $product->pharmacy_id,
+                                'pharmacistId' => $product->user->id,
                             ];
                         @endphp
                         <x-product-card :product="$productData" />

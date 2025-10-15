@@ -27,11 +27,13 @@
     <meta name="twitter:description" content="{{ $pageDescription }}" />
     <meta name="twitter:image" content="{{ $ogImage }}" />
 
-    {{-- Favicons & Theme Color --}}
+    <!-- Favicons -->
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon.ico" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
-    <meta name="theme-color" content="#0d9488"> {{-- Teal-600 --}}
+    <meta name="theme-color" content="#2563EB">
 
     {{-- Fonts --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -48,10 +50,10 @@
     </style>
 </head>
 <body class="font-sans antialiased text-slate-800 flex flex-col min-h-screen">
-    <div 
-        @guest 
-            x-data="guestCart" 
-            @save-cart-to-storage.window="saveCartToStorage($event.detail.items)" 
+    <div
+        @guest
+            x-data="guestCart"
+            @save-cart-to-storage.window="saveCartToStorage($event.detail.items)"
         @endguest
     >
         <x-partials.header />
@@ -96,7 +98,7 @@
                 }
             }));
         });
-        
+
         document.addEventListener('DOMContentLoaded', () => {
             const body = document.querySelector('body');
             body.setAttribute('x-data', 'guestCart');
