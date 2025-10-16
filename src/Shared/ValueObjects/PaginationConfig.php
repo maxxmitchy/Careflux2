@@ -25,7 +25,7 @@ final readonly class PaginationConfig
         return new self(
             type: $store->paginate_type,
             keyword: $store->paginate_keyword,
-            maxPages: config('scraping.max_pagination_pages', 10),
+            maxPages: config('scraping.max_pagination_pages', 100),
             pageSize: (int) ($store->page_size ?? config('scraping.default_page_size', 24)),
         );
     }
