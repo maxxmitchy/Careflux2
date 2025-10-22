@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Laravel\Sanctum\HasApiTokens;
 use Src\Location\Domain\Models\City;
 use Src\Location\Domain\Models\Country;
 use Src\Location\Domain\Models\State;
@@ -16,6 +17,7 @@ use Src\Subscription\Domain\Concerns\HasSubscription;
 
 class Pharmacy extends Model
 {
+    use HasApiTokens;
     use HasFactory;
     use HasSubscription;
     use HasSubscription;
@@ -24,6 +26,7 @@ class Pharmacy extends Model
 
     protected $casts = [
         'is_approved' => 'boolean',
+        'theme_settings' => 'array',
     ];
 
     public function users(): HasMany

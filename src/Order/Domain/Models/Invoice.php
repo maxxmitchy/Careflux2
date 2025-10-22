@@ -51,4 +51,32 @@ class Invoice extends Model
     {
         return $this->hasMany(OrderEvent::class)->latest();
     }
+
+    /**
+     * Get the parent transactions that include this invoice.
+     * In our current logic, an invoice will only ever belong to one transaction.
+     */
+    public function transactions()
+    {
+        // This is a more complex relationship. We query the transactions table
+        // where the metadata->invoice_ids array contains this invoice's ID.
+        return $this->belongsToMany(Transaction::class, 'transaction_invoice_pivot_table_placeholder')
+            ->using(json_contains('metadata->invoice_ids', $this->id));
+        // A simpler, more direct query method is better here.
+    }
+
+    // public function transactions()
+    // {
+    //     return Transaction::whereJsonContains('metadata->invoice_ids', $this->id)->get();
+    // }
+
+    /**
+     * A simple, direct method to find the parent pending transaction.
+     */
+    public function getPendingTransaction(): ?Transaction
+    {
+        return Transaction::where('status', 'pending')
+            ->whereJsonContains('metadata->invoice_ids', $this->id)
+            ->first();
+    }
 }

@@ -2,18 +2,18 @@
 
 namespace App\Filament\Pharmacy\Resources\TeamTasks\Schemas;
 
-use Illuminate\Support\Str;
-use Filament\Schemas\Schema;
 use Filament\Facades\Filament;
-use Src\Shared\Domain\Models\User;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\DatePicker;
-use Illuminate\Database\Eloquent\Builder;
 use Filament\Schemas\Components\Utilities\Get;
-use Src\Pharmacy\Domain\Models\PharmacyProduct;
+use Filament\Schemas\Schema;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Str;
 use Src\Gamification\Domain\Models\TaskDefinition;
+use Src\Pharmacy\Domain\Models\PharmacyProduct;
+use Src\Shared\Domain\Models\User;
 
 class TeamTaskForm
 {
@@ -60,15 +60,18 @@ class TeamTaskForm
                     ->getSearchResultsUsing(function (string $search) use ($user) {
                         return PharmacyProduct::query()
                             ->where('pharmacy_id', $user->pharmacy_id)
-                            ->whereHas('medicationVariant.medication', fn(Builder $q) => $q->where('name', 'like', "%{$search}%"))
+                            ->whereHas('medicationVariant.medication', fn (Builder $q) => $q->where('name', 'like', "%{$search}%"))
                             ->limit(50)
                             ->get()
                             ->pluck('name', 'id');
                     })
                     ->visible(function (Get $get): bool {
                         $taskDefId = $get('task_definition_id');
-                        if (!$taskDefId) return false;
+                        if (! $taskDefId) {
+                            return false;
+                        }
                         $taskDef = TaskDefinition::find($taskDefId);
+
                         return in_array($taskDef?->key, ['TECHNICIAN_PRICE_VERIFY', 'TECHNICIAN_EXPIRY_LOG']);
                     }),
 

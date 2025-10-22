@@ -117,7 +117,7 @@
                         <p class="text-2xl font-mono font-bold tracking-widest text-emerald-600">{{ $verification?->reference_code }}</p>
                     </div>
                     <div class="space-y-3">
-                        <a href="https://wa.me/{{ $verification?->verifier?->phone }}?text=Hello, I need to verify my prescription for {{ urlencode($product->name) }}. My reference is {{ $verification?->reference_code }}" target="_blank" class="w-full flex items-center justify-center gap-2 bg-green-500 text-white font-semibold py-3 rounded-lg text-sm hover:bg-green-600 transition">
+                        <a href="https://wa.me/{{ $verification?->verifier?->phone }}?text=Hello, I need to verify my prescription for {{ urlencode($product->name) }}. My reference is {{ $verification?->reference_code }}" target="_blank" class="w-full flex items-center justify-center gap-2 bg-emerald-500 text-white font-semibold py-3 rounded-lg text-sm hover:bg-emerald-600 transition">
                             <x-heroicon-s-chat-bubble-left-right class="h-5 w-5" />
                             Contact on WhatsApp
                         </a>
@@ -145,8 +145,8 @@
             <!-- Step 4: Success -->
             <div x-show="$wire.step === 'success'" x-cloak x-transition.opacity>
                 <div class="text-center">
-                    <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
-                        <x-heroicon-o-check class="h-6 w-6 text-green-600" />
+                    <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100">
+                        <x-heroicon-o-check class="h-6 w-6 text-emerald-600" />
                     </div>
                     <h1 class="mt-4 text-lg font-bold text-gray-900">Verification Successful!</h1>
                     <p class="mt-2 text-xs text-gray-600">"{{ $product->name }}" has been added to your cart.</p>

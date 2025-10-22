@@ -19,8 +19,10 @@ class CartItemDTO extends Data
         public ?int $pharmacistId,
         public bool $isPrescription,
         public ?int $verificationId,
-        public ?int $applied_coupon_id = null,
-        public ?int $discount_amount = 0,
-        public ?int $final_price = null, // price after discount, if any
+        public ?int $applied_coupon_id,
+        public ?int $discount_amount,
+        public ?int $final_price, // price after discount, if any
+
+        public ?int $productId,
     ) {}
 }

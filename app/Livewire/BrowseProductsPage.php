@@ -83,29 +83,35 @@ class BrowseProductsPage extends Component
     #[Computed]
     public function products(): LengthAwarePaginator
     {
+        // === Step 1: Build the Base Query ===
         $productsQuery = PharmacyProduct::query()
             ->with(['pharmacy', 'medicationVariant.medication'])
-            ->whereHas('pharmacy', fn (Builder $q) => $q->where('is_approved', true))
-            ->when($this->category_slug, function (Builder $query, $slug) {
-                $query->whereHas('categories', fn (Builder $q) => $q->where('slug', $slug));
-            });
+            ->whereHas('pharmacy', fn (Builder $q) => $q->where('is_approved', true));
 
+        // We use "dot notation" to query through the nested relationships.
+        if (! empty($this->category_slug)) {
+            $productsQuery->whereHas('medicationVariant.medication.categories', function (Builder $q) {
+                $q->where('slug', $this->category_slug);
+            });
+        }
+
+        // Apply other filters
         if (! empty($this->search)) {
             $productsQuery->whereHas('medicationVariant.medication', function (Builder $q) {
                 $q->where('name', 'like', '%'.$this->search.'%')
                     ->orWhere('generic_name', 'like', '%'.$this->search.'%');
             });
         }
-
         if (! empty($this->activeFilters['max_price'])) {
             $productsQuery->where('price', '<=', $this->activeFilters['max_price'] * 100);
         }
 
+        // === Step 2: Fetch only the IDs for performance ===
         $productIds = $productsQuery->pluck('id')->toArray();
 
+        // === Step 3: Inject In-Feed Banners ===
         $itemsForPagination = $productIds;
         $offset = 0;
-
         foreach ($this->inFeedBanners as $banner) {
             $position = $banner->display_after_item + $offset;
             if (count($itemsForPagination) > $position) {
@@ -115,16 +121,15 @@ class BrowseProductsPage extends Component
             }
         }
 
+        // === Step 4 & 5: Paginate IDs and Fetch Models ===
         $paginator = ArrayPaginator::paginate($itemsForPagination, 24);
-
         $productIdsOnPage = collect($paginator->items())->filter(function ($value) {
             return is_numeric($value);
         })->all();
-
         $productModels = PharmacyProduct::find($productIdsOnPage)->keyBy('id');
-
         $bannersById = $this->inFeedBanners->keyBy('id');
 
+        // === Step 6: Reconstruct the paginator with full models and banners ===
         $paginator->setCollection(
             collect($paginator->items())->map(function ($idOrIdentifier) use ($productModels, $bannersById) {
                 if (is_string($idOrIdentifier) && str_starts_with($idOrIdentifier, 'promo::')) {

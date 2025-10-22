@@ -71,11 +71,11 @@
                     </svg>
                     <!-- Verified Response -->
                     <svg x-show="currentIndex === 2 && steps[currentIndex].status === 'verified'" x-transition class="z-0 absolute left-[22%] w-[28%] lg:left-[16%] lg:w-[35%]" viewBox="0 0 100 10" preserveAspectRatio="none">
-                        <path d="M100 5 L0 5" stroke="#34D399" stroke-width="3" stroke-dasharray="100" class="animate-draw"></path>
+                        <path d="M100 5 L0 5" stroke="#34D399" stroke-width="1" stroke-dasharray="100" class="animate-draw"></path>
                     </svg>
                     <!-- Failed Response -->
                     <svg x-show="currentIndex === 3 && steps[currentIndex].status === 'mismatched'" x-transition class="z-0 absolute left-[22%] w-[28%] lg:left-[16%] lg:w-[35%]" viewBox="0 0 100 10" preserveAspectRatio="none">
-                        <path d="M100 5 L0 5" stroke="#F87171" stroke-width="3" stroke-dasharray="100" class="animate-draw"></path>
+                        <path d="M100 5 L0 5" stroke="#F87171" stroke-width="1" stroke-dasharray="100" class="animate-draw"></path>
                     </svg>
                 </div>
 

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Pharmacies\Schemas;
 
+use Filament\Actions\Action;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -24,6 +25,22 @@ class PharmacyForm
                     ->schema([
                         TextInput::make('name')->required(),
                         TextInput::make('phone')->tel(),
+                        TextInput::make('api_token')
+                            ->label('API Token')
+                            // ->disabled()
+                            ->columnSpanFull()
+                            ->copyable()
+                            ->extraInputAttributes(['class' => 'font-mono break-all'])
+                            ->suffixAction(
+                                Action::make('copy')
+                                    ->icon('heroicon-m-clipboard')
+                                    ->action(fn ($state) => \Filament\Notifications\Notification::make()
+                                        ->title('Copied!')
+                                        ->body('API token copied to clipboard.')
+                                        ->success()
+                                        ->send())
+                                    ->requiresConfirmation(false)
+                            ),
                         FileUpload::make('logo')->image()->disk('public')->directory('pharmacy-logos')->columnSpanFull(),
                     ]),
 

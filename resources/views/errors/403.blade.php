@@ -1,5 +1,5 @@
 <x-layouts.guest title="Access Denied (403)">
-    <div class="min-h-[50vh] flex flex-col items-center justify-center text-center py-16 px-4">
+    <div class="min-h-[50vh] flex flex-col items-center justify-center text-center py-16 px-4 mt-20">
         <div class="max-w-md">
              <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100 mb-4">
                 <x-heroicon-o-no-symbol class="h-6 w-6 text-red-600" />

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Src\Pharmacy\Domain\Models\PharmacyProduct;
+use Src\Medication\Domain\Models\Medication;
 
 class Category extends Model
 {
@@ -44,11 +44,8 @@ class Category extends Model
         return $this->hasMany(Category::class, 'parent_id')->orderBy('sort_order');
     }
 
-    /**
-     * The pharmacy products that belong to this category.
-     */
-    public function pharmacyProducts(): BelongsToMany
+    public function medications(): BelongsToMany
     {
-        return $this->belongsToMany(PharmacyProduct::class, 'category_pharmacy_product');
+        return $this->belongsToMany(Medication::class);
     }
 }

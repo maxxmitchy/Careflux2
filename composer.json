@@ -12,6 +12,7 @@
         "irazasyed/telegram-bot-sdk": "^3.15",
         "laravel/fortify": "^1.30",
         "laravel/framework": "^12.0",
+        "laravel/sanctum": "^4.0",
         "laravel/socialite": "^5.23",
         "laravel/tinker": "^2.10.1",
         "livewire/flux": "^2.1.1",
@@ -20,11 +21,13 @@
         "setasign/fpdf": "^1.8",
         "spatie/browsershot": "^5.0",
         "spatie/laravel-data": "^4.17",
+        "spatie/laravel-query-builder": "^6.3",
         "spatie/laravel-settings": "^3.4",
         "symfony/dom-crawler": "^7.3"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
+        "knuckleswtf/scribe": "^5.3",
         "laravel/pail": "^1.2.2",
         "laravel/pint": "^1.18",
         "laravel/sail": "^1.41",

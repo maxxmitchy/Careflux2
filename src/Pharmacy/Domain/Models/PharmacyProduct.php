@@ -2,7 +2,6 @@
 
 namespace Src\Pharmacy\Domain\Models;
 
-use App\Models\Category;
 use App\Models\MedicationInformation;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -65,14 +64,6 @@ class PharmacyProduct extends Model
     public function medicationInformation(): BelongsToMany
     {
         return $this->belongsToMany(MedicationInformation::class, 'med_info_pharmacy_product');
-    }
-
-    /**
-     * Many-to-Many with Category.
-     */
-    public function categories()
-    {
-        return $this->belongsToMany(Category::class, 'category_pharmacy_product');
     }
 
     public function tasks(): MorphToMany

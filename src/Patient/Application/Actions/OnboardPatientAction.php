@@ -6,7 +6,6 @@ use App\Events\PatientOnboarded;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 use Src\Patient\Domain\Models\Patient;
 use Src\Shared\Domain\Models\User;
 
@@ -20,9 +19,9 @@ class OnboardPatientAction
             $user = User::firstOrCreate(
                 ['phone' => $patientData['phone']],
                 [
-                    'name' => $patientData['full_name'],
+                    'name' => $patientData['name'],
                     'email' => $patientData['email'] ?? null,
-                    'password' => Hash::make(Str::random(16)), // Secure, random password for new users
+                    'password' => Hash::make($patientData['password']), // Secure, random password for new users
                     'is_patient' => true,
                     'verified_at' => now(), // Patient accounts are active immediately
                 ]
@@ -39,13 +38,12 @@ class OnboardPatientAction
             $patient = $user->patientProfile()->create([
                 'pharmacist_id' => $pharmacistId,
                 'community_id' => $communityId,
-                'full_name' => $patientData['full_name'],
+                'full_name' => $patientData['name'],
                 'phone' => $patientData['phone'],
-                'date_of_birth' => $patientData['date_of_birth'],
-                'gender' => $patientData['gender'],
-                'location_area' => $patientData['location_area'],
+                'date_of_birth' => $patientData['date_of_birth'] ?? null,
+                'gender' => $patientData['gender'] ?? null,
+                'location_area' => $patientData['location_area'] ?? null,
 
-                // --- THIS IS THE COMPLETE LIST OF FIELDS ---
                 'takes_regular_medications' => $patientData['takes_regular_medications'] ?? false,
                 'medication_list' => $patientData['medication_list'] ?? null,
                 'known_health_conditions' => $patientData['known_health_conditions'] ?? null,
@@ -55,7 +53,6 @@ class OnboardPatientAction
                 'received_pharmacist_follow_up' => $patientData['received_pharmacist_follow_up'] ?? false,
                 'expectations_from_pharmacist' => $patientData['expectations_from_pharmacist'] ?? null,
                 'consents_to_contact' => $patientData['consents_to_contact'] ?? false,
-                // --- END OF COMPLETE LIST ---
             ]);
 
             // Step 4: Ensure the new patient has a wallet.

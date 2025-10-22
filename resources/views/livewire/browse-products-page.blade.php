@@ -62,7 +62,7 @@
                                     ])>
                                 {{ $category->name }}
                             </button>
-                            @if($category->children->isNotEmpty())
+                            {{-- @if($category->children->isNotEmpty())
                                 @foreach($category->children as $child)
                                     <button wire:click="setCategory('{{ $child->slug }}')"
                                             @class([
@@ -73,7 +73,7 @@
                                         {{ $child->name }}
                                     </button>
                                 @endforeach
-                            @endif
+                            @endif --}}
                         @endforeach
                     </div>
                 </div>

@@ -1,5 +1,5 @@
 <x-layouts.guest title="Page Not Found (404)">
-    <div class="min-h-[50vh] flex flex-col items-center justify-center text-center py-16 px-4">
+    <div class="min-h-[50vh] flex flex-col items-center justify-center text-center py-16 px-4 mt-20">
         <div class="max-w-md">
             <div class="flex items-center justify-center gap-4">
                 <p class="text-5xl sm:text-6xl font-extrabold text-emerald-600">404</p>

@@ -2,17 +2,15 @@
 
 namespace App\Livewire;
 
-use Livewire\Component;
-use Livewire\Attributes\On;
-use Livewire\Attributes\Computed;
+use App\Models\PromotionalBanner;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
-use Src\Pharmacy\Domain\Models\Pharmacy;
-use Src\Pharmacy\Domain\Models\PharmacyProduct;
+use Illuminate\Support\Facades\DB;
+use Livewire\Attributes\On;
+use Livewire\Component;
 use Src\Order\Domain\Contracts\CartServiceInterface;
 use Src\Order\Domain\Exceptions\InvalidCartQuantityException;
-use App\Models\PromotionalBanner; // <-- Import PromotionalBanner
+use Src\Pharmacy\Domain\Models\PharmacyProduct; // <-- Import PromotionalBanner
 
 class MostPurchasedProducts extends Component
 {
@@ -55,6 +53,7 @@ class MostPurchasedProducts extends Component
     {
         if (empty($productSlug)) {
             $this->dispatch('toast', message: 'Product information is missing for verification.', type: 'error');
+
             return;
         }
 
@@ -88,7 +87,7 @@ class MostPurchasedProducts extends Component
      */
     private function getMostPurchased(): Collection
     {
-        $cacheKey = 'most_purchased_products_' . ($this->selectedPharmacyId ?? 'all');
+        $cacheKey = 'most_purchased_products_'.($this->selectedPharmacyId ?? 'all');
 
         return Cache::remember($cacheKey, now()->addHours(1), function () {
             $topProductIdsQuery = DB::table('invoice_items')

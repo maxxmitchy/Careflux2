@@ -29,6 +29,8 @@ return new class extends Migration
             // Unique slug for SEO/URL
             $table->string('slug')->unique();
 
+            $table->string('icon')->nullable()->comment('Heroicon name');
+
             // Optional longer description
             $table->text('description')->nullable();
 

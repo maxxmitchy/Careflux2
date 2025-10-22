@@ -22,6 +22,11 @@ class CategoryForm
                     ->searchable()->preload(),
                 TextInput::make('name')->required()->live(onBlur: true)
                     ->afterStateUpdated(fn (Set $set, ?string $state) => $set('slug', Str::slug($state))),
+                TextInput::make('icon')
+                    ->label('Heroicon Name')
+                    ->placeholder('e.g. shopping-cart, squares-2x2, heart')
+                    ->helperText('Enter the Heroicon name (without prefix). Example: shopping-cart')
+                    ->suffixIcon('heroicon-o-squares-2x2'),
                 TextInput::make('slug')->required()->unique(ignoreRecord: true),
                 TextInput::make('category_code')
                     ->label('Category Code')

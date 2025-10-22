@@ -15,6 +15,8 @@ return new class extends Migration
             $table->string('phone')->nullable();
             $table->string('logo')->nullable();
             $table->boolean('is_approved')->default(false)->index();
+            $table->text('api_token')->nullable();
+            $table->json('theme_settings')->nullable();
 
             // locator fields
             $table->foreignId('country_id')->nullable()->constrained()->nullOnDelete();

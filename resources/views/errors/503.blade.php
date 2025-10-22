@@ -1,5 +1,5 @@
 <x-layouts.guest title="Service Unavailable (503)">
-    <div class="min-h-[50vh] flex flex-col items-center justify-center text-center py-16 px-4">
+    <div class="min-h-[50vh] flex flex-col items-center justify-center text-center py-16 px-4 mt-20">
         <div class="max-w-md">
              <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 mb-4">
                 <x-heroicon-o-wrench-screwdriver class="h-6 w-6 text-amber-600" />

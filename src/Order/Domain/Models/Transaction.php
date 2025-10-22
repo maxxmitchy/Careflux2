@@ -2,7 +2,6 @@
 
 namespace Src\Order\Domain\Models;
 
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -11,15 +10,42 @@ use Src\Shared\Domain\Models\User;
 
 class Transaction extends Model
 {
-    use HasUuids;
-
-    public $incrementing = false;
-
+    /**
+     * The primary key for the model.
+     */
     protected $primaryKey = 'reference';
+
+    /**
+     * The "type" of the primary key ID.
+     */
+    protected $keyType = 'string';
+
+    /**
+     * Indicates if the IDs are auto-incrementing.
+     */
+    public $incrementing = false;
 
     protected $guarded = [];
 
-    protected $casts = ['amount' => 'integer', 'metadata' => 'array', 'gateway_response' => 'array', 'processed_at' => 'datetime', 'failed_at' => 'datetime'];
+    protected $casts = [
+        'amount' => 'integer',
+        'metadata' => 'array',
+        'gateway_response' => 'array',
+        'processed_at' => 'datetime',
+        'failed_at' => 'datetime',
+    ];
+
+    /**
+     * Get the route key for the model. This is critical for route model binding.
+     */
+    public function getRouteKeyName(): string
+    {
+        return 'reference';
+    }
+
+    // protected $guarded = [];
+
+    // protected $casts = ['amount' => 'integer', 'metadata' => 'array', 'gateway_response' => 'array', 'processed_at' => 'datetime', 'failed_at' => 'datetime'];
 
     // Relationships: user(), transactionable(), paymentAttempts()
 

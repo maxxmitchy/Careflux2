@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 use Src\Gamification\Domain\Enums\PharmacistLevel;
 use Src\Gamification\Domain\Models\GamificationLedgerEntry;
 use Src\Patient\Domain\Models\Patient;
@@ -32,7 +33,7 @@ class User extends Authenticatable implements CanResetPassword, FilamentUser
     use CanResetPasswordTrait;
 
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, HasSubscription, HasWallet, Notifiable;
+    use HasApiTokens, HasFactory, HasSubscription, HasWallet, Notifiable;
 
     /**
      * The attributes that are mass assignable.

@@ -1,22 +1,23 @@
 <?php
 
-use App\Http\Controllers\Auth\OAuthController;
-use App\Http\Controllers\LandingPageController;
-use App\Livewire\Auth\CompleteSocialProfile;
-use App\Livewire\PartnerDetailPage;
-use App\Livewire\PrescriptionVerificationPage;
-use App\Livewire\ProductDetailPage;
-use App\Livewire\PublicProductSearch;
-use App\Livewire\QuestionnaireForm;
-use App\Livewire\Settings\Appearance;
-use App\Livewire\Settings\Password;
+use Laravel\Fortify\Features;
 use App\Livewire\Settings\Profile;
-use App\Livewire\Settings\TwoFactor;
-use App\Livewire\ShoppableWishlistPage;
+use App\Livewire\PartnerDetailPage;
+use App\Livewire\ProductDetailPage;
+use App\Livewire\QuestionnaireForm;
+use App\Livewire\Settings\Password;
 use App\Livewire\TrackRequestQuote;
 use App\Livewire\WishlistIndexPage;
+use App\Livewire\Settings\TwoFactor;
+use App\Livewire\PublicProductSearch;
+use App\Livewire\Settings\Appearance;
 use Illuminate\Support\Facades\Route;
-use Laravel\Fortify\Features;
+use App\Livewire\ShoppableWishlistPage;
+use App\Http\Controllers\Auth\SsoController;
+use App\Livewire\Auth\CompleteSocialProfile;
+use App\Http\Controllers\Auth\OAuthController;
+use App\Livewire\PrescriptionVerificationPage;
+use App\Http\Controllers\LandingPageController;
 
 Route::get('/', LandingPageController::class)->name('landing');
 
@@ -42,6 +43,8 @@ Route::middleware(['auth'])->group(function () {
         )
         ->name('two-factor.show');
 });
+
+Route::get('/auth/sso/login', [SsoController::class, 'login'])->name('auth.sso.login');
 
 Route::get('/q/{invitation:token}', QuestionnaireForm::class)->name('questionnaire.show');
 
