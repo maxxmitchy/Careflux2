@@ -32,12 +32,43 @@ final class PuppeteerService
         return null;
     }
 
+    // protected function runScript(string $url, string $outputFile): bool
+    // {
+    //     $scriptPath = base_path('node-scraper/playwright.mjs'); // Ensure this file exists
+    //     $nodeBinary = App::environment('production')
+    //         ? '/usr/bin/node' // Adjust if your production node path is different
+    //         : 'node';
+
+    //     $cmdParts = [
+    //         escapeshellcmd($nodeBinary),
+    //         escapeshellarg($scriptPath),
+    //         escapeshellarg($url),
+    //         escapeshellarg($outputFile),
+    //     ];
+
+    //     $command = implode(' ', $cmdParts).' 2>&1';
+    //     $output = [];
+    //     $exitCode = null;
+
+    //     exec($command, $output, $exitCode);
+
+    //     if ((int) $exitCode !== 0) {
+    //         Log::error('Playwright script execution failed.', [
+    //             'url' => $url,
+    //             'exitCode' => $exitCode,
+    //             'output' => implode("\n", $output),
+    //         ]);
+
+    //         return false;
+    //     }
+
+    //     return true;
+    // }
+
     protected function runScript(string $url, string $outputFile): bool
     {
-        $scriptPath = base_path('node-scraper/playwright.mjs'); // Ensure this file exists
-        $nodeBinary = App::environment('production')
-            ? '/usr/bin/node' // Adjust if your production node path is different
-            : 'node';
+        $scriptPath = base_path('node-scraper/playwright.mjs');
+        $nodeBinary = '/home/maxxmitchy/.nvm/versions/node/v25.0.0/bin/node';
 
         $cmdParts = [
             escapeshellcmd($nodeBinary),
@@ -53,7 +84,7 @@ final class PuppeteerService
         exec($command, $output, $exitCode);
 
         if ((int) $exitCode !== 0) {
-            Log::error('Playwright script execution failed.', [
+            \Log::error('Playwright script execution failed.', [
                 'url' => $url,
                 'exitCode' => $exitCode,
                 'output' => implode("\n", $output),
