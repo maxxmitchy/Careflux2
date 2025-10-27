@@ -2,12 +2,12 @@
 
 namespace App\Filament\Pharmacy\Resources\TeamTasks\Pages;
 
-use Filament\Actions\ViewAction;
-use Filament\Actions\DeleteAction;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Database\Eloquent\Model;
-use Filament\Resources\Pages\EditRecord;
 use App\Filament\Pharmacy\Resources\TeamTasks\TeamTaskResource;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\ViewAction;
+use Filament\Resources\Pages\EditRecord;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class EditTeamTask extends EditRecord
 {
@@ -21,6 +21,7 @@ class EditTeamTask extends EditRecord
     {
         $this->getRecord()->load('pharmacyProducts');
         $data['product_ids'] = $this->getRecord()->pharmacyProducts->pluck('id')->all();
+
         return $data;
     }
 
@@ -37,6 +38,7 @@ class EditTeamTask extends EditRecord
             } else {
                 $record->pharmacyProducts()->sync([]);
             }
+
             return $record;
         });
     }
