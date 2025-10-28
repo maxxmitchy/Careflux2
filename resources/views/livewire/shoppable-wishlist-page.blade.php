@@ -49,18 +49,34 @@
                             <p class="mt-2 text-sm font-bold text-gray-900">₦{{ number_format(($productObject->price ?? 0) / 100, 2) }}</p>
                         </div>
                         <div class="p-3 border-t">
-                            {{-- --- THIS IS THE DEFINITIVE FIX --- --}}
+                            {{-- --- THIS IS THE DEFINITIVE FIX WITH LOADING SPINNER --- --}}
                             @php
-                                // Set a variable for cleaner code in the button
                                 $isPrescription = isset($productObject->is_prescription) && $productObject->is_prescription;
                             @endphp
-                            <button wire:click="addToCart({{ $productObject->product_id }})"
-                                    @class([
-                                        'w-full text-xs text-center font-semibold py-2 rounded-md transition-colors',
-                                        'bg-emerald-600 text-white hover:bg-emerald-700' => !$isPrescription,
-                                        'bg-red-600 text-white hover:bg-red-700' => $isPrescription,
-                                    ])>
-                                {{ $isPrescription ? 'Verify Prescription' : 'Add to Cart' }}
+
+                            <button
+                                wire:click="addToCart({{ $productObject->product_id }})"
+                                wire:loading.attr="disabled"
+                                @class([
+                                    'w-full text-xs text-center font-semibold py-2 rounded-md transition-colors flex items-center justify-center gap-2',
+                                    'bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-70' => !$isPrescription,
+                                    'bg-red-600 text-white hover:bg-red-700 disabled:opacity-70' => $isPrescription,
+                                ])
+                            >
+                                {{-- Default label --}}
+                                <span wire:loading.remove wire:target="addToCart({{ $productObject->product_id }})">
+                                    {{ $isPrescription ? 'Verify Prescription' : 'Add to Cart' }}
+                                </span>
+
+                                {{-- Spinner while loading --}}
+                                <span wire:loading wire:target="addToCart({{ $productObject->product_id }})" class="inline-flex flex items-center gap-2">
+                                    <svg class="inline-flex animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor"
+                                            d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                                    </svg>
+                                    <span>Loading...</span>
+                                </span>
                             </button>
                             {{-- --- END OF FIX --- --}}
                         </div>

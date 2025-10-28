@@ -142,14 +142,56 @@ class CheckoutPage extends Component
     protected function rules(): array
     {
         $rules = [
-            'full_name' => ['required', 'string', 'max:255'],
+            'full_name' => [
+                'required',
+                'string',
+                'max:255',
+                function ($attribute, $value, $fail) {
+                    $trimmed = trim($value);
+
+                    // Must be at least 3 characters
+                    if (strlen($trimmed) < 3) {
+                        return $fail('The full name must be at least 3 characters.');
+                    }
+
+                    // Split by one or more spaces
+                    $parts = preg_split('/\s+/', $trimmed);
+
+                    // If user only entered one word, duplicate it
+                    if (count($parts) === 1) {
+                        $this->full_name = "{$parts[0]} {$parts[0]}";
+                    } else {
+                        // Normalize spacing in multi-word names
+                        $this->full_name = implode(' ', $parts);
+                    }
+                },
+            ],
             'email' => ['required', 'email', 'max:255'],
             'phone' => ['required', 'string', 'min:10'],
             'location_area' => ['required', 'string', 'max:255'],
         ];
 
         if ($this->shipToDifferentAddress) {
-            $rules['shipping_full_name'] = ['required', 'string', 'max:255'];
+            $rules['shipping_full_name'] = [
+                'required',
+                'string',
+                'max:255',
+                function ($attribute, $value, $fail) {
+                    $trimmed = trim($value);
+
+                    if (strlen($trimmed) < 3) {
+                        return $fail('The shipping name must be at least 3 characters.');
+                    }
+
+                    $parts = preg_split('/\s+/', $trimmed);
+
+                    if (count($parts) === 1) {
+                        $this->shipping_full_name = "{$parts[0]} {$parts[0]}";
+                    } else {
+                        $this->shipping_full_name = implode(' ', $parts);
+                    }
+                },
+            ];
             $rules['shipping_phone'] = ['required', 'string', 'min:10'];
             $rules['shipping_location_area'] = ['required', 'string', 'max:255'];
         }
