@@ -184,6 +184,9 @@ class ProductDetailPage extends Component
                 'imageUrl' => $product->image,
                 'price' => $product->price,
                 'sourceName' => $product->pharmacy->name,
+                'pharmacyId' => $product->pharmacy->id,
+                'pharmacistId' => $product->user_id,
+                'verificationId' => null, // Will be set when prescription is verified
                 'pharmacistPhone' => $product->user?->phone,
                 'pharmacistName' => $product->user?->name,
             ];
@@ -199,6 +202,9 @@ class ProductDetailPage extends Component
                 'imageUrl' => $product->image_url,
                 'price' => $product->price,
                 'sourceName' => $product->store->name,
+                'pharmacyId' => null, // Scraped products don't belong to a specific pharmacy
+                'pharmacistId' => null, // Scraped products are handled by support
+                'verificationId' => null, // Scraped products are not prescription
                 'pharmacistPhone' => config('careflux.default_support_phone'),
                 'pharmacistName' => 'Careflux Support',
             ];

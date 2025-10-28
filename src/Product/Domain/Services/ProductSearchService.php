@@ -109,6 +109,7 @@ class ProductSearchService
                 'pharmacistId' => $product->pharmacy?->users
                     ->where('is_pharmacist', true)
                     ->first()?->id,
+                'verificationId' => null, // Will be set when prescription is verified
             ];
         });
     }
@@ -161,6 +162,7 @@ class ProductSearchService
                 'relevance' => $soundex ? 50 : ($product->relevance_score ?? 100),
                 'pharmacyId' => $sourcingPharmacyId,
                 'pharmacistId' => null,
+                'verificationId' => null, // Scraped products are not prescription
                 'productUrl' => $product->product_url,
                 'storeId' => $product->store_id,
                 'updated_at' => $product->updated_at,
