@@ -24,7 +24,7 @@ class UpcomingRefillsWidget extends BaseWidget
                     ->where('patient_id', Filament::auth()->user()->patientProfile?->id)
                     ->where('is_recurring', true)
                     ->whereDate('refill_due_date', '>=', now())
-                    ->whereDate('refill_due_date', '<=', now()->addDays(14)) // Next 2 weeks
+                    ->whereDate('refill_due_date', '<=', now()->addDays(7)) // Next 1 weeks
             )
             ->columns([
                 Tables\Columns\TextColumn::make('medication.name'),

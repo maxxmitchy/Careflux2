@@ -19,6 +19,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $schedule->command('patients:assign-unassigned')->everyFiveMinutes();
 
         $schedule->command('scrape:nafdac-registry')->weekly()->sundays()->at('02:00'); // Run at 2 AM every Sunday
+
+        $schedule->command('refills:send-reminders')->dailyAt('08:00');
     })
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([

@@ -52,11 +52,10 @@ class PatientForm
                                 // --- END OF FIX ---
                             )->validationMessages(['unique' => 'A patient profile with this phone number already exists.']),
 
-                        TextInput::make('user.email')->email()
+                        TextInput::make('email')->email()
                             ->unique(
                                 table: User::class,
                                 column: 'email',
-                                // --- THIS IS THE DEFINITIVE FIX ---
                                 ignoreRecord: false, // Turn off automatic detection
                                 modifyRuleUsing: fn (Unique $rule, ?Model $record) => $rule
                                     ->where('is_patient', true)
