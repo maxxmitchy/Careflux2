@@ -65,6 +65,14 @@ class Patient extends Model
         return $this->hasMany(QuestionnaireInvitation::class);
     }
 
+    /**
+     * The pharmacist assigned to this patient.
+     */
+    public function pharmacist(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'pharmacist_id');
+    }
+
     public function prescriptions(): HasMany
     {
         return $this->hasMany(Prescription::class);
