@@ -21,6 +21,7 @@
         "spatie/browsershot": "^5.0",
         "spatie/laravel-data": "^4.17",
         "spatie/laravel-settings": "^3.4",
+        "spatie/simple-excel": "^3.8",
         "symfony/dom-crawler": "^7.3"
     },
     "require-dev": {

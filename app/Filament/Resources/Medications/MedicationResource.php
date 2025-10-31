@@ -46,6 +46,7 @@ class MedicationResource extends Resource
     {
         return [
             RelationManagers\VariantsRelationManager::class,
+            RelationManagers\CounselingPointsRelationManager::class,
         ];
     }
 

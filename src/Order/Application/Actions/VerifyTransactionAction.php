@@ -2,17 +2,18 @@
 
 namespace Src\Order\Application\Actions;
 
+use App\Events\OrderCompleted;
 use App\Events\TransactionCompleted;
 use App\Jobs\NotifyPharmacistOfNewOrderJob;
-use App\Mail\OrderConfirmationMail; // <-- Import the Mailable
+use App\Mail\OrderConfirmationMail;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail; // <-- Import the Mail facade
+use Illuminate\Support\Facades\Mail;
 use Src\Order\Domain\Models\Invoice;
-use Src\Order\Domain\Models\PaymentAttempt;
-use Src\Order\Domain\Models\Transaction; // <-- Import Transaction
-use Throwable;
+use Src\Order\Domain\Models\PaymentAttempt; // <-- Import the Mailable
+use Src\Order\Domain\Models\Transaction; // <-- Import the Mail facade
+use Throwable; // <-- Import Transaction
 
 class VerifyTransactionAction
 {
@@ -81,17 +82,17 @@ class VerifyTransactionAction
 
             $invoices = Invoice::with(['pharmacy', 'patient', 'items'])->findMany($invoiceIds);
 
-            // --- EMAIL & NOTIFICATION INTEGRATION ---
             if ($invoices->isNotEmpty()) {
                 // 1. Send email confirmation to the patient.
                 Mail::to($parentTransaction->user)->queue(new OrderConfirmationMail($parentTransaction->user, $invoices));
 
                 // 2. Dispatch jobs to notify each relevant pharmacist.
                 foreach ($invoices as $invoice) {
+                    OrderCompleted::dispatch($invoice);
+
                     NotifyPharmacistOfNewOrderJob::dispatch($invoice);
                 }
             }
-            // --- END INTEGRATION ---
 
             // Dispatch event for other listeners (e.g., coupon redemption, subscription activation).
             TransactionCompleted::dispatch($parentTransaction);

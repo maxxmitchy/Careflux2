@@ -7,6 +7,7 @@ use App\Filament\Pharmacy\Resources\PharmacyProducts\PharmacyProductResource;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -79,6 +80,7 @@ class CreatePharmacyProduct extends CreateRecord
                 TextInput::make('price')->required()->numeric()->prefix('₦'),
                 TextInput::make('stock')->required()->numeric()->integer(),
                 TextInput::make('nafdac_number')->label('NAFDAC Number'),
+                TagsInput::make('batch_numbers')->label('Batch Numbers')->placeholder('Enter batch numbers for this stock'),
             ]);
     }
 

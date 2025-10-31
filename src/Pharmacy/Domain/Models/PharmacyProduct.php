@@ -24,6 +24,7 @@ class PharmacyProduct extends Model
         'price' => 'integer',
         'stock' => 'integer',
         'verification_status' => NafdacVerificationStatus::class,
+        'batch_numbers' => 'array',
     ];
 
     public function getRouteKeyName(): string

@@ -36,6 +36,26 @@ class TaskDefinitionSeeder extends Seeder
             'name' => 'Restock Alert Update', 'points' => 10, 'is_active' => true,
         ]);
 
+        TaskDefinition::updateOrCreate(
+            ['key' => 'PRODUCT_INTEGRITY_CHECK'],
+            [
+                'name' => 'Urgent: Product Integrity Check',
+                'description' => 'Points awarded for completing a product recall or batch verification task.',
+                'points' => 50, // Higher points for higher importance
+                'is_active' => true,
+            ]
+        );
+
+        TaskDefinition::updateOrCreate(
+            ['key' => 'PATIENT_COUNSELING_FOLLOW_UP'],
+            [
+                'name' => 'Patient Counseling Follow-up',
+                'description' => 'Points awarded for sending crucial counseling information to a patient about a new or high-risk medication.',
+                'points' => 25,
+                'is_active' => true,
+            ]
+        );
+
         // We can add more tasks here in the future
     }
 }

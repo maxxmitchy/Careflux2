@@ -2,19 +2,19 @@
 
 namespace App\Jobs;
 
+use App\Filament\Pharmacy\Resources\Tasks\TaskResource;
 use Filament\Actions\Action;
-use Illuminate\Bus\Queueable;
-use Illuminate\Support\Collection;
-use Src\Shared\Domain\Models\User;
-use Illuminate\Queue\SerializesModels;
 use Filament\Notifications\Notification;
-use Illuminate\Queue\InteractsWithQueue;
-use Src\Gamification\Domain\Models\Task;
+use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Collection;
+use Src\Gamification\Domain\Models\Task;
 use Src\Gamification\Domain\Models\TaskDefinition;
+use Src\Shared\Domain\Models\User;
 use Src\Shared\Infrastructure\Services\TelegramService;
-use App\Filament\Pharmacy\Resources\Tasks\TaskResource;
 
 class NotifyPharmacistOfRefillJob implements ShouldQueue
 {
@@ -35,7 +35,7 @@ class NotifyPharmacistOfRefillJob implements ShouldQueue
     public function handle(TelegramService $telegramService): void
     {
         $pharmacist = User::find($this->pharmacistId);
-        if (!$pharmacist) {
+        if (! $pharmacist) {
             return;
         }
 
@@ -46,7 +46,7 @@ class NotifyPharmacistOfRefillJob implements ShouldQueue
         foreach ($prescriptionsByPatient as $patientId => $patientPrescriptions) {
             $patient = $patientPrescriptions->first()->patient;
             $medicationNames = $patientPrescriptions->pluck('medication.name')->implode(', ');
-            
+
             // Create a single, consolidated task for this patient's refills.
             $task = Task::create([
                 'task_definition_id' => $taskDefinition?->id,
@@ -67,19 +67,19 @@ class NotifyPharmacistOfRefillJob implements ShouldQueue
                 ->actions([
                     Action::make('view_task')
                         ->label('View Task')
-                        ->url(TaskResource::getUrl('index'))
-                        // ->url(route('filament.pharmacy.resources.tasks.edit', ['record' => $task])) // Assuming a Task resource
+                        ->url(TaskResource::getUrl('index')),
+                    // ->url(route('filament.pharmacy.resources.tasks.edit', ['record' => $task])) // Assuming a Task resource
                 ])
                 ->sendToDatabase($pharmacist);
-            
+
             // 2. Send Telegram Notification (using your queueable service)
             if ($pharmacist->telegram_chat_id) {
                 $telegramMessage = "🔔 *New Refill Task*\n\n"
-                                 . "*Patient:* {$patient->full_name}\n"
-                                 . "*Due:* In {$this->daysUntilDue} days\n"
-                                 . "*Medications:* {$medicationNames}\n\n"
-                                 . "Please log in to your dashboard to view and complete the task.";
-                
+                                 ."*Patient:* {$patient->full_name}\n"
+                                 ."*Due:* In {$this->daysUntilDue} days\n"
+                                 ."*Medications:* {$medicationNames}\n\n"
+                                 .'Please log in to your dashboard to view and complete the task.';
+
                 $telegramService->sendMessageToUser($pharmacist, $telegramMessage);
             }
         }

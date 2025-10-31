@@ -17,6 +17,7 @@ class Medication extends Model
 
     protected $casts = [
         'is_prescription' => 'boolean',
+        'invalid_batches' => 'array',
     ];
 
     public function prescriptions(): HasMany
@@ -33,5 +34,10 @@ class Medication extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by_user_id');
+    }
+
+    public function counselingPoints(): HasMany
+    {
+        return $this->hasMany(MedicationCounselingPoint::class);
     }
 }

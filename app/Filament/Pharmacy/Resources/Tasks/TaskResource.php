@@ -4,14 +4,17 @@ namespace App\Filament\Pharmacy\Resources\Tasks;
 
 use App\Filament\Pharmacy\Resources\Patients\PatientResource;
 use App\Filament\Pharmacy\Resources\Tasks\Pages\ManageTasks;
+use App\Models\PharmacistActionLog;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Facades\Filament;
 use Filament\Forms;
+use Filament\Forms\Components\Textarea;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
@@ -46,6 +49,10 @@ class TaskResource extends Resource
                 Tables\Columns\TextColumn::make('taskDefinition.name')
                     ->label('Task')->searchable()->wrap(),
 
+                TextColumn::make('taskDefinition.name')
+                    ->color(fn (Task $record) => $record->taskDefinition->key === 'PRODUCT_INTEGRITY_CHECK' ? 'danger' : null)
+                    ->weight(fn (Task $record) => $record->taskDefinition->key === 'PRODUCT_INTEGRITY_CHECK' ? 'bold' : null),
+
                 Tables\Columns\TextColumn::make('subjects_description')
                     ->label('Subject(s)')->wrap()
                     ->url(function (Task $record): ?string {
@@ -77,7 +84,7 @@ class TaskResource extends Resource
 
                         if (str_starts_with($taskKey, 'PATIENT_FOLLOW_UP')) {
                             return [
-                                Forms\Components\Textarea::make('notes')
+                                Textarea::make('notes')
                                     ->required()
                                     ->label('Follow-up Notes')
                                     ->rows(4),
@@ -114,6 +121,29 @@ class TaskResource extends Resource
                         }
                         // --- END BATCH EDITING LOGIC ---
 
+                        if ($taskKey === 'PRODUCT_INTEGRITY_CHECK') {
+                            $products = $record->pharmacyProducts()->with('medicationVariant.medication')->get();
+
+                            return [
+                                TextEntry::make('instructions')
+                                    ->label('Instructions')
+                                    ->state($record->description),
+
+                                Forms\Components\CheckboxList::make('confirmation')
+                                    ->label('Confirmation Checklist')
+                                    ->options(
+                                        $products->mapWithKeys(fn ($p) => [$p->id => $p->name])
+                                    )
+                                    ->helperText('Please check the box for each product to confirm you have completed the required action.')
+                                    ->required()
+                                    ->rules(['array', function ($attribute, $value, $fail) use ($products) {
+                                        if (count($value) !== $products->count()) {
+                                            $fail('You must confirm the action for all listed products.');
+                                        }
+                                    }]),
+                            ];
+                        }
+
                         return []; // Default for simple confirmation tasks
                     })
 
@@ -121,6 +151,22 @@ class TaskResource extends Resource
                     ->action(function (Task $record, array $data, AwardPointsAction $awardPoints) {
                         $taskKey = $record->taskDefinition->key;
                         $user = Auth::user();
+
+                        if ($taskKey === 'PRODUCT_INTEGRITY_CHECK') {
+                            $confirmedProducts = PharmacyProduct::find(array_keys($data['confirmation']));
+
+                            PharmacistActionLog::create([
+                                'user_id' => $user->id,
+                                'subjectable_id' => $record->id,
+                                'subjectable_type' => $record->getMorphClass(),
+                                'action_type' => 'PRODUCT_INTEGRITY_CHECK_CONFIRMED',
+                                'description' => "Confirmed completion of product integrity check: '{$record->title}'.",
+                                'metadata' => [
+                                    'alert_title' => $record->title,
+                                    'confirmed_product_ids' => $confirmedProducts->pluck('id')->all(),
+                                ],
+                            ]);
+                        }
 
                         if (str_starts_with($taskKey, 'PATIENT_FOLLOW_UP')) {
                             if ($record->subjectable instanceof Patient) {

@@ -2,15 +2,16 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
+use App\Jobs\NotifyPharmacistOfRefillJob;
 use Carbon\Carbon;
+use Illuminate\Console\Command;
 use Illuminate\Support\Collection;
-use Src\Patient\Domain\Models\Prescription;
-use App\Jobs\NotifyPharmacistOfRefillJob; // We will create this Job next
+use Src\Patient\Domain\Models\Prescription; // We will create this Job next
 
 class SendRefillReminders extends Command
 {
     protected $signature = 'refills:send-reminders {--days= : Specify a single day to check, e.g., --days=7}';
+
     protected $description = 'Finds recurring prescriptions due for refill and dispatches jobs to create tasks for pharmacists.';
 
     public function handle(): int
@@ -21,7 +22,7 @@ class SendRefillReminders extends Command
         $reminderWindows = $this->option('days') ? [$this->option('days')] : [7, 3, 0];
 
         foreach ($reminderWindows as $days) {
-            $targetDate = Carbon::today()->addDays((int)$days);
+            $targetDate = Carbon::today()->addDays((int) $days);
             $this->line("Checking for refills due in {$days} days (on {$targetDate->toDateString()})...");
 
             // Use a chunked query to handle potentially thousands of prescriptions efficiently.
@@ -41,14 +42,15 @@ class SendRefillReminders extends Command
                         if (empty($pharmacistId)) {
                             continue; // Skip patients who are not yet assigned to a pharmacist
                         }
-                        
+
                         // Dispatch one job per pharmacist, with all their relevant patient refills for that day.
                         NotifyPharmacistOfRefillJob::dispatch($pharmacistId, $pharmacistPrescriptions, $days);
                     }
                 });
         }
-        
+
         $this->info('All refill reminder jobs have been dispatched successfully.');
+
         return self::SUCCESS;
     }
 }
