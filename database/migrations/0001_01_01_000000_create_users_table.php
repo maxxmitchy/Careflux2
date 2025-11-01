@@ -43,7 +43,7 @@ return new class extends Migration
             // Remember token for authentication
             $table->rememberToken();
 
-            $table->string('telegram_chat_id')->nullable();
+            $table->string('telegram_chat_id')->unique()->nullable();
 
             // Gamification & finance
             $table->unsignedBigInteger('points_balance')->default(0);

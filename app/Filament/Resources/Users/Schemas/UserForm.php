@@ -16,6 +16,9 @@ class UserForm
                 TextInput::make('name')->required(),
                 TextInput::make('email')->email()->required(),
                 TextInput::make('phone')->tel(),
+                TextInput::make('telegram_chat_id')
+                    ->label('Telegram Chat ID')
+                    ->helperText('Ask the user to message your bot and provide the Chat ID it replies with.'),
                 Select::make('pharmacy_id')->relationship('pharmacy', 'name'),
                 Toggle::make('is_admin'),
                 Toggle::make('is_pharmacist'),

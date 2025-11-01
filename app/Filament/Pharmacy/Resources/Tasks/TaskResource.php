@@ -72,10 +72,68 @@ class TaskResource extends Resource
                 Tables\Columns\TextColumn::make('status')->badge(),
             ])
             ->recordActions([
+                Action::make('send_and_complete')
+                    ->label('Review & Send')
+                    ->icon('heroicon-o-paper-airplane')
+                    ->color('success')
+                    ->visible(fn (Task $record): bool => $record->status === 'pending' && $record->taskDefinition->key === 'PATIENT_COUNSELING_FOLLOW_UP')
+                    ->modalHeading('Send Counseling Message')
+                    ->modalDescription('Review the message. Clicking "Open WhatsApp" will prepare it to be sent from your device. You must then return here to confirm completion.')
+                    ->schema([
+                        Forms\Components\Textarea::make('message_to_send')
+                            ->label('Message Content')
+                            ->rows(6)
+                            ->default(fn (Task $record) => $record->description)
+                            ->disabled(),
+                    ])
+                    ->modalFooterActions(function (Task $record) {
+                        $patient = $record->subjectable;
+                        if (!$patient instanceof Patient || !$patient->phone) {
+                            return [Action::make('close')->label('Close: Patient has no phone number')->modalClose()->color('danger')];
+                        }
+                        
+                        $message = $record->description;
+                        $whatsappUrl = 'https://wa.me/' . $patient->phone . '?text=' . urlencode($message);
+
+                        return [
+                            Action::make('open_whatsapp')
+                                ->label('Open WhatsApp & Prepare Message')
+                                ->icon('heroicon-s-paper-airplane')
+                                ->url($whatsappUrl, shouldOpenInNewTab: true),
+                            
+                            Action::make('confirm_completion')
+                                ->label('I Have Sent It')
+                                ->color('success')
+                                ->action(function (Task $record, AwardPointsAction $awardPoints) {
+                                    $user = Auth::user();
+                                    $patient = $record->subjectable;
+
+                                    PharmacistActionLog::create([
+                                        'user_id' => $user->id,
+                                        'task_id' => $record->id,
+                                        'subjectable_id' => $patient->id,
+                                        'subjectable_type' => $patient->getMorphClass(),
+                                        'action_type' => 'PATIENT_COUNSELING_SENT',
+                                        'description' => "Logged sending of counseling message for '{$record->title}'.",
+                                        'metadata' => ['message_sent' => $record->description],
+                                    ]);
+
+                                    $record->update(['status' => 'completed', 'completed_at' => now()]);
+                                    $awardPoints->execute($user, $record->taskDefinition->key, $record);
+                                    Notification::make()->title('Task Completed!')->body("You earned {$record->taskDefinition->points} points.")->success()->send();
+                                })
+                                ->requiresConfirmation()
+                                ->modalHeading('Confirm Task Completion')
+                                ->modalDescription('Are you sure you have sent the message to the patient? This will complete the task and award you points.'),
+                        ];
+                    })
+                    ->modalSubmitAction(false)
+                    ->modalCancelActionLabel('Cancel'),
                 Action::make('complete_task')
                     ->label('Complete')
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
+                    ->hidden(fn (Task $record): bool => $record->taskDefinition->key === 'PATIENT_COUNSELING_FOLLOW_UP')
                     ->visible(fn (Task $record): bool => $record->status === 'pending')
 
                     // --- THE DEFINITIVE DYNAMIC FORM ---
