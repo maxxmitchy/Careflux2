@@ -18,7 +18,7 @@ return new class extends Migration
             $table->date('manufacturing_date')->nullable();
             $table->date('expiry_date');
             // We can add a unique constraint to prevent duplicate batches in the same list
-            $table->unique(['master_batch_list_id', 'batch_number']);
+            $table->unique(['master_batch_list_id', 'batch_number'], 'mbl_entry_unique');
         });
     }
 

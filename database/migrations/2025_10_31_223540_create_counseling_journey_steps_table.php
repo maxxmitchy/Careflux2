@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('counseling_journey_id')->constrained()->cascadeOnDelete();
             $table->unsignedInteger('day_to_send')->comment('e.g., 1 for Day 1, 2 for Day 2');
             $table->text('message_template');
-            $table->unique(['counseling_journey_id', 'day_to_send']);
+            $table->unique(['counseling_journey_id', 'day_to_send'], 'cjs_unique');
         });
     }
 
