@@ -139,7 +139,7 @@
         </section>
 
         {{-- trust and verification --}}
-        @include('partials.trustandverification')
+        {{-- @include('partials.trustandverification') --}}
 
         <livewire:most-purchased-products />
 
