@@ -20,7 +20,11 @@ if (!url) {
   process.exit(1);
 }
 
-const isProduction = process.env.NODE_ENV === 'production';
+// const isProduction = process.env.NODE_ENV === 'production';
+
+const homeDir = os.homedir();
+const isProduction =
+  process.env.NODE_ENV === 'production' || homeDir === '/home/ubuntu';
 
 (async () => {
   const browser = await chromium.launch({

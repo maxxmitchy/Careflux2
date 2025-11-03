@@ -84,7 +84,7 @@ final class PuppeteerService
         exec($command, $output, $exitCode);
 
         if ((int) $exitCode !== 0) {
-            \Log::error('Playwright script execution failed.', [
+            Log::error('Playwright script execution failed.', [
                 'url' => $url,
                 'exitCode' => $exitCode,
                 'output' => implode("\n", $output),
