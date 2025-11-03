@@ -25,11 +25,11 @@ const isProduction = process.env.NODE_ENV === 'production';
 (async () => {
   const browser = await chromium.launch({
     headless: true,
-    // executablePath: isProduction
-    //         ? '/home/debian/.cache/puppeteer/chrome/linux-136.0.7103.49/chrome-linux64/chrome'
-    //         : undefined,
+    executablePath: isProduction
+            ? '/home/ubuntu/.config/nvm/versions/node/v22.18.0/bin/node'
+            : '/home/maxxmitchy/.cache/ms-playwright/chromium-1194/chrome-linux/chrome',
 
-    executablePath: '/home/maxxmitchy/.cache/ms-playwright/chromium-1194/chrome-linux/chrome',
+    // executablePath: '/home/maxxmitchy/.cache/ms-playwright/chromium-1194/chrome-linux/chrome',
 
     args: [
       '--no-sandbox',
