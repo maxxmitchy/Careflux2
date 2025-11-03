@@ -77,7 +77,7 @@ class CreatePharmacyProduct extends CreateRecord
 
                         return $variant->id;
                     }),
-                TextInput::make('price')->required()->numeric()->prefix('₦'),
+                TextInput::make('price')->required()->numeric()->prefix('₦')->hint('Price per unit in Kobo, that is ₦100 = 10000 Kobo. So if a product is sold for ₦150, enter 15000 here.'),
                 TextInput::make('stock')->required()->numeric()->integer(),
                 TextInput::make('nafdac_number')->label('NAFDAC Number'),
                 TagsInput::make('batch_numbers')->label('Batch Numbers')->placeholder('Enter batch numbers for this stock'),
