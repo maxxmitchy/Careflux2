@@ -68,7 +68,10 @@ final class PuppeteerService
     protected function runScript(string $url, string $outputFile): bool
     {
         $scriptPath = base_path('node-scraper/playwright.mjs');
-        $nodeBinary = '/home/maxxmitchy/.nvm/versions/node/v25.0.0/bin/node';
+
+        $nodeBinary = App::environment('production')
+            ? '/home/ubuntu/.nvm/versions/node/v22.18.0/bin/node'
+            : '/home/maxxmitchy/.nvm/versions/node/v25.0.0/bin/node';
 
         $cmdParts = [
             escapeshellcmd($nodeBinary),
