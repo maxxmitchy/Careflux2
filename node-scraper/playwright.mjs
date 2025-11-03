@@ -20,20 +20,16 @@ if (!url) {
   process.exit(1);
 }
 
-// const isProduction = process.env.NODE_ENV === 'production';
-
-const homeDir = os.homedir();
-const isProduction =
-  process.env.NODE_ENV === 'production' || homeDir === '/home/ubuntu';
+const isProduction = process.env.NODE_ENV === 'production';
 
 (async () => {
   const browser = await chromium.launch({
     headless: true,
     // executablePath: isProduction
-    //         ? '/home/ubuntu/.config/nvm/versions/node/v22.18.0/bin/node'
-    //         : '/home/maxxmitchy/.cache/ms-playwright/chromium-1194/chrome-linux/chrome',
+    //         ? '/home/debian/.cache/puppeteer/chrome/linux-136.0.7103.49/chrome-linux64/chrome'
+    //         : undefined,
 
-    executablePath: '/home/ubuntu/.config/nvm/versions/node/v22.18.0/bin/node',
+    executablePath: '/home/maxxmitchy/.cache/ms-playwright/chromium-1194/chrome-linux/chrome',
 
     args: [
       '--no-sandbox',
