@@ -74,7 +74,7 @@ final class PuppeteerService
             : '/home/maxxmitchy/.nvm/versions/node/v25.0.0/bin/node';
 
         $cmdParts = [
-            escapeshellcmd($nodeBinary),
+            escapeshellcmd('/home/ubuntu/.nvm/versions/node/v22.18.0/bin/node'),
             escapeshellarg($scriptPath),
             escapeshellarg($url),
             escapeshellarg($outputFile),
