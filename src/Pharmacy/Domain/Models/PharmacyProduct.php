@@ -48,19 +48,29 @@ class PharmacyProduct extends Model
     }
 
     // ACCESSORS to pull data from the global catalog for clean presentation
+    // public function getNameAttribute(): string
+    // {
+    //     return $this->medicationVariant->medication->name.' ('.$this->medicationVariant->name.')';
+    // }
+    /**
+     * ACCESSOR: Magically get the product's name from the global catalog.
+     * Uses the null-safe operator (?->) to prevent errors if relations are missing.
+     */
     public function getNameAttribute(): string
     {
-        return $this->medicationVariant->medication->name.' ('.$this->medicationVariant->name.')';
+        $medicationName = $this->medicationVariant?->medication?->name ?? 'Archived Medication';
+        $variantName = $this->medicationVariant?->name ?? 'N/A';
+        return "{$medicationName} ({$variantName})";
     }
 
     public function getImageAttribute(): ?string
     {
-        return $this->medicationVariant->medication->image;
+        return $this->medicationVariant->medication?->image;
     }
 
     public function getIsPrescriptionAttribute(): bool
     {
-        return $this->medicationVariant->medication->is_prescription;
+        return $this->medicationVariant->medication?->is_prescription;
     }
 
     public function medicationInformation(): BelongsToMany

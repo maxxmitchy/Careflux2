@@ -17,7 +17,7 @@ class PharmacyProductsTable
             ->columns([
                 ImageColumn::make('image')->label(''),
                 TextColumn::make('name')->label('Product Name')->searchable(),
-                TextColumn::make('price')->money('NGN'),
+                TextColumn::make('price')->money('NGN', 100),
                 TextColumn::make('stock')->numeric(),
             ])
             ->filters([

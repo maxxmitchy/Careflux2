@@ -90,6 +90,8 @@ class ProductSearchService
                 if ($otcOnly) {
                     $q->where('is_prescription', false);
                 }
+
+                $q->where('status', 'approved');
             })
             ->limit(25);
 

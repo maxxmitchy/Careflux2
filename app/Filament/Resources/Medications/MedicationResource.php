@@ -2,20 +2,22 @@
 
 namespace App\Filament\Resources\Medications;
 
-use App\Filament\Resources\Medications\Pages\CreateMedication;
-use App\Filament\Resources\Medications\Pages\EditMedication;
-use App\Filament\Resources\Medications\Pages\ListMedications;
-use App\Filament\Resources\Medications\Pages\ViewMedication;
-use App\Filament\Resources\Medications\Schemas\MedicationForm;
-use App\Filament\Resources\Medications\Schemas\MedicationInfolist;
-use App\Filament\Resources\Medications\Tables\MedicationsTable;
-use BackedEnum;
-use Filament\Resources\Resource;
-use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
-use Filament\Tables\Table;
-use Src\Medication\Domain\Models\Medication;
 use UnitEnum;
+use BackedEnum;
+use Filament\Tables\Table;
+use Filament\Schemas\Schema;
+use Filament\Resources\Resource;
+use App\Models\Scopes\ApprovedScope;
+use Filament\Support\Icons\Heroicon;
+use Illuminate\Database\Eloquent\Builder;
+use Src\Medication\Domain\Models\Medication;
+use App\Filament\Resources\Medications\Pages\EditMedication;
+use App\Filament\Resources\Medications\Pages\ViewMedication;
+use App\Filament\Resources\Medications\Pages\ListMedications;
+use App\Filament\Resources\Medications\Pages\CreateMedication;
+use App\Filament\Resources\Medications\Schemas\MedicationForm;
+use App\Filament\Resources\Medications\Tables\MedicationsTable;
+use App\Filament\Resources\Medications\Schemas\MedicationInfolist;
 
 class MedicationResource extends Resource
 {
@@ -58,5 +60,14 @@ class MedicationResource extends Resource
             'view' => ViewMedication::route('/{record}'),
             'edit' => EditMedication::route('/{record}/edit'),
         ];
+    }
+
+    /**
+     * This method allows us to modify the base Eloquent query for the entire resource.
+     */
+    public static function getEloquentQuery(): Builder
+    {
+        // 2. Remove the global scope for this resource.
+        return parent::getEloquentQuery()->withoutGlobalScope(ApprovedScope::class);
     }
 }

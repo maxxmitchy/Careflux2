@@ -37,15 +37,15 @@ class EditPharmacyProduct extends EditRecord
 
                                 $medication = $record->medicationVariant->medication;
                                 $variantName = $record->medicationVariant->name;
-                                $imageUrl = $medication->image
+                                $imageUrl = $medication?->image
                                     ? asset('storage/'.$medication->image)
-                                    : 'https://ui-avatars.com/api/?name='.urlencode($medication->name);
+                                    : 'https://ui-avatars.com/api/?name='.urlencode($medication?->name);
 
                                 return <<<HTML
                             <div class="flex items-center gap-4">
                                 <img src="{$imageUrl}" alt="{$medication->name}" class="h-16 w-16 rounded-lg object-cover border p-1" />
                                 <div>
-                                    <h3 class="text-lg font-bold text-gray-800">{$medication->name}</h3>
+                                    <h3 class="text-lg font-bold text-gray-800">{$medication?->name}</h3>
                                     <p class="text-sm text-gray-500">{$variantName}</p>
                                 </div>
                             </div>

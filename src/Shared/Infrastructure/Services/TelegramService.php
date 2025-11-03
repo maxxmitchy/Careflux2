@@ -16,7 +16,7 @@ class TelegramService
 
     public function __construct()
     {
-        $token = config('telegram.bots.default.token');
+        $token = config('telegram.bots.mybot.token');
         if (! empty($token)) {
             try {
                 $this->telegram = new Api($token);
@@ -51,6 +51,11 @@ class TelegramService
      */
     public function send(?string $chatId, string $message): void
     {
+        if (!$this->isValidChatId($chatId)) {
+            Log::error('Telegram Service: Attempted to send a message with an invalid Chat ID format.', ['chat_id' => $chatId]);
+            return;
+        }
+
         if (! $this->isConfigured) {
             Log::warning('Telegram Service: Cannot send message because service is not configured.');
 
@@ -75,6 +80,19 @@ class TelegramService
                 'error' => $e->getMessage(),
             ]);
         }
+    }
+
+    /**
+     * --- NEW VALIDATION METHOD ---
+     * Validates that a given string is in the format of a Telegram Chat ID (integer, possibly negative).
+     */
+    private function isValidChatId(?string $chatId): bool
+    {
+        if (empty($chatId)) {
+            return false;
+        }
+        // A valid ID is a numeric string, which may start with a hyphen.
+        return (bool) preg_match('/^-?[0-9]+$/', $chatId);
     }
 
     private function escapeMarkdown(string $text): string

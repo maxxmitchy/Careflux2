@@ -2,17 +2,19 @@
 
 namespace App\Filament\Resources\Users\Tables;
 
+use Filament\Tables\Table;
 use Filament\Actions\Action;
+use Filament\Actions\EditAction;
+use Src\Shared\Domain\Models\User;
+use Filament\Tables\Filters\Filter;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
-use Filament\Notifications\Notification;
+use Filament\Forms\Components\Textarea;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\Filter;
-use Filament\Tables\Table;
+use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Builder;
-use Src\Shared\Domain\Models\User;
+use Src\Shared\Infrastructure\Services\TelegramService;
 use Src\Subscription\Application\Actions\StartTrialSubscriptionAction;
 
 class UsersTable
@@ -73,6 +75,33 @@ class UsersTable
                         $record->pharmacy &&
                         $record->pharmacy->is_approved
                     ),
+
+                Action::make('send_telegram_message')
+                    ->label('Send Telegram')
+                    ->icon('heroicon-o-paper-airplane')
+                    ->color('secondary')
+                    // Only show this button if the user has a chat ID configured
+                    ->visible(fn (User $record): bool => !empty($record->telegram_chat_id))
+                    ->schema([
+                        Textarea::make('message')
+                            ->label('Message Content')
+                            ->required()
+                            ->rows(5)
+                            ->helperText('This message will be sent directly to the user\'s Telegram. Markdown is supported.'),
+                    ])
+                    ->action(function (User $record, array $data, TelegramService $telegramService) {
+                        // Use our existing, robust service to send the message
+                        $telegramService->sendMessageToUser($record, $data['message']);
+
+                        // Provide immediate feedback to the admin
+                        Notification::make()
+                            ->title('Message Sent')
+                            ->body("The message has been queued to be sent to {$record->name}.")
+                            ->success()
+                            ->send();
+                    })
+                    ->modalHeading('Send Direct Telegram Message')
+                    ->modalSubmitActionLabel('Send Message'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
