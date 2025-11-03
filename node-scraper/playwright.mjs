@@ -29,11 +29,11 @@ const isProduction =
 (async () => {
   const browser = await chromium.launch({
     headless: true,
-    executablePath: isProduction
-            ? '/home/ubuntu/.config/nvm/versions/node/v22.18.0/bin/node'
-            : '/home/maxxmitchy/.cache/ms-playwright/chromium-1194/chrome-linux/chrome',
+    // executablePath: isProduction
+    //         ? '/home/ubuntu/.config/nvm/versions/node/v22.18.0/bin/node'
+    //         : '/home/maxxmitchy/.cache/ms-playwright/chromium-1194/chrome-linux/chrome',
 
-    // executablePath: '/home/maxxmitchy/.cache/ms-playwright/chromium-1194/chrome-linux/chrome',
+    executablePath: '/home/ubuntu/.config/nvm/versions/node/v22.18.0/bin/node',
 
     args: [
       '--no-sandbox',
