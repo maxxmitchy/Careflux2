@@ -62,7 +62,8 @@ class EditPharmacyProduct extends EditRecord
                             ->label('Your Selling Price')
                             ->required()
                             ->numeric()
-                            ->prefix('₦'),
+                            ->prefix('₦')
+                            ->hint('Price per unit in Kobo, that is ₦100 = 10000 Kobo. So if a product is sold for ₦150, enter 15000 here.'),
                         TextInput::make('stock')
                             ->label('Current Stock Quantity')
                             ->required()
