@@ -69,7 +69,7 @@
                 @endauth
                 class="w-full flex items-center justify-center gap-2 px-4 py-2 text-xs font-semibold rounded text-white bg-red-600 hover:bg-red-700 transition"
             >
-                <x-heroicon-s-shield-check class="h-4 w-4" />
+                {{-- <x-heroicon-s-shield-check class="h-4 w-4" /> --}}
                 Get Prescription
             </button>
 
