@@ -88,19 +88,19 @@ class TaskResource extends Resource
                     ])
                     ->modalFooterActions(function (Task $record) {
                         $patient = $record->subjectable;
-                        if (!$patient instanceof Patient || !$patient->phone) {
+                        if (! $patient instanceof Patient || ! $patient->phone) {
                             return [Action::make('close')->label('Close: Patient has no phone number')->modalClose()->color('danger')];
                         }
-                        
+
                         $message = $record->description;
-                        $whatsappUrl = 'https://wa.me/' . $patient->phone . '?text=' . urlencode($message);
+                        $whatsappUrl = 'https://wa.me/'.$patient->phone.'?text='.urlencode($message);
 
                         return [
                             Action::make('open_whatsapp')
                                 ->label('Open WhatsApp & Prepare Message')
                                 ->icon('heroicon-s-paper-airplane')
                                 ->url($whatsappUrl, shouldOpenInNewTab: true),
-                            
+
                             Action::make('confirm_completion')
                                 ->label('I Have Sent It')
                                 ->color('success')

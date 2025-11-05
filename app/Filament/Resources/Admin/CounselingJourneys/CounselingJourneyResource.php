@@ -22,7 +22,9 @@ class CounselingJourneyResource extends Resource
     protected static string|BackedEnum|null $navigationIcon = Heroicon::ChatBubbleBottomCenterText;
 
     protected static string|UnitEnum|null $navigationGroup = 'Content Management';
+
     protected static ?int $navigationSort = 4;
+
     protected static ?string $modelLabel = 'Counseling Journey';
 
     protected static ?string $recordTitleAttribute = 'name';

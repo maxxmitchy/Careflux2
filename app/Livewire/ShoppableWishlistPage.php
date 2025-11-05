@@ -26,6 +26,15 @@ class ShoppableWishlistPage extends Component
         $this->asset = $marketingAsset->load(['pharmacy', 'user']);
         $this->productData = $this->asset->product_data;
         $this->isCarePackage = $this->asset->type === 'care_package';
+
+        // --- GTM EVENT ---
+        $this->dispatch('gtm-event', [
+            'event' => 'view_item_list',
+            'ecommerce' => [
+                'item_list_id' => 'wishlist-'.$this->asset->slug,
+                'item_list_name' => $this->asset->title,
+            ],
+        ]);
     }
 
     public function addToCart(int $productId, CartServiceInterface $cartService)
@@ -89,6 +98,20 @@ class ShoppableWishlistPage extends Component
             $cartService->add($cartItemData, 'ready_to_pay');
             $this->dispatch('cart-updated');
             $this->dispatch('toast', message: "'{$product->name}' added to cart!", type: 'success');
+
+            // --- GTM EVENT ---
+            $this->dispatch('gtm-event', [
+                'event' => 'add_to_cart',
+                'ecommerce' => [
+                    'items' => [[
+                        'item_id' => $cartItemData['uniqueId'],
+                        'item_name' => $cartItemData['productName'],
+                        'price' => $cartItemData['price'] / 100,
+                        'quantity' => 1,
+                        'item_list_name' => $this->asset->title, // Attribute the source
+                    ]],
+                ],
+            ]);
         } catch (InvalidCartQuantityException $e) {
             $this->dispatch('toast', message: $e->getMessage(), type: 'error');
         }

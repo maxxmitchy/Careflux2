@@ -101,6 +101,13 @@ class PrescriptionVerificationPage extends Component
 
         $this->verification = $action->execute(Auth::user()->patientProfile, $this->product);
         $this->step = 'contact_pharmacist';
+
+        // --- GTM EVENT ---
+        $this->dispatch('gtm-event', [
+            'event' => 'begin_verification',
+            'product_name' => $this->product->name,
+            'product_variant' => $this->selectedVariant->name,
+        ]);
     }
 
     public function proceedToCodeEntry(): void
@@ -112,6 +119,12 @@ class PrescriptionVerificationPage extends Component
     {
         $this->validate(['finalCodeInput' => 'required|string|min:4']);
         try {
+            // --- GTM EVENT ---
+            $this->dispatch('gtm-event', [
+                'event' => 'submit_verification_code',
+                'verification_reference' => $this->verification->reference_code,
+            ]);
+
             if ($action->execute($this->verification, $this->finalCodeInput)) {
                 $cartItemData = [
                     'uniqueId' => 'pharmacy::'.$this->product->id,
@@ -129,6 +142,19 @@ class PrescriptionVerificationPage extends Component
                 $this->verification->update(['status' => 'completed']);
                 $this->dispatch('cart-updated');
                 $this->step = 'success';
+
+                // --- GTM EVENT ---
+                $this->dispatch('gtm-event', [
+                    'event' => 'verification_success',
+                    'ecommerce' => [
+                        'items' => [[
+                            'item_id' => $cartItemData['uniqueId'],
+                            'item_name' => $cartItemData['productName'],
+                            'price' => $cartItemData['price'] / 100,
+                            'quantity' => 1,
+                        ]],
+                    ],
+                ]);
             } else {
                 $this->addError('finalCodeInput', 'The verification code is invalid.');
             }

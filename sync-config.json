@@ -1,0 +1,16 @@
+{
+  "output_file": "all-scraped-products.json",
+  "mysql": {
+    "host": "127.0.0.1",
+    "port": 3306,
+    "user": "root",
+    "password": "root",
+    "database": "arbitrage"
+  },
+  "vps": {
+    "user": "ubuntu",
+    "host": "142.44.163.70",
+    "project_path": "~/web-projects/careflux"
+  },
+  "remote_import_command": "php artisan import:scraped-products all-scraped-products.json"
+}

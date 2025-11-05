@@ -24,6 +24,14 @@ class PartnerDetailPage extends Component
         $this->pharmacy = Pharmacy::with(['users' => function ($query) {
             $query->where('is_pharmacist', true);
         }, 'city', 'state'])->findOrFail($pharmacyId);
+
+        $this->dispatch('gtm-event', [
+            'event' => 'view_item_list',
+            'ecommerce' => [
+                'item_list_id' => 'partner-'.$this->pharmacy->id,
+                'item_list_name' => 'Partner Page: '.$this->pharmacy->name,
+            ],
+        ]);
     }
 
     /**
@@ -51,6 +59,20 @@ class PartnerDetailPage extends Component
             $cartService->add($productData, 'ready_to_pay');
             $this->dispatch('cart-updated');
             $this->dispatch('toast', message: 'Item added to cart!', type: 'success');
+
+            // --- GTM EVENT ---
+            $this->dispatch('gtm-event', [
+                'event' => 'add_to_cart',
+                'ecommerce' => [
+                    'items' => [[
+                        'item_id' => $productData['uniqueId'],
+                        'item_name' => $productData['productName'],
+                        'price' => $productData['price'] / 100,
+                        'quantity' => 1,
+                        'item_brand' => $this->pharmacy->name, // The partner is the brand in this context
+                    ]],
+                ],
+            ]);
         } catch (InvalidCartQuantityException $e) {
             $this->dispatch('toast', message: $e->getMessage(), type: 'error');
         }

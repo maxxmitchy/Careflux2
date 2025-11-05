@@ -121,6 +121,13 @@ class PublicProductSearch extends Component
 
         $this->logSearch();
         $this->addSearchToHistory($this->search);
+
+        // --- GTM EVENT DISPATCH ---
+        $this->dispatch('gtm-event', [
+            'event' => 'search',
+            'search_term' => $this->search,
+            'results_count' => $this->totalResults,
+        ]);
     }
 
     #[Computed(persist: true)]

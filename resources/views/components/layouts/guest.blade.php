@@ -40,6 +40,19 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
+    {{-- --- GTM SCRIPT (HEAD) --- --}}
+    @if(config('services.gtm.id'))
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-PQ334TGQ');</script>
+    <!-- End Google Tag Manager -->
+    @endif
+    {{-- --- END GTM SCRIPT --- --}}
+
+
     {{-- Styles & Scripts --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
@@ -48,8 +61,24 @@
     <style>
         [x-cloak] { display: none !important; }
     </style>
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-D2LGZJK5WQ"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-D2LGZJK5WQ');
+    </script>
 </head>
-<body class="font-sans antialiased text-slate-800 flex flex-col min-h-screen">
+<body x-data="gtm" class="font-sans antialiased text-slate-800 flex flex-col min-h-screen">
+    @if(config('services.gtm.id'))
+        <!-- Google Tag Manager (noscript) -->
+        <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PQ334TGQ"
+        height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+        <!-- End Google Tag Manager (noscript) -->
+    @endif
     <div
         @guest
             x-data="guestCart"
@@ -105,5 +134,26 @@
         });
     </script>
     @endguest
+
+    {{-- --- GTM DATA LAYER EVENT LISTENER --- --}}
+    @if(config('services.gtm.id'))
+        <script>
+            // Initialize the dataLayer if it doesn't exist
+            window.dataLayer = window.dataLayer || [];
+
+            document.addEventListener('alpine:init', () => {
+                Alpine.data('gtm', () => ({
+                    init() {
+                        // Listen for a custom 'gtm-event' dispatched from Livewire
+                        document.addEventListener('gtm-event', (event) => {
+                            // Push the entire detail object to the dataLayer
+                            window.dataLayer.push(event.detail);
+                            console.log('GTM Event Pushed:', event.detail); // For debugging
+                        });
+                    }
+                }))
+            });
+        </script>
+    @endif
 </body>
 </html>

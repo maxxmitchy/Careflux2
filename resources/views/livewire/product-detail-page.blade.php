@@ -129,12 +129,10 @@
                         </div>
                     @endif
 
-                    <!-- Other Options -->
-                    @if($otherOptions->isNotEmpty())
+                    {{-- @if($otherOptions->isNotEmpty())
                         <section class="mt-8">
                             <h2 class="text-base font-semibold text-gray-700">Other Available Products ({{ $this->totalOtherOptions }})</h2>
 
-                            {{-- We now use a responsive grid to display the product cards --}}
                             <div class="mt-4 grid grid-cols-2 md:grid-cols-3 gap-4">
                                 @foreach($otherOptions as $option)
                                     <x-product-card :product="$option" />
@@ -142,6 +140,38 @@
                             </div>
 
                             @if($otherOptions->count() < $this->totalOtherOptions)
+                                <div class="mt-6 text-center">
+                                    <button wire:click="loadMore" class="text-xs font-semibold text-emerald-600 hover:underline">
+                                        Load More Options
+                                    </button>
+                                </div>
+                            @endif
+                        </section>
+                    @endif --}}
+
+                    @php
+                        $items = $this->similarAndPromotionalItems();
+                    @endphp
+                    @if($items->isNotEmpty())
+                        <section class="mt-8">
+                            <h2 class="text-base font-semibold text-gray-700">
+                                {{ $this->otherOptions()->isNotEmpty() ? 'Other Available Options' : 'You Might Be Interested In' }}
+                            </h2>
+
+                            <div class="mt-4 grid grid-cols-2 md:grid-cols-3 gap-4">
+                                @foreach($items as $item)
+                                    @if($item instanceof \App\Models\PromotionalBanner)
+                                        {{-- Render the banner card --}}
+                                        <x-in-feed-banner-card :banner="$item" />
+                                    @else
+                                        {{-- Render the standard product card --}}
+                                        <x-product-card :product="$item" />
+                                    @endif
+                                @endforeach
+                            </div>
+
+                            {{-- The "Load More" button should only appear if there are more actual products to load --}}
+                            @if($this->otherOptions()->count() < $this->totalOtherOptions())
                                 <div class="mt-6 text-center">
                                     <button wire:click="loadMore" class="text-xs font-semibold text-emerald-600 hover:underline">
                                         Load More Options

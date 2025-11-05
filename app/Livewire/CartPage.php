@@ -59,6 +59,26 @@ class CartPage extends Component
             : 'quote';
     }
 
+    public function booted(): void
+    {
+        $itemsForGTM = $this->readyToPayItems()->map(fn ($item) => [
+            'item_id' => $item->uniqueId,
+            'item_name' => $item->productName,
+            'price' => $item->price / 100,
+            'quantity' => $item->quantity,
+            'item_brand' => $item->sourceName,
+        ])->all();
+
+        $this->dispatch('gtm-event', [
+            'event' => 'view_cart',
+            'ecommerce' => [
+                'items' => $itemsForGTM,
+                'value' => $this->total / 100,
+                'currency' => 'NGN',
+            ],
+        ]);
+    }
+
     private function updateCartState(CartServiceInterface $cartService): void
     {
         // This is a placeholder for the logic that partitions items from the service

@@ -35,6 +35,8 @@ class RegisterUserAction
             Mail::to($user)->send(new PatientWelcomeMail($user, $token)); // Send welcome email with token
         }
 
+        event(new \App\Events\UserSignedUp($user, $data['role']));
+
         Auth::login($user);
 
         return $user;

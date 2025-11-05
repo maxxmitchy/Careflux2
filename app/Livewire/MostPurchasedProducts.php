@@ -40,6 +40,21 @@ class MostPurchasedProducts extends Component
             $cartService->add($productData, 'ready_to_pay');
             $this->dispatch('cart-updated');
             $this->dispatch('toast', message: 'Item added to cart!', type: 'success');
+            // --- GTM EVENT DISPATCH ---
+            $this->dispatch('gtm-event', [
+                'event' => 'add_to_cart_most_purchased',
+                'ecommerce' => [
+                    'items' => [
+                        [
+                            'item_id' => $productData['uniqueId'],
+                            'item_name' => $productData['productName'],
+                            'price' => $productData['price'] / 100, // Convert kobo to Naira for analytics
+                            'quantity' => 1,
+                            'item_brand' => $productData['sourceName'],
+                        ],
+                    ],
+                ],
+            ]);
         } catch (InvalidCartQuantityException $e) {
             $this->dispatch('toast', message: $e->getMessage(), type: 'error');
         }

@@ -2,12 +2,12 @@
 
 namespace App\Filament\Resources\Medications\Pages;
 
+use App\Filament\Resources\Medications\MedicationResource;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Schemas\Components\Tabs\Tab;
 use Illuminate\Database\Eloquent\Builder;
 use Src\Medication\Domain\Models\Medication;
-use App\Filament\Resources\Medications\MedicationResource;
 
 class ListMedications extends ListRecords
 {

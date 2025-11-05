@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Livewire\Concerns\WithQuoteActions;
 use App\Models\MedicationInformation;
+use App\Models\PromotionalBanner;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Collection;
@@ -144,6 +145,26 @@ class ProductDetailPage extends Component
         $this->identifier = $identifier;
     }
 
+    public function booted(): void
+    {
+        $product = $this->featuredProduct();
+
+        if ($product) {
+            // Dispatch the GTM event for 'view_item'
+            $this->dispatch('gtm-event', [
+                'event' => 'view_item',
+                'ecommerce' => [
+                    'items' => [[
+                        'item_id' => $product->uniqueId,
+                        'item_name' => $product->productName,
+                        'price' => $product->price / 100, // Convert to Naira
+                        'item_brand' => $product->sourceName,
+                    ]],
+                ],
+            ]);
+        }
+    }
+
     public function loadMore()
     {
         $this->perPage += 5;
@@ -166,9 +187,25 @@ class ProductDetailPage extends Component
             $cartService->add($productData, 'ready_to_pay');
             $this->dispatch('cart-updated');
             $this->dispatch('toast', message: 'Item added to cart!', type: 'success');
+            // --- GTM EVENT DISPATCH ---
+            $this->dispatch('gtm-event', [
+                'event' => 'add_to_cart_product_details',
+                'ecommerce' => [
+                    'items' => [
+                        [
+                            'item_id' => $productData['uniqueId'],
+                            'item_name' => $productData['productName'],
+                            'price' => $productData['price'] / 100, // Convert kobo to Naira for analytics
+                            'quantity' => 1,
+                            'item_brand' => $productData['sourceName'],
+                        ],
+                    ],
+                ],
+            ]);
         } catch (InvalidCartQuantityException $e) {
             $this->dispatch('toast', message: $e->getMessage(), type: 'error');
         }
+
     }
 
     private function transformProduct(Model $product): object
@@ -210,6 +247,39 @@ class ProductDetailPage extends Component
             ];
         }
         throw new \InvalidArgumentException('Unsupported product type.');
+    }
+
+    #[Computed]
+    public function similarAndPromotionalItems(): Collection
+    {
+        // Use the existing `otherOptions` computed property which is already cached
+        $similarProducts = $this->otherOptions();
+
+        // 1. If similar products exist, fetch banners to inject.
+        if ($similarProducts->isNotEmpty()) {
+            $banners = PromotionalBanner::where('is_active', true)
+                ->where('placement', 'product_detail_in_feed') // A specific placement for this context
+                ->inRandomOrder()
+                ->limit(2) // Limit the number of injected banners
+                ->get();
+
+            // Inject banners strategically. For example, after the 2nd and 4th product.
+            if ($banners->has(0) && $similarProducts->has(1)) {
+                $similarProducts->splice(2, 0, [$banners->get(0)]);
+            }
+            if ($banners->has(1) && $similarProducts->has(3)) {
+                $similarProducts->splice(4, 0, [$banners->get(1)]);
+            }
+
+            return $similarProducts;
+        }
+
+        // 2. If NO similar products exist, return only fallback banners.
+        return PromotionalBanner::where('is_active', true)
+            ->where('placement', 'product_detail_fallback')
+            ->inRandomOrder()
+            ->limit(5) // Show more banners in this case
+            ->get();
     }
 
     public function render()

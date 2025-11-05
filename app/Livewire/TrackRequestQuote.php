@@ -15,6 +15,15 @@ class TrackRequestQuote extends Component
     public function mount(QuoteRequest $quoteRequest)
     {
         $this->loadRequest($quoteRequest);
+
+        // --- GTM EVENT ---
+        $this->dispatch('gtm-event', [
+            'event' => 'view_item_list',
+            'ecommerce' => [
+                'item_list_id' => 'quote-'.$this->quoteRequest->id,
+                'item_list_name' => 'Quote Request Tracking',
+            ],
+        ]);
     }
 
     public function refreshRequest()
@@ -107,6 +116,20 @@ class TrackRequestQuote extends Component
         // Add the item to the cart and update the global counter
         $cartService->add($productData, 'ready_to_pay');
         $this->dispatch('cart-updated');
+
+        // --- GTM EVENT ---
+        $this->dispatch('gtm-event', [
+            'event' => 'add_to_cart',
+            'ecommerce' => [
+                'items' => [[
+                    'item_id' => $productData['uniqueId'],
+                    'item_name' => $productData['productName'],
+                    'price' => $productData['price'] / 100,
+                    'quantity' => 1,
+                    'item_list_name' => 'Quote Request Fulfillment',
+                ]],
+            ],
+        ]);
     }
 
     public function render()

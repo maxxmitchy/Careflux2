@@ -50,6 +50,13 @@ class Login extends Component
         Auth::login($user, $this->remember);
 
         RateLimiter::clear($this->throttleKey());
+
+        // --- GTM EVENT ---
+        $this->dispatch('gtm-event', [
+            'event' => 'login',
+            'method' => 'Pharmacist Panel', // Differentiate login types
+        ]);
+
         Session::regenerate();
 
         $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);

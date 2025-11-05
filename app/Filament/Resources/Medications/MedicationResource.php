@@ -2,22 +2,22 @@
 
 namespace App\Filament\Resources\Medications;
 
-use UnitEnum;
-use BackedEnum;
-use Filament\Tables\Table;
-use Filament\Schemas\Schema;
-use Filament\Resources\Resource;
+use App\Filament\Resources\Medications\Pages\CreateMedication;
+use App\Filament\Resources\Medications\Pages\EditMedication;
+use App\Filament\Resources\Medications\Pages\ListMedications;
+use App\Filament\Resources\Medications\Pages\ViewMedication;
+use App\Filament\Resources\Medications\Schemas\MedicationForm;
+use App\Filament\Resources\Medications\Schemas\MedicationInfolist;
+use App\Filament\Resources\Medications\Tables\MedicationsTable;
 use App\Models\Scopes\ApprovedScope;
+use BackedEnum;
+use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Src\Medication\Domain\Models\Medication;
-use App\Filament\Resources\Medications\Pages\EditMedication;
-use App\Filament\Resources\Medications\Pages\ViewMedication;
-use App\Filament\Resources\Medications\Pages\ListMedications;
-use App\Filament\Resources\Medications\Pages\CreateMedication;
-use App\Filament\Resources\Medications\Schemas\MedicationForm;
-use App\Filament\Resources\Medications\Tables\MedicationsTable;
-use App\Filament\Resources\Medications\Schemas\MedicationInfolist;
+use UnitEnum;
 
 class MedicationResource extends Resource
 {

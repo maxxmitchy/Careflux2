@@ -60,6 +60,7 @@ class PharmacyProduct extends Model
     {
         $medicationName = $this->medicationVariant?->medication?->name ?? 'Archived Medication';
         $variantName = $this->medicationVariant?->name ?? 'N/A';
+
         return "{$medicationName} ({$variantName})";
     }
 

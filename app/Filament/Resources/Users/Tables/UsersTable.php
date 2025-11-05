@@ -2,18 +2,18 @@
 
 namespace App\Filament\Resources\Users\Tables;
 
-use Filament\Tables\Table;
 use Filament\Actions\Action;
-use Filament\Actions\EditAction;
-use Src\Shared\Domain\Models\User;
-use Filament\Tables\Filters\Filter;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Forms\Components\Textarea;
+use Filament\Notifications\Notification;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Notifications\Notification;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Src\Shared\Domain\Models\User;
 use Src\Shared\Infrastructure\Services\TelegramService;
 use Src\Subscription\Application\Actions\StartTrialSubscriptionAction;
 
@@ -81,7 +81,7 @@ class UsersTable
                     ->icon('heroicon-o-paper-airplane')
                     ->color('secondary')
                     // Only show this button if the user has a chat ID configured
-                    ->visible(fn (User $record): bool => !empty($record->telegram_chat_id))
+                    ->visible(fn (User $record): bool => ! empty($record->telegram_chat_id))
                     ->schema([
                         Textarea::make('message')
                             ->label('Message Content')

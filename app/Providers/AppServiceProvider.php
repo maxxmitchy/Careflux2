@@ -2,21 +2,21 @@
 
 namespace App\Providers;
 
-use App\Observers\InvoiceObserver;
-use Src\Order\Domain\Models\Invoice;
-use App\Observers\MedicationObserver;
-use Illuminate\Support\ServiceProvider;
 use App\Http\Responses\LoginViewResponse;
+use App\Observers\InvoiceObserver;
 use App\Observers\MarketingAssetObserver;
-use App\Observers\ScrapedProductObserver;
-use App\Observers\PharmacyProductObserver;
-use Src\Medication\Domain\Models\Medication;
+use App\Observers\MedicationObserver;
 use App\Observers\PatientInteractionObserver;
-use Src\Scraping\Domain\Models\ScrapedProduct;
-use Src\Marketing\Domain\Models\MarketingAsset;
-use Src\Pharmacy\Domain\Models\PharmacyProduct;
-use Src\Patient\Domain\Models\PatientInteraction;
+use App\Observers\PharmacyProductObserver;
+use App\Observers\ScrapedProductObserver;
+use Illuminate\Support\ServiceProvider;
 use Laravel\Fortify\Contracts\LoginViewResponse as LoginViewResponseContract;
+use Src\Marketing\Domain\Models\MarketingAsset;
+use Src\Medication\Domain\Models\Medication;
+use Src\Order\Domain\Models\Invoice;
+use Src\Patient\Domain\Models\PatientInteraction;
+use Src\Pharmacy\Domain\Models\PharmacyProduct;
+use Src\Scraping\Domain\Models\ScrapedProduct;
 
 class AppServiceProvider extends ServiceProvider
 {

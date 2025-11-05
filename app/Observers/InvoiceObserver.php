@@ -9,9 +9,6 @@ class InvoiceObserver
 {
     /**
      * Handle the Invoice "updated" event.
-     *
-     * @param  \Src\Order\Domain\Models\Invoice  $invoice
-     * @return void
      */
     public function updated(Invoice $invoice): void
     {

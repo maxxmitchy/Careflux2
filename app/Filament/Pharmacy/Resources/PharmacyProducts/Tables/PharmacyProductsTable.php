@@ -2,12 +2,12 @@
 
 namespace App\Filament\Pharmacy\Resources\PharmacyProducts\Tables;
 
-use Filament\Tables\Table;
-use Filament\Actions\EditAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
-use Filament\Tables\Columns\TextColumn;
+use Filament\Actions\EditAction;
 use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
 class PharmacyProductsTable
@@ -23,7 +23,7 @@ class PharmacyProductsTable
                         query: function (Builder $query, string $search): Builder {
                             return $query->whereHas('medicationVariant.medication', function (Builder $q) use ($search) {
                                 $q->where('name', 'like', "%{$search}%")
-                                  ->orWhere('generic_name', 'like', "%{$search}%");
+                                    ->orWhere('generic_name', 'like', "%{$search}%");
                             });
                         }
                     ),

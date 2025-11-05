@@ -51,8 +51,9 @@ class TelegramService
      */
     public function send(?string $chatId, string $message): void
     {
-        if (!$this->isValidChatId($chatId)) {
+        if (! $this->isValidChatId($chatId)) {
             Log::error('Telegram Service: Attempted to send a message with an invalid Chat ID format.', ['chat_id' => $chatId]);
+
             return;
         }
 
@@ -91,6 +92,7 @@ class TelegramService
         if (empty($chatId)) {
             return false;
         }
+
         // A valid ID is a numeric string, which may start with a hyphen.
         return (bool) preg_match('/^-?[0-9]+$/', $chatId);
     }
