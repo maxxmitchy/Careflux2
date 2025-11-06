@@ -36,7 +36,7 @@ import { execSync } from 'child_process';
             FROM scraped_products p
             JOIN stores s ON p.store_id = s.id
             WHERE p.store_id = ?`,
-            ['01k4qq2qek0k21gm9ejbf6a06t'] // Example store_id, change if needed
+            [4] // Example store_id, change if needed
         );
         // --- END OF MODIFICATION ---
 
