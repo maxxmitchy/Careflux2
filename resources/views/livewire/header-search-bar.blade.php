@@ -9,7 +9,7 @@
             autocomplete="off"
             type="search"
             placeholder="Search products..."
-            class="w-full rounded border-gray-300 bg-gray-100 border py-3 pl-9 pr-4 text-xs focus:border-emerald-500 focus:ring-emerald-500 transition"
+            class="w-full rounded border-gray-300 bg-gray-100 border py-3 pl-9 pr-4 text-xs focus:border-emerald-500 focus:outline-emerald-500 transition"
         >
     </form>
 
