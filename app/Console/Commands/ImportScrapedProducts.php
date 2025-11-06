@@ -2,10 +2,10 @@
 
 namespace App\Console\Commands;
 
-use App\Models\ScrapedProduct;
-use App\Models\Store;
-use Illuminate\Console\Command;
 use Illuminate\Support\Str;
+use Illuminate\Console\Command;
+use Src\Store\Domain\Models\Store;
+use Src\Scraping\Domain\Models\ScrapedProduct;
 
 class ImportScrapedProducts extends Command
 {

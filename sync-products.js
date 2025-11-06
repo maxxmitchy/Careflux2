@@ -1,4 +1,4 @@
-// --- THIS IS THE DEFINITIVE, ESM-COMPATIBLE SCRIPT ---
+// --- THIS IS THE MODIFIED, ESM-COMPATIBLE SCRIPT ---
 
 import fs from 'fs';
 import mysql from 'mysql2/promise';
@@ -16,26 +16,34 @@ import { execSync } from 'child_process';
         const connection = await mysql.createConnection(dbConfig);
 
         console.log('[2/5] Fetching all scraped products with store names...');
-        // --- THIS IS THE DEFINITIVE FIX ---
-        // We select BOTH the local store_id (for debugging) AND the store_name.
+        
+        // --- THIS IS THE MODIFIED QUERY TO MATCH YOUR NEW MIGRATION ---
+        // It selects the correct columns from the 'scraped_products' table.
         const [products] = await connection.execute(
             `SELECT
                 s.name AS store_name,
                 p.store_id AS local_store_id,
-                p.product_name, p.product_url, p.image_url, p.price,
-                p.original_price, p.currency, p.stock_status, p.brand, p.external_id,
-                p.upc, p.extra, p.search_keyword, p.slug
+                p.product_name,
+                p.product_url,
+                p.image_url,
+                p.price,
+                p.stock_status,
+                p.brand,
+                p.external_id,
+                p.search_keyword,
+                p.is_blacklisted,
+                p.soundex_name
             FROM scraped_products p
             JOIN stores s ON p.store_id = s.id
             WHERE p.store_id = ?`,
-            ['01k4qq2qek0k21gm9ejbf6a06t']
+            ['01k4qq2qek0k21gm9ejbf6a06t'] // Example store_id, change if needed
         );
+        // --- END OF MODIFICATION ---
 
-        // --- END OF FIX ---
         await connection.end();
 
         if (products.length === 0) {
-            console.warn('⚠️ No products found in the local database. Nothing to sync.');
+            console.warn('⚠️ No products found in the local database for the specified store. Nothing to sync.');
             process.exit(0);
         }
         console.log(`[✓] Found ${products.length} products to sync.`);
