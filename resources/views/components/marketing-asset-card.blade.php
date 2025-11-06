@@ -10,7 +10,7 @@
     </div>
     <div class="p-3 flex flex-col flex-grow">
         <p class="text-xs font-semibold uppercase tracking-wider {{ $asset->type === 'care_package' ? 'text-indigo-600' : 'text-emerald-600' }}">
-            {{ str_replace('_', ' ', $asset->type) }}
+            {{ $asset->type == 'wishlist' ? 'pharmacist recommendations' : str_replace('_', ' ', $asset->type) }}
         </p>
         <h3 class="mt-1 text-sm font-bold text-gray-800 line-clamp-2 flex-grow">{{ $asset->title }}</h3>
 
