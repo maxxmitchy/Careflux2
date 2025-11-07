@@ -15,7 +15,7 @@ class MedicationForm
         return $schema
             ->components([
                 FileUpload::make('image')
-                    ->image()->disk('public')->directory('medications')->columnSpanFull()->imageEditor(),
+                    ->image()->disk('public')->directory('medications')->visibility('public')->columnSpanFull()->imageEditor(),
                 TextInput::make('name')->required()->maxLength(255),
                 TextInput::make('generic_name')->maxLength(255),
                 Textarea::make('description')->columnSpanFull(),

@@ -22,7 +22,7 @@
                     <div class="text-center lg:text-left">
                         <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-gray-900 leading-tight">
                             Healthcare That Actually<br>
-                            <span class="text-emerald-600">Works</span>
+                            <span class="text-emerald-600">Checks</span> In On You
                         </h1>
                         <p class="mt-6 text-sm sm:text-base lg:text-lg text-gray-600 max-w-lg mx-auto lg:mx-0">
                             Not just pills. Your pharmacist, your health partner.
