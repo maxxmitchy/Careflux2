@@ -52,7 +52,7 @@
                     @endif
 
                     <!-- Featured Offer Buy Box -->
-                    <section class="mt-6 rounded-xl p-4
+                    <section class="mt-6 rounded p-4
                         @if ($featuredProduct->isPrescription)
                             bg-red-50 border-2 border-red-200
                         @elseif ($featuredProduct->type === 'scraped')
