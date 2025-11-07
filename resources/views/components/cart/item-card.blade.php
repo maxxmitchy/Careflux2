@@ -35,8 +35,10 @@
         <h3 class="text-xs sm:text-sm font-semibold text-gray-800 line-clamp-2 leading-tight">
             {{ $item->productName }}
         </h3>
-        <p class="mt-1 text-xs text-gray-500">
-            From: <span class="font-medium text-gray-700">{{ $item->sourceName }}</span>
+        
+        <p class="mt-1 text-xxs text-gray-400 flex items-center gap-1">
+            <x-heroicon-o-building-storefront class="size-3"/> 
+            <span class="text-xxs font-medium text-gray-700">{{ $item->sourceName }}</span>
         </p>
         <p class="mt-2 text-sm sm:text-base font-bold text-emerald-700">
             ₦{{ number_format($item->price / 100, 2) }}
