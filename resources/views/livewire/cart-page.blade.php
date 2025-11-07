@@ -28,7 +28,7 @@
                         </div>
                         <aside class="lg:col-span-1 mt-8 lg:mt-0">
                             <div class="bg-white rounded shadow-sm border p-4 sticky top-24">
-                                <h3 class="text-base font-semibold">Order Summary</h3>
+                                <h3 class="text-sm sm:text-base font-semibold">Order Summary</h3>
                                 <div class="mt-4 space-y-2 text-xs border-t pt-4">
                                     <div class="flex justify-between"><span>Subtotal</span><span class="font-medium">₦{{ number_format($subtotal / 100, 2) }}</span></div>
                                     <div class="flex justify-between"><span>Delivery</span><span class="font-medium">₦{{ number_format($deliveryFee / 100, 2) }}</span></div>
