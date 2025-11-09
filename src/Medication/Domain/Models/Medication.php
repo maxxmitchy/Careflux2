@@ -2,13 +2,15 @@
 
 namespace Src\Medication\Domain\Models;
 
-use App\Models\Scopes\ApprovedScope;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Src\Patient\Domain\Models\Prescription;
+use App\Models\Category;
 use Src\Shared\Domain\Models\User;
+use App\Models\Scopes\ApprovedScope;
+use Illuminate\Database\Eloquent\Model;
+use Src\Patient\Domain\Models\Prescription;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Medication extends Model
 {
@@ -50,5 +52,10 @@ class Medication extends Model
     {
         // 2. Apply the scope.
         static::addGlobalScope(new ApprovedScope);
+    }
+
+    public function categories(): BelongsToMany
+    {
+        return $this->belongsToMany(Category::class, 'category_medication');
     }
 }

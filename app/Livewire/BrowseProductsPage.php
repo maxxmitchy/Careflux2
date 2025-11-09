@@ -88,7 +88,10 @@ class BrowseProductsPage extends Component
             ->whereHas('pharmacy', fn (Builder $q) => $q->where('is_approved', true))
             ->whereHas('medicationVariant.medication', fn (Builder $q) => $q->where('status', 'approved'))
             ->when($this->category_slug, function (Builder $query, $slug) {
-                $query->whereHas('categories', fn (Builder $q) => $q->where('slug', $slug));
+                // PharmacyProduct -> MedicationVariant -> Medication -> categories()
+                $query->whereHas('medicationVariant.medication.categories', function (Builder $q) use ($slug) {
+                    $q->where('slug', $slug);
+                });
             });
 
         if (! empty($this->search)) {
