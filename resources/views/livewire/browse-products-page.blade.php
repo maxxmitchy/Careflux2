@@ -16,10 +16,10 @@
                     <x-heroicon-o-magnifying-glass class="h-5 w-5 text-gray-400" />
                 </div>
                 <input wire:model.live.debounce.300ms="search" type="search" placeholder="Search within our partner pharmacies..."
-                       class="w-full rounded border focus:outline-emerald-600 border-gray-300 py-3 pl-10 pr-4 text-sm focus:border-emerald-500 focus:ring-emerald-500">
+                       class="w-full rounded border focus:outline-emerald-600 border-gray-300 py-2 pl-10 pr-4 text-sm focus:border-emerald-500 focus:ring-emerald-500">
             </div>
             <div class="lg:hidden w-full sm:w-auto flex-1">
-                <button @click="filtersOpen = true" class="w-full flex items-center justify-center gap-2 text-sm font-medium text-gray-700 border border-gray-300 rounded px-4 py-3">
+                <button @click="filtersOpen = true" class="w-full flex items-center justify-center gap-2 text-sm font-medium text-gray-700 border border-gray-300 rounded px-4 py-2">
                     <x-heroicon-o-funnel class="h-4 w-4" />
                     <span>Filters</span>
                 </button>
