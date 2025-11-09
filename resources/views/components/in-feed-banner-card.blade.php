@@ -31,7 +31,7 @@
                 />
 
                 <!-- Promoted Badge -->
-                <span class="absolute top-2 right-2 bg-emerald-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm flex items-center gap-1">
+                <span class="absolute top-2 right-2 bg-amber-400 text-gray-500 text-[10px] font-semibold px-2 py-0.5 rounded-full shadow-sm flex items-center gap-1">
                     <x-heroicon-s-sparkles class="h-3 w-3" />
                     Promoted
                 </span>
@@ -53,7 +53,7 @@
         <!-- Footer Button -->
         <div class="p-3 border-t border-gray-100 mt-auto">
             <a href="{{ $banner->button_url }}"
-               class="w-full flex items-center justify-center gap-2 px-4 py-2 text-xs font-semibold rounded text-white bg-emerald-600 hover:bg-emerald-700 transition">
+               class="w-full flex items-center justify-center gap-2 px-4 py-2 text-xs font-semibold rounded text-gray-600 bg-amber-500 hover:bg-emerald-700 transition">
                 <span>{{ $banner->button_text ?? 'Learn More' }}</span>
                 {{-- <x-heroicon-s-arrow-right class="h-4 w-4" /> --}}
             </a>

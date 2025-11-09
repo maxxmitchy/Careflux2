@@ -51,8 +51,26 @@ class BrowseProductsPage extends Component
             ->get();
     }
 
+     /**
+     * Fetches only the initial set of categories to display on the page.
+     */
     #[Computed(persist: true)]
-    public function categories(): Collection
+    public function initialCategories(): Collection
+    {
+        return Category::query()
+            ->whereNull('parent_id')
+            ->where('is_visible', true)
+            ->with(['children' => fn ($query) => $query->where('is_visible', true)->orderBy('sort_order')])
+            ->orderBy('sort_order')
+            ->take(3) // Take a smaller number to make the "See more" more impactful
+            ->get();
+    }
+
+    /**
+     * Fetches ALL visible categories, intended for use in the modal.
+     */
+    #[Computed(persist: true)]
+    public function allCategories(): Collection
     {
         return Category::query()
             ->whereNull('parent_id')

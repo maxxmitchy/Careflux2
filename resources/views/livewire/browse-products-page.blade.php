@@ -19,7 +19,7 @@
                        class="w-full rounded border focus:outline-emerald-600 border-gray-300 py-3 pl-10 pr-4 text-sm focus:border-emerald-500 focus:ring-emerald-500">
             </div>
             <div class="lg:hidden w-full sm:w-auto flex-1">
-                <button @click="filtersOpen = true" class="w-full flex items-center justify-center gap-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded px-4 py-3">
+                <button @click="filtersOpen = true" class="w-full flex items-center justify-center gap-2 text-sm font-medium text-gray-700 border border-gray-300 rounded px-4 py-3">
                     <x-heroicon-o-funnel class="h-4 w-4" />
                     <span>Filters</span>
                 </button>
@@ -41,9 +41,13 @@
 
             <!-- Main Product Grid -->
             <main class="lg:col-span-9">
-                <div class="mb-8">
-                    <h3 class="text-xs sm:text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wider">Categories</h3>
+                <div class="mb-8" x-data="{ open: false }">
+                    <h3 class="text-xs sm:text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wider">
+                        Categories
+                    </h3>
+
                     <div class="flex flex-wrap gap-2">
+                        <!-- All Products Button -->
                         <button wire:click="setCategory('')"
                                 @class([
                                     'px-3 py-2 rounded text-xs sm:text-sm transition-colors duration-150 border',
@@ -53,7 +57,9 @@
                             All Products
                         </button>
 
-                        @foreach($this->categories as $category)
+                        <!-- Show limited number of top-level categories -->
+                        @foreach($this->initialCategories as $category)
+                            @if($loop->iteration > 5) @break @endif
                             <button wire:click="setCategory('{{ $category->slug }}')"
                                     @class([
                                         'px-3 py-1 rounded text-xs sm:text-sm transition-colors duration-150 border',
@@ -62,8 +68,10 @@
                                     ])>
                                 {{ $category->name }}
                             </button>
+
+                            <!-- Show limited children -->
                             @if($category->children->isNotEmpty())
-                                @foreach($category->children as $child)
+                                @foreach($category->children->take(2) as $child)
                                     <button wire:click="setCategory('{{ $child->slug }}')"
                                             @class([
                                                 'px-3 py-1 rounded text-xs sm:text-sm transition-colors duration-150 border',
@@ -75,8 +83,72 @@
                                 @endforeach
                             @endif
                         @endforeach
+
+                        <!-- See All Button -->
+                        <button @click="open = true"
+                                class="px-3 py-1 rounded text-xs sm:text-sm transition-colors duration-150 border font-medium text-emerald-600 bg-emerald-50 hover:bg-emerald-100 border-emerald-200">
+                            See all...
+                        </button>
+                    </div>
+
+                    <!-- Modal -->
+                    <div x-show="open"
+                        x-cloak
+                        x-transition:enter="ease-out duration-300"
+                        x-transition:enter-start="opacity-0"
+                        x-transition:enter-end="opacity-100"
+                        x-transition:leave="ease-in duration-200"
+                        x-transition:leave-start="opacity-100"
+                        x-transition:leave-end="opacity-0"
+                        class="fixed inset-0 z-50 flex items-center justify-center p-4">
+                        
+                        <!-- Backdrop -->
+                        <div class="fixed inset-0 bg-gray-900/50" @click="open = false"></div>
+
+                        <!-- Modal Panel -->
+                        <div x-show="open"
+                            x-transition:enter="ease-out duration-300"
+                            x-transition:enter-start="opacity-0 scale-95"
+                            x-transition:enter-end="opacity-100 scale-100"
+                            x-transition:leave="ease-in duration-200"
+                            x-transition:leave-start="opacity-100 scale-100"
+                            x-transition:leave-end="opacity-0 scale-95"
+                            class="relative bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[80vh] flex flex-col overflow-hidden">
+
+                            <!-- Modal Header -->
+                            <div class="flex items-center justify-between p-4 border-b">
+                                <h2 class="text-base font-semibold text-gray-800">All Categories</h2>
+                                <button @click="open = false" class="p-1 rounded-full hover:bg-gray-100">
+                                    <x-heroicon-o-x-mark class="h-5 w-5 text-gray-600" />
+                                </button>
+                            </div>
+
+                            <!-- Modal Content -->
+                            <div class="p-6 overflow-y-auto space-y-6">
+                                @foreach($this->allCategories as $parentCategory)
+                                    <div>
+                                        <h4 class="text-sm font-bold text-gray-800 mb-2">{{ $parentCategory->name }}</h4>
+                                        <div class="flex flex-wrap gap-2">
+                                            @foreach($parentCategory->children as $childCategory)
+                                                <button
+                                                    wire:click="setCategory('{{ $childCategory->slug }}')"
+                                                    @click="open = false"
+                                                    @class([
+                                                        'px-3 py-1 rounded text-xs sm:text-sm transition-colors duration-150 border',
+                                                        'bg-emerald-600 text-white border-emerald-600' => $category_slug === $childCategory->slug,
+                                                        'bg-gray-50 text-gray-700 border-gray-300 hover:bg-emerald-100' => $category_slug !== $childCategory->slug,
+                                                    ])>
+                                                    {{ $childCategory->name }}
+                                                </button>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
                     </div>
                 </div>
+
                 {{-- This computed property will automatically react to changes in search and filters --}}
                 @if($this->products->isNotEmpty())
                     <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
