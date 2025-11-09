@@ -4,7 +4,7 @@
             <!-- Logo -->
             <a href="{{ route('landing') }}" class="flex-shrink-0 flex items-center gap-2">
                 <img class="h-10 w-auto" src="/logo.jpg" alt="Careflux Logo">
-                <span class="text-xl font-bold text-teal-600">Careflux</span>
+                <span class="text-xl font-bold text-emerald-600">Careflux</span>
             </a>
 
             <!-- Desktop Search Bar -->
@@ -16,8 +16,8 @@
 
             <!-- Desktop Navigation & Actions -->
             <div class="hidden md:flex items-center space-x-6">
-                <a href="{{ route('products.browse') }}" class="text-sm font-semibold text-slate-600 hover:text-teal-600 transition-colors">Shop</a>
-                <a href="{{ route('public.wishlists') }}" class="text-sm font-semibold text-slate-600 hover:text-teal-600 transition-colors">Wishlists</a>
+                <a href="{{ route('products.browse') }}" class="text-sm font-semibold text-slate-600 hover:text-emerald-600 transition-colors">Shop</a>
+                <a href="{{ route('public.wishlists') }}" class="text-sm font-semibold text-slate-600 hover:text-emerald-600 transition-colors">Wishlists</a>
 
                 <div class="h-6 border-l border-gray-200"></div>
 
