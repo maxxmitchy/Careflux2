@@ -3,14 +3,14 @@
 namespace Src\Medication\Domain\Models;
 
 use App\Models\Category;
-use Src\Shared\Domain\Models\User;
 use App\Models\Scopes\ApprovedScope;
-use Illuminate\Database\Eloquent\Model;
-use Src\Patient\Domain\Models\Prescription;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Src\Patient\Domain\Models\Prescription;
+use Src\Shared\Domain\Models\User;
 
 class Medication extends Model
 {

@@ -4,20 +4,22 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Storage;
+use League\Csv\Writer;
 use Src\Pharmacy\Domain\Models\PharmacyProduct;
 use Src\Scraping\Domain\Models\ScrapedProduct;
-use League\Csv\Writer;
 
 class GenerateProductCatalogCommand extends Command
 {
     /**
      * The name and signature of the console command.
+     *
      * @var string
      */
     protected $signature = 'careflux:generate-product-catalog {--disk=local} {--path=exports/product_catalog.csv}';
 
     /**
      * The console command description.
+     *
      * @var string
      */
     protected $description = 'Generates a CSV of all products for Google Analytics Data Import.';
@@ -39,7 +41,7 @@ class GenerateProductCatalogCommand extends Command
         try {
             // Use league/csv for robust CSV creation
             $csv = Writer::createFromPath($filePath, 'w+');
-            
+
             // Define the headers that match our GTM Data Import schema
             $csv->insertOne(['item_id', 'item_category', 'item_brand']);
 
@@ -49,7 +51,7 @@ class GenerateProductCatalogCommand extends Command
             PharmacyProduct::with(['pharmacy', 'medicationVariant.medication.categories'])->chunk(200, function ($products) use ($csv, $progressBar) {
                 foreach ($products as $product) {
                     $csv->insertOne([
-                        'item_id' => 'pharmacy::' . $product->id,
+                        'item_id' => 'pharmacy::'.$product->id,
                         'item_category' => $product->medicationVariant->medication->categories->first()->name ?? 'Uncategorized',
                         'item_brand' => $product->pharmacy->name,
                     ]);
@@ -65,7 +67,7 @@ class GenerateProductCatalogCommand extends Command
             ScrapedProduct::with('store')->chunk(200, function ($products) use ($csv, $progressBar) {
                 foreach ($products as $product) {
                     $csv->insertOne([
-                        'item_id' => 'scraped::' . $product->id,
+                        'item_id' => 'scraped::'.$product->id,
                         'item_category' => 'General', // Scraped products may not have a category
                         'item_brand' => $product->store->name,
                     ]);
@@ -79,7 +81,8 @@ class GenerateProductCatalogCommand extends Command
 
             return self::SUCCESS;
         } catch (\Exception $e) {
-            $this->error('❌ An error occurred during CSV generation: ' . $e->getMessage());
+            $this->error('❌ An error occurred during CSV generation: '.$e->getMessage());
+
             return self::FAILURE;
         }
     }

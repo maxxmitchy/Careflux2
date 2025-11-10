@@ -2,10 +2,9 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Support\Str;
 use Illuminate\Console\Command;
-use Src\Store\Domain\Models\Store;
 use Src\Scraping\Domain\Models\ScrapedProduct;
+use Src\Store\Domain\Models\Store;
 
 class ImportScrapedProducts extends Command
 {
@@ -20,6 +19,7 @@ class ImportScrapedProducts extends Command
 
         if (! file_exists($path)) {
             $this->error("Import file not found at: {$path}");
+
             return self::FAILURE;
         }
 
@@ -28,10 +28,12 @@ class ImportScrapedProducts extends Command
 
         if (json_last_error() !== JSON_ERROR_NONE) {
             $this->error('Invalid JSON file.');
+
             return self::FAILURE;
         }
         if (empty($productsData)) {
             $this->warn('No products found in the file.');
+
             return self::SUCCESS;
         }
 
@@ -49,6 +51,7 @@ class ImportScrapedProducts extends Command
             // 2. We check for 'store_name', NOT 'store_id'.
             if (empty($product['store_name'])) {
                 $skippedCount++;
+
                 continue;
             }
 
@@ -59,6 +62,7 @@ class ImportScrapedProducts extends Command
                 // If the store doesn't exist on production, we skip this product.
                 $skippedCount++;
                 $missingStores[$storeName] = true; // Track which stores were missing
+
                 continue;
             }
 
@@ -91,10 +95,11 @@ class ImportScrapedProducts extends Command
             $this->error('No valid products to import after filtering.');
             if ($skippedCount > 0) {
                 $this->warn("Skipped {$skippedCount} products due to missing store_name or store not found on production.");
-                if (!empty($missingStores)) {
+                if (! empty($missingStores)) {
                     $this->warn('Missing store names: '.implode(', ', array_keys($missingStores)));
                 }
             }
+
             return self::FAILURE;
         }
 
@@ -109,7 +114,7 @@ class ImportScrapedProducts extends Command
                 update: [
                     'product_name', 'product_url', 'image_url', 'price',
                     'stock_status', 'brand', 'search_keyword', 'updated_at',
-                    'soundex_name', 'is_blacklisted' // Ensure new fields are updated on conflict
+                    'soundex_name', 'is_blacklisted', // Ensure new fields are updated on conflict
                 ]
             );
         }
@@ -117,7 +122,7 @@ class ImportScrapedProducts extends Command
         $this->info('Import complete. Successfully processed '.count($upsertData).' products.');
         if ($skippedCount > 0) {
             $this->warn("Skipped a total of {$skippedCount} products.");
-            if (!empty($missingStores)) {
+            if (! empty($missingStores)) {
                 $this->warn('Missing store names on production: '.implode(', ', array_keys($missingStores)));
             }
         }

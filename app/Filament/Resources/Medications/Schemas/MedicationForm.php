@@ -2,13 +2,13 @@
 
 namespace App\Filament\Resources\Medications\Schemas;
 
-use Filament\Schemas\Schema;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Utilities\Set;
+use Filament\Schemas\Schema;
 
 class MedicationForm
 {
@@ -35,6 +35,10 @@ class MedicationForm
                             ->live(debounce: 500)
                             ->afterStateUpdated(fn ($state, Set $set) => $set('slug', \Illuminate\Support\Str::slug($state))),
                         TextInput::make('slug')->required()->unique(),
+                        TextInput::make('category_code')
+                            ->label('Category Code')
+                            ->required()
+                            ->maxLength(10),
                     ])
                     ->columnSpanFull(),
             ]);
