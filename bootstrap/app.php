@@ -13,7 +13,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withSchedule(function (Schedule $schedule): void {
         $schedule->command('tasks:dispatch-onboarding-followups')->hourly();
-        // $schedule->command('tasks:dispatch-refill-reminders')->dailyAt('08:00');
+        $schedule->command('tasks:dispatch-refill-reminders')->dailyAt('08:00');
         $schedule->command('wallet:convert-points')->monthlyOn(1, '02:00'); // Run at 2 AM on the 1st of every month
         $schedule->command('patients:schedule-followups')->hourly();
         $schedule->command('patients:assign-unassigned')->everyFiveMinutes();

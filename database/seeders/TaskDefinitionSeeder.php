@@ -19,22 +19,60 @@ class TaskDefinitionSeeder extends Seeder
             ]
         );
 
-        TaskDefinition::updateOrCreate(['key' => 'TECHNICIAN_PRICE_VERIFY'], [
-            'name' => 'Verify Product Price', 'points' => 5,
-        ]);
-        TaskDefinition::updateOrCreate(['key' => 'TECHNICIAN_EXPIRY_LOG'], [
-            'name' => 'Log Product Expiry Date', 'points' => 10,
-        ]);
+        TaskDefinition::updateOrCreate(
+            ['key' => 'PATIENT_FOLLOW_UP_48HR'],
+            [
+                'name' => '48-Hour Patient Follow-up',
+                'description' => 'Points awarded for checking in with a patient within 48 hours after dispensing medication to ensure adherence and manage side effects.',
+                'points' => 15,
+                'is_active' => true,
+            ]
+        );
 
-        TaskDefinition::updateOrCreate(['key' => 'PHARMACIST_NEW_PRODUCT_VERIFIED'], [
-            'name' => 'Verified New Product Listing', 'points' => 10, 'is_active' => true,
-        ]);
-        TaskDefinition::updateOrCreate(['key' => 'PHARMACIST_PRICE_LEADERSHIP'], [
-            'name' => 'Price Leadership', 'points' => 25, 'is_active' => true,
-        ]);
-        TaskDefinition::updateOrCreate(['key' => 'TECHNICIAN_RESTOCK_ALERT'], [
-            'name' => 'Restock Alert Update', 'points' => 10, 'is_active' => true,
-        ]);
+        TaskDefinition::updateOrCreate(
+            ['key' => 'TECHNICIAN_PRICE_VERIFY'],
+            [
+                'name' => 'Verify Product Price',
+                'points' => 5,
+                'is_active' => true,
+            ]
+        );
+
+        TaskDefinition::updateOrCreate(
+            ['key' => 'TECHNICIAN_EXPIRY_LOG'],
+            [
+                'name' => 'Log Product Expiry Date',
+                'points' => 10,
+                'is_active' => true,
+            ]
+        );
+
+        TaskDefinition::updateOrCreate(
+            ['key' => 'PHARMACIST_NEW_PRODUCT_VERIFIED'],
+            [
+                'name' => 'Verified New Product Listing',
+                'points' => 10,
+                'is_active' => true,
+            ]
+        );
+
+        TaskDefinition::updateOrCreate(
+            ['key' => 'PHARMACIST_PRICE_LEADERSHIP'],
+            [
+                'name' => 'Price Leadership',
+                'points' => 25,
+                'is_active' => true,
+            ]
+        );
+
+        TaskDefinition::updateOrCreate(
+            ['key' => 'TECHNICIAN_RESTOCK_ALERT'],
+            [
+                'name' => 'Restock Alert Update',
+                'points' => 10,
+                'is_active' => true,
+            ]
+        );
 
         TaskDefinition::updateOrCreate(
             ['key' => 'PRODUCT_INTEGRITY_CHECK'],
@@ -56,6 +94,6 @@ class TaskDefinitionSeeder extends Seeder
             ]
         );
 
-        // We can add more tasks here in the future
+        // Future task definitions can be added here...
     }
 }
