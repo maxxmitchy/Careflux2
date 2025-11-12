@@ -2,15 +2,17 @@
 
 namespace Src\Patient\Domain\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Src\Order\Domain\Models\Invoice;
-use Src\Pharmacy\Domain\Models\Community;
-use Src\Questionnaire\Domain\Models\QuestionnaireInvitation;
 use Src\Shared\Domain\Models\User;
+use Src\Order\Domain\Models\Invoice;
+use Illuminate\Database\Eloquent\Model;
+use Src\Gamification\Domain\Models\Task;
+use Src\Pharmacy\Domain\Models\Community;
 use Src\Wallet\Domain\Concerns\HasWallet;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Src\Questionnaire\Domain\Models\QuestionnaireInvitation;
 
 class Patient extends Model
 {
@@ -46,6 +48,8 @@ class Patient extends Model
             'received_pharmacist_follow_up' => 'boolean',
             'consents_to_contact' => 'boolean',
             'expectations_from_pharmacist' => 'array',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
         ];
     }
 
@@ -71,6 +75,11 @@ class Patient extends Model
     public function pharmacist(): BelongsTo
     {
         return $this->belongsTo(User::class, 'pharmacist_id');
+    }
+
+    public function tasks(): MorphMany
+    {
+        return $this->morphMany(Task::class, 'subjectable');
     }
 
     public function prescriptions(): HasMany

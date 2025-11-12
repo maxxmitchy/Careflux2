@@ -18,7 +18,7 @@ class MedicationForm
             ->components([
                 FileUpload::make('image')
                     ->image()->disk('public')->directory('medications')->visibility('public')->columnSpanFull()->imageEditor(),
-                TextInput::make('name')->required()->maxLength(255),
+                TextInput::make('name')->required()->maxLength(255)->unique(ignoreRecord: true),
                 TextInput::make('generic_name')->maxLength(255),
                 Textarea::make('description')->columnSpanFull(),
                 Toggle::make('is_prescription')->label('Requires Prescription')->default(false),

@@ -20,6 +20,7 @@ class EditPharmacyProduct extends EditRecord
 
     public function form(Schema $form): Schema
     {
+        //  GET|HEAD   pharmacy/pharmacy-products/{record}/edit filament.pharmacy.resources.pharmacy-products.edit › App\Filament\Pharmacy…
         return $form
             ->schema([
                 // Section 1: Read-only display of the global medication

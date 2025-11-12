@@ -26,8 +26,8 @@ class SendMismatchNotification implements ShouldQueue
         }
 
         // The URL for the pharmacist to directly edit the problematic product
-        $url = PharmacyProductResource::getUrl('edit', ['record' => $product]);
-
+        $url = route('filament.pharmacy.resources.pharmacy-products.edit', ['record' => $product]);
+        
         // --- 1. Send Filament Notification to the Pharmacist ---
         Notification::make()
             ->title('NAFDAC Verification Failed')
