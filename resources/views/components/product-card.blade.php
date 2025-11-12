@@ -72,7 +72,7 @@
                 class="w-full flex items-center justify-center gap-2 px-4 py-2 text-xs sm:text-sm font-semibold rounded
                        text-white bg-red-600 hover:bg-red-700 focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all duration-200"
             >
-                <x-heroicon-s-shield-check class="h-4 w-4" />
+                {{-- <x-heroicon-s-shield-check class="h-4 w-4" /> --}}
                 Get Prescription
             </button>
 
