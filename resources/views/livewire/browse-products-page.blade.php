@@ -183,7 +183,7 @@
                     <!-- Custom Pagination -->
                     <div class="mt-16 flex justify-center">
                         @if ($this->products->hasPages())
-                            <div class="flex items-center gap-2 text-sm">
+                            <div class="flex flex-wrap items-center justify-center gap-2 text-sm max-w-full">
 
                                 {{-- Previous Button --}}
                                 @if ($this->products->onFirstPage())
@@ -229,6 +229,7 @@
                             </div>
                         @endif
                     </div>
+
 
                 @else
                     <div class="text-center py-16 px-4 bg-white rounded border">
