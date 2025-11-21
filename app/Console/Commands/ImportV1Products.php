@@ -13,9 +13,9 @@ use ZipArchive;
 
 class ImportV1Products extends Command
 {
-    protected $signature = 'import:v1-products {--file=v1_export.zip : The path to the v1 export zip file.}';
+    protected $signature = 'import:v1-products {--file=v1_export.zip : The path to the v1 export zip file.} {--images-only : Skip database operations and only handle image storage.}';
 
-    protected $description = 'Imports products and images from a v1 export zip file into the v2 database structure.';
+    protected $description = 'Imports products and images from a v1 export zip file into the v2 database structure. Use --images-only to skip database operations and only handle image storage.';
 
     public function handle(): int
     {
@@ -27,7 +27,11 @@ class ImportV1Products extends Command
             return self::FAILURE;
         }
 
-        $this->info("📦 Starting v1 product import from {$zipPath}...");
+        if ($this->option('images-only')) {
+            $this->info("🖼️ Starting image-only import from {$zipPath}...");
+        } else {
+            $this->info("📦 Starting v1 product import from {$zipPath}...");
+        }
 
         $zip = new ZipArchive;
         if ($zip->open($zipPath) !== true) {
@@ -82,6 +86,17 @@ class ImportV1Products extends Command
             $this->info('✅ All images copied successfully.');
         } else {
             $this->warn("⚠️ No 'images' folder found in the archive. Skipping image copy.");
+        }
+
+        // Check if we should only process images
+        if ($this->option('images-only')) {
+            // --- Step 6: Clean Up (for images-only mode) ---
+            File::deleteDirectory($tempDir);
+
+            $this->info("\n\n✅ Image processing completed successfully!");
+            $this->warn('💡 Tip: Run `php artisan storage:link` if images aren\'t visible publicly.');
+
+            return self::SUCCESS;
         }
 
         // --- Step 4: Cache Lookups ---
