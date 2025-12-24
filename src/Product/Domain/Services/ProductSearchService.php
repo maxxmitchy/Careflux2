@@ -7,6 +7,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Src\Pharmacy\Domain\Models\Pharmacy;
 use Src\Pharmacy\Domain\Models\PharmacyProduct;
+use Src\Scraping\Domain\Enums\StockStatus;
 use Src\Scraping\Domain\Models\ScrapedProduct;
 
 class ProductSearchService
@@ -103,6 +104,7 @@ class ProductSearchService
                 'productName' => $product->name,
                 'imageUrl' => $product->image,
                 'price' => $product->price,
+                'stock' => $product->stock,
                 'sourceName' => $product->pharmacy?->name,
                 'isPrescription' => $product->is_prescription,
                 'slug' => $product->slug,
@@ -158,6 +160,7 @@ class ProductSearchService
                 'productName' => $product->product_name,
                 'imageUrl' => $product->image_url,
                 'price' => $product->price,
+                'stock' => $product->stock_status === StockStatus::IN_STOCK ? 1 : 0,
                 'sourceName' => $product->store?->name,
                 'isPrescription' => false,
                 'slug' => null,

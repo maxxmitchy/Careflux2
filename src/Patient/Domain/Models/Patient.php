@@ -2,17 +2,18 @@
 
 namespace Src\Patient\Domain\Models;
 
-use Src\Shared\Domain\Models\User;
-use Src\Order\Domain\Models\Invoice;
-use Illuminate\Database\Eloquent\Model;
-use Src\Gamification\Domain\Models\Task;
-use Src\Pharmacy\Domain\Models\Community;
-use Src\Wallet\Domain\Concerns\HasWallet;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Src\Gamification\Domain\Models\Task;
+use Src\Order\Domain\Models\Invoice;
+use Src\Pharmacy\Domain\Models\Community;
 use Src\Questionnaire\Domain\Models\QuestionnaireInvitation;
+use Src\Shared\Domain\Models\User;
+use Src\Wallet\Domain\Concerns\HasWallet;
 
 class Patient extends Model
 {
@@ -137,6 +138,23 @@ class Patient extends Model
             '15k_30k' => '₦15,000 - ₦30,000',
             '30k_plus' => 'More than ₦30,000',
         ];
+    }
+
+    /**
+     * --- THIS IS THE NEW ACCESSOR ---
+     * Converts the stored monthly spend string range into a representative integer in kobo.
+     */
+    protected function numericMonthlySpend(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value, $attributes) => match ($attributes['monthly_medicine_spend'] ?? null) {
+                '0_5k' => 250000,       // Midpoint: ₦2,500
+                '5k_15k' => 1000000,     // Midpoint: ₦10,000
+                '15k_30k' => 2250000,    // Midpoint: ₦22,500
+                '30k_plus' => 4000000,   // An estimated average for "more than 30k"
+                default => 0,
+            }
+        );
     }
 
     public static function getPurchaseLocationOptions(): array

@@ -10,10 +10,18 @@ class ApprovedScope implements Scope
 {
     /**
      * Apply the scope to a given Eloquent query builder.
+     *
+     * --- THIS IS THE FIX ---
+     *
+     * @template TModel of \Illuminate\Database\Eloquent\Model
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder<TModel>  $builder
+     * @param  \Illuminate\Database\Eloquent\Model  $model
+     *                                                      --- END OF FIX ---
      */
     public function apply(Builder $builder, Model $model): void
     {
-        // By default, only retrieve records where the status is 'approved'.
-        $builder->where('status', 'approved');
+        // This logic is already correct.
+        $builder->where($model->getTable().'.status', 'approved');
     }
 }

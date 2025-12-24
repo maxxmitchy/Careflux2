@@ -6,6 +6,7 @@ use App\Filament\Resources\Medications\Pages\CreateMedication;
 use App\Filament\Resources\Medications\Pages\EditMedication;
 use App\Filament\Resources\Medications\Pages\ListMedications;
 use App\Filament\Resources\Medications\Pages\ViewMedication;
+use App\Filament\Resources\Medications\RelationManagers\SimilarMedicationsRelationManager;
 use App\Filament\Resources\Medications\Schemas\MedicationForm;
 use App\Filament\Resources\Medications\Schemas\MedicationInfolist;
 use App\Filament\Resources\Medications\Tables\MedicationsTable;
@@ -49,6 +50,7 @@ class MedicationResource extends Resource
         return [
             RelationManagers\VariantsRelationManager::class,
             RelationManagers\CounselingPointsRelationManager::class,
+            SimilarMedicationsRelationManager::class,
         ];
     }
 

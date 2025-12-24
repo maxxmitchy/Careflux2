@@ -2,7 +2,9 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Widgets\MedicationUsageWidget;
 use App\Filament\Widgets\PharmacistPerformanceWidget;
+use App\Filament\Widgets\PharmacistValueWidget;
 use App\Filament\Widgets\RecentFeedbackWidget;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -46,6 +48,8 @@ class AdminPanelProvider extends PanelProvider
                 AccountWidget::class,
                 // FilamentInfoWidget::class,
                 StatsOverviewWidget::class,
+                MedicationUsageWidget::class,
+                PharmacistValueWidget::class,
                 PharmacistPerformanceWidget::class,
                 RecentFeedbackWidget::class,
             ])

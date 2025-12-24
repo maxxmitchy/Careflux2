@@ -11,26 +11,25 @@ trait WithQuoteActions
     #[On('toggle-quote-request')]
     public function toggleQuoteRequest(array $productData, CartServiceInterface $cartService, QuoteRequestService $quoteService)
     {
-        $productUrl = $productData['productUrl'] ?? null;
-        if (! $productUrl) {
+        $uniqueId = $productData['uniqueId'] ?? null;
+        if (! $uniqueId) {
             return;
         }
 
-        if ($quoteService->isRecentlyRequested($productUrl)) {
-            // --- REMOVAL LOGIC ---
+        if ($quoteService->isRecentlyRequested($uniqueId)) {
             $cartItems = $cartService->getItemsInternal();
-            $itemToRemove = $cartItems->firstWhere('productUrl', $productUrl);
+            $itemToRemove = $cartItems->firstWhere('uniqueId', $uniqueId);
+
             if ($itemToRemove && isset($itemToRemove['cartKey'])) {
                 $cartService->remove($itemToRemove['cartKey']);
             }
-            $quoteService->unmarkAsRequested($productUrl);
+            $quoteService->unmarkAsRequested($uniqueId);
 
             $this->dispatch('cart-updated');
             $this->dispatch('toast', message: 'Request removed.', type: 'info');
         } else {
-            // --- ADDITION LOGIC ---
             $cartService->add($productData, 'pending_quote');
-            $quoteService->markAsRequested($productUrl);
+            $quoteService->markAsRequested($uniqueId);
 
             $this->dispatch('cart-updated');
             $this->dispatch('toast', message: 'Item added to your quote request list!', type: 'info');

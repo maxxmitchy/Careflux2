@@ -24,6 +24,10 @@ class PharmacyForm
                     ->schema([
                         TextInput::make('name')->required(),
                         TextInput::make('phone')->tel(),
+                        TextInput::make('average_markup_percentage')
+                            ->label('Average Markup (%)')
+                            ->numeric()
+                            ->helperText('Enter the estimated average markup for this pharmacy to calculate gross profit.'),
                         FileUpload::make('logo')->image()->disk('public')->directory('pharmacy-logos')->columnSpanFull(),
                     ]),
 

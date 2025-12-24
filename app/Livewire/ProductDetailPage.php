@@ -8,6 +8,7 @@ use App\Models\PromotionalBanner;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Computed;
@@ -27,68 +28,147 @@ class ProductDetailPage extends Component
 
     public string $identifier;
 
-    private ?Collection $allOtherOffers = null;
-
-    public int $perPage = 5;
+    /* -----------------------------------------------------------------
+     |  CORE PRODUCT
+     |-----------------------------------------------------------------*/
 
     #[Computed(cache: true)]
     public function featuredProduct(): ?object
     {
         [$type, $id] = array_pad(explode('::', $this->identifier, 2), 2, null);
+
         if (! $id) {
             return null;
         }
 
         try {
-            if ($type === 'pharmacy') {
-                $product = PharmacyProduct::with(['pharmacy.users', 'medicationVariant.medication'])->findOrFail($id);
-
-                return $this->transformProduct($product);
-            }
-            if ($type === 'scraped') {
-                $product = ScrapedProduct::with('store')->findOrFail($id);
-
-                return $this->transformProduct($product);
-            }
+            return match ($type) {
+                'pharmacy' => $this->transformProduct(
+                    PharmacyProduct::with(['pharmacy.users', 'medicationVariant.medication'])
+                        ->findOrFail($id)
+                ),
+                'scraped' => $this->transformProduct(
+                    ScrapedProduct::with('store')->findOrFail($id)
+                ),
+                default => null,
+            };
         } catch (ModelNotFoundException) {
             return null;
         }
-
-        return null;
     }
+
+    /* -----------------------------------------------------------------
+     |  PRICE COMPARISON — SAME PRODUCT
+     |-----------------------------------------------------------------*/
 
     #[Computed]
-    public function otherOptions(): Collection
+    public function otherOffers(): Collection
     {
-        if (is_null($this->allOtherOffers)) {
-            $this->allOtherOffers = app(ProductSearchService::class)
-                ->search($this->featuredProduct()->productName ?? '')
-                ->reject(fn ($result) => $result->uniqueId === $this->identifier);
+        $featured = $this->featuredProduct();
+
+        if (! $featured) {
+            return collect();
         }
 
-        return $this->allOtherOffers->take($this->perPage);
+        return app(ProductSearchService::class)
+            ->search($featured->productName)
+            ->reject(fn ($result) => $result->uniqueId === $this->identifier)
+            ->values();
     }
+
+    /* -----------------------------------------------------------------
+     |  CURATED ALTERNATIVES — DIFFERENT PRODUCTS
+     |-----------------------------------------------------------------*/
 
     #[Computed]
-    public function totalOtherOptions(): int
+    public function similarProducts(): Collection
     {
-        if (is_null($this->allOtherOffers)) {
-            $this->otherOptions();
+        $featured = $this->featuredProduct();
+
+        if ($featured?->type !== 'pharmacy') {
+            return collect();
         }
 
-        return $this->allOtherOffers->count();
+        $product = PharmacyProduct::find($featured->productId);
+
+        if (! $product) {
+            return collect();
+        }
+
+        $medication = $product->medicationVariant->medication;
+
+        $similarMedicationIds = $medication
+            ->similarMedications()
+            ->pluck('medications.id');
+
+        return PharmacyProduct::query()
+            ->with(['pharmacy.users', 'medicationVariant.medication'])
+            ->whereHas('medicationVariant', fn ($q) => $q->whereIn('medication_id', $similarMedicationIds)
+            )
+            ->where('id', '!=', $product->id)
+            ->inRandomOrder()
+            ->limit(8)
+            ->get()
+            ->map(fn ($p) => $this->transformProduct($p));
     }
+
+    /* -----------------------------------------------------------------
+     |  PROMOTIONAL / FALLBACK CONTENT
+     |-----------------------------------------------------------------*/
+
+    #[Computed]
+    public function promotionalContent(): Collection
+    {
+        // Case 1: Inject banners into other offers
+        if ($this->otherOffers()->isNotEmpty()) {
+            $items = $this->otherOffers()->values();
+
+            $banners = PromotionalBanner::where('is_active', true)
+                ->where('placement', 'product_detail_in_feed')
+                ->inRandomOrder()
+                ->limit(2)
+                ->get();
+
+            if ($banners->has(0) && $items->count() > 2) {
+                $items->splice(2, 0, [$banners[0]]);
+            }
+
+            if ($banners->has(1) && $items->count() > 4) {
+                $items->splice(4, 0, [$banners[1]]);
+            }
+
+            return $items;
+        }
+
+        // Case 2: No offers + no similar products → fallback banners
+        if ($this->similarProducts()->isEmpty()) {
+            return PromotionalBanner::where('is_active', true)
+                ->where('placement', 'product_detail_fallback')
+                ->inRandomOrder()
+                ->limit(4)
+                ->get();
+        }
+
+        return collect();
+    }
+
+    /* -----------------------------------------------------------------
+     |  INFO PAGE / RELATED
+     |-----------------------------------------------------------------*/
 
     #[Computed]
     public function infoPage(): ?MedicationInformation
     {
-        if ($this->featuredProduct()?->type === 'pharmacy' && $this->featuredProduct()?->productId) {
-            $model = PharmacyProduct::find($this->featuredProduct()->productId);
+        $featured = $this->featuredProduct();
 
-            return $model?->medicationInformation()->where('is_published', true)->first();
+        if ($featured?->type !== 'pharmacy') {
+            return null;
         }
 
-        return null;
+        return PharmacyProduct::find($featured->productId)
+            ?->medicationInformation()
+            ->where('is_published', true)
+            ->first();
     }
 
     #[Computed]
@@ -98,115 +178,100 @@ class ProductDetailPage extends Component
             return collect();
         }
 
-        return $this->infoPage()->pharmacyProducts()
+        return $this->infoPage()
+            ->pharmacyProducts()
             ->where('pharmacy_products.id', '!=', $this->featuredProduct()->productId)
             ->with(['pharmacy', 'medicationVariant.medication'])
-            ->inRandomOrder()->limit(4)->get();
+            ->inRandomOrder()
+            ->limit(4)
+            ->get();
     }
 
-    public function getGuestCartContext(?object $productOnPage = null): array
+    /* -----------------------------------------------------------------
+     |  GUEST CART CONTEXT
+     |-----------------------------------------------------------------*/
+
+    public function getGuestCartContext(?object $product = null): array
     {
-        if (auth()->check()) {
+        if (Auth::check()) {
             return ['id' => null, 'link' => '#'];
         }
 
-        $targetPhoneNumber = $productOnPage?->pharmacistPhone ?? config('careflux.default_support_phone');
-        $pharmacistName = $productOnPage?->pharmacistName ?? 'Careflux Support';
+        $phone = $product?->pharmacistPhone ?? config('careflux.default_support_phone');
+        $name = $product?->pharmacistName ?? 'Careflux Support';
 
-        if (! $targetPhoneNumber) {
+        if (! $phone) {
             return ['id' => null, 'link' => '#'];
         }
 
-        $cartService = app(CartServiceInterface::class);
-        $cartItems = $cartService->getItemsInternal()->all(); // Assuming getItemsInternal exists
+        $cart = app(CartServiceInterface::class)->getItemsInternal()->all();
 
-        if (empty($cartItems)) {
-            $productName = $productOnPage?->productName ?? 'a medication';
-            $message = "Hello {$pharmacistName}, I need assistance with a product on Careflux: {$productName}.";
-            $link = 'https://wa.me/'.$targetPhoneNumber.'?text='.urlencode($message);
+        if (empty($cart)) {
+            $msg = "Hello {$name}, I need assistance with {$product?->productName}.";
 
-            return ['id' => null, 'link' => $link];
+            return ['id' => null, 'link' => 'https://wa.me/'.$phone.'?text='.urlencode($msg)];
         }
 
-        $contextId = 'guest-cart-'.(string) Str::ulid();
-        Cache::put($contextId, $cartItems, now()->addHours(2));
-        $productNames = implode(', ', array_column($cartItems, 'productName'));
-        $whatsappMessage = "Hello {$pharmacistName}, I need help with my Careflux cart items ({$productNames}). My Cart ID is: {$contextId}";
+        $contextId = 'guest-cart-'.Str::ulid();
+        Cache::put($contextId, $cart, now()->addHours(2));
+
+        $items = implode(', ', array_column($cart, 'productName'));
+        $msg = "Hello {$name}, I need help with my Careflux cart ({$items}). Cart ID: {$contextId}";
 
         return [
             'id' => $contextId,
-            'link' => 'https://wa.me/'.$targetPhoneNumber.'?text='.urlencode($whatsappMessage),
+            'link' => 'https://wa.me/'.$phone.'?text='.urlencode($msg),
         ];
     }
-    // --- END OF MISSING METHOD ---
 
-    public function mount(string $identifier)
+    /* -----------------------------------------------------------------
+     |  LIFECYCLE
+     |-----------------------------------------------------------------*/
+
+    public function mount(string $identifier): void
     {
         $this->identifier = $identifier;
     }
 
     public function booted(): void
     {
-        $product = $this->featuredProduct();
-
-        if ($product) {
-            // Dispatch the GTM event for 'view_item'
-            $this->dispatch('gtm-event', [
-                'event' => 'view_item',
-                'ecommerce' => [
-                    'items' => [[
-                        'item_id' => $product->uniqueId,
-                        'item_name' => $product->productName,
-                        'price' => $product->price / 100, // Convert to Naira
-                        'item_brand' => $product->sourceName,
-                    ]],
-                ],
-            ]);
-        }
-    }
-
-    public function loadMore()
-    {
-        $this->perPage += 5;
-    }
-
-    #[On('redirect-to-verify')]
-    public function redirectToVerification(string $productSlug)
-    {
-        if (empty($productSlug)) {
+        if (! $product = $this->featuredProduct()) {
             return;
         }
 
-        return $this->redirect(route('prescription.verify', ['pharmacyProduct' => $productSlug]));
+        $this->dispatch('gtm-event', [
+            'event' => 'view_item',
+            'ecommerce' => [
+                'items' => [[
+                    'item_id' => $product->uniqueId,
+                    'item_name' => $product->productName,
+                    'price' => $product->price / 100,
+                    'item_brand' => $product->sourceName,
+                ]],
+            ],
+        ]);
     }
+
+    /* -----------------------------------------------------------------
+     |  CART ACTIONS
+     |-----------------------------------------------------------------*/
 
     #[On('add-to-cart')]
     public function addToCart(array $productData, CartServiceInterface $cartService)
     {
         try {
             $cartService->add($productData, 'ready_to_pay');
+
             $this->dispatch('cart-updated');
             $this->dispatch('toast', message: 'Item added to cart!', type: 'success');
-            // --- GTM EVENT DISPATCH ---
-            $this->dispatch('gtm-event', [
-                'event' => 'add_to_cart_product_details',
-                'ecommerce' => [
-                    'items' => [
-                        [
-                            'item_id' => $productData['uniqueId'],
-                            'item_name' => $productData['productName'],
-                            'price' => $productData['price'] / 100, // Convert kobo to Naira for analytics
-                            'quantity' => 1,
-                            'item_brand' => $productData['sourceName'],
-                        ],
-                    ],
-                ],
-            ]);
         } catch (InvalidCartQuantityException $e) {
             $this->dispatch('toast', message: $e->getMessage(), type: 'error');
         }
-
     }
+
+    /* -----------------------------------------------------------------
+     |  TRANSFORMER
+     |-----------------------------------------------------------------*/
 
     private function transformProduct(Model $product): object
     {
@@ -220,14 +285,13 @@ class ProductDetailPage extends Component
                 'slug' => $product->slug,
                 'imageUrl' => $product->image,
                 'price' => $product->price,
+                'stock' => $product->stock,
                 'sourceName' => $product->pharmacy->name,
-                'pharmacyId' => $product->pharmacy->id,
-                'pharmacistId' => $product->user_id,
-                'verificationId' => null, // Will be set when prescription is verified
                 'pharmacistPhone' => $product->user?->phone,
                 'pharmacistName' => $product->user?->name,
             ];
         }
+
         if ($product instanceof ScrapedProduct) {
             return (object) [
                 'productId' => $product->id,
@@ -238,58 +302,28 @@ class ProductDetailPage extends Component
                 'slug' => null,
                 'imageUrl' => $product->image_url,
                 'price' => $product->price,
+                'stock' => $product->stock,
                 'sourceName' => $product->store->name,
-                'pharmacyId' => null, // Scraped products don't belong to a specific pharmacy
-                'pharmacistId' => null, // Scraped products are handled by support
-                'verificationId' => null, // Scraped products are not prescription
                 'pharmacistPhone' => config('careflux.default_support_phone'),
                 'pharmacistName' => 'Careflux Support',
             ];
         }
+
         throw new \InvalidArgumentException('Unsupported product type.');
     }
 
-    #[Computed]
-    public function similarAndPromotionalItems(): Collection
-    {
-        // Use the existing `otherOptions` computed property which is already cached
-        $similarProducts = $this->otherOptions();
-
-        // 1. If similar products exist, fetch banners to inject.
-        if ($similarProducts->isNotEmpty()) {
-            $banners = PromotionalBanner::where('is_active', true)
-                ->where('placement', 'product_detail_in_feed') // A specific placement for this context
-                ->inRandomOrder()
-                ->limit(2) // Limit the number of injected banners
-                ->get();
-
-            // Inject banners strategically. For example, after the 2nd and 4th product.
-            if ($banners->has(0) && $similarProducts->has(1)) {
-                $similarProducts->splice(2, 0, [$banners->get(0)]);
-            }
-            if ($banners->has(1) && $similarProducts->has(3)) {
-                $similarProducts->splice(4, 0, [$banners->get(1)]);
-            }
-
-            return $similarProducts;
-        }
-
-        // 2. If NO similar products exist, return only fallback banners.
-        return PromotionalBanner::where('is_active', true)
-            ->where('placement', 'product_detail_fallback')
-            ->inRandomOrder()
-            ->limit(5) // Show more banners in this case
-            ->get();
-    }
+    /* -----------------------------------------------------------------
+     |  VIEW
+     |-----------------------------------------------------------------*/
 
     public function render()
     {
         $productName = $this->featuredProduct()?->productName ?? 'Product';
 
         return view('livewire.product-detail-page')->with([
-            'title' => $productName.' - Compare Prices',
-            'description' => 'Find the best price for '.$productName.' from our network of trusted pharmacies. Get proactive care and reliable delivery with Careflux.',
-            'ogImage' => $this->featuredProduct()->imageUrl ?? null,
+            'title' => "{$productName} - Compare Prices",
+            'description' => "Find the best price for {$productName} on Careflux.",
+            'ogImage' => $this->featuredProduct()?->imageUrl,
         ]);
     }
 }

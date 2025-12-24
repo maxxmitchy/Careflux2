@@ -10,6 +10,7 @@ use Src\Patient\Domain\Models\Patient;
 class ScheduleFollowups extends Command
 {
     protected $signature = 'patients:schedule-followups';
+
     protected $description = 'Scans for patients needing follow-ups and assigns tasks to pharmacists.';
 
     public function handle(AssignTaskAction $assignTaskAction): int
@@ -31,7 +32,7 @@ class ScheduleFollowups extends Command
             ->whereNotNull('last_interacted_at') // <-- Can also add this at the query level for efficiency
             ->chunkById(100, function ($patients) use ($assignTaskAction, $followUpTiers, $taskDefinitions) {
                 foreach ($patients as $patient) {
-                   
+
                     // Guard Clause: If there's no interaction timestamp, we cannot calculate
                     // the duration. Skip this patient for this run.
                     if (is_null($patient->last_interacted_at)) {
@@ -47,15 +48,14 @@ class ScheduleFollowups extends Command
 
                             if ($taskDefinition) {
                                 $this->info("Assigning {$taskDefinition->name} for patient: {$patient->full_name}");
-                                
+
                                 // The execute method returns null if the task already exists, which is perfect.
                                 $assignTaskAction->execute(
                                     taskDefinition: $taskDefinition,
                                     assignee: $patient->pharmacist,
                                     subjectable: $patient
                                 );
-                                
-                                
+
                                 break;
                             }
                         }
@@ -64,6 +64,7 @@ class ScheduleFollowups extends Command
             });
 
         $this->info('Follow-up check complete.');
+
         return self::SUCCESS;
     }
 }

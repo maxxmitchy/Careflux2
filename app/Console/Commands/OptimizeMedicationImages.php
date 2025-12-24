@@ -4,8 +4,8 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
-use Symfony\Component\Process\Process;
 use Symfony\Component\Process\Exception\ProcessFailedException;
+use Symfony\Component\Process\Process;
 
 class OptimizeMedicationImages extends Command
 {
@@ -38,14 +38,16 @@ class OptimizeMedicationImages extends Command
         $isDryRun = $this->option('dry-run');
         $force = $this->option('force');
 
-        if (!File::exists($medicationsPath)) {
+        if (! File::exists($medicationsPath)) {
             $this->error("❌ Medications directory not found: {$medicationsPath}");
+
             return self::FAILURE;
         }
 
         // Check if ImageMagick is available
-        if (!$this->isImageMagickAvailable()) {
-            $this->error("❌ ImageMagick is not available. Please install ImageMagick to use this command.");
+        if (! $this->isImageMagickAvailable()) {
+            $this->error('❌ ImageMagick is not available. Please install ImageMagick to use this command.');
+
             return self::FAILURE;
         }
 
@@ -56,7 +58,8 @@ class OptimizeMedicationImages extends Command
         $totalFiles = count($imageFiles);
 
         if ($totalFiles === 0) {
-            $this->warn("⚠️ No image files found in the medications directory.");
+            $this->warn('⚠️ No image files found in the medications directory.');
+
             return self::SUCCESS;
         }
 
@@ -71,34 +74,34 @@ class OptimizeMedicationImages extends Command
             'optimized' => 0,
             'original_size' => 0,
             'optimized_size' => 0,
-            'errors' => 0
+            'errors' => 0,
         ];
 
         foreach ($imageFiles as $imagePath) {
             try {
                 $result = $this->processImage($imagePath, $maxSizeKB, $maxDimension, $isDryRun, $force);
-                
+
                 $stats['processed']++;
                 $stats['original_size'] += $result['original_size'];
-                
+
                 if ($result['skipped']) {
                     $stats['skipped']++;
                 } else {
                     $stats['optimized']++;
                     $stats['optimized_size'] += $result['optimized_size'];
-                    
+
                     if ($isDryRun) {
                         $this->newLine();
-                        $this->line("  📄 " . basename($imagePath));
-                        $this->line("    Original: " . number_format($result['original_size'] / 1024, 2) . "KB");
-                        $this->line("    Optimized: " . number_format($result['optimized_size'] / 1024, 2) . "KB");
-                        $this->line("    Savings: " . number_format(($result['original_size'] - $result['optimized_size']) / 1024, 2) . "KB");
+                        $this->line('  📄 '.basename($imagePath));
+                        $this->line('    Original: '.number_format($result['original_size'] / 1024, 2).'KB');
+                        $this->line('    Optimized: '.number_format($result['optimized_size'] / 1024, 2).'KB');
+                        $this->line('    Savings: '.number_format(($result['original_size'] - $result['optimized_size']) / 1024, 2).'KB');
                     }
                 }
             } catch (\Exception $e) {
                 $stats['errors']++;
                 $this->newLine();
-                $this->error("❌ Error processing " . basename($imagePath) . ": " . $e->getMessage());
+                $this->error('❌ Error processing '.basename($imagePath).': '.$e->getMessage());
             }
 
             $progressBar->advance();
@@ -109,7 +112,7 @@ class OptimizeMedicationImages extends Command
         $this->newLine();
 
         // Display summary
-        $this->info("📈 Optimization Summary:");
+        $this->info('📈 Optimization Summary:');
         $this->line("  Total files processed: {$stats['processed']}");
         $this->line("  Files skipped: {$stats['skipped']}");
         $this->line("  Files optimized: {$stats['optimized']}");
@@ -128,11 +131,11 @@ class OptimizeMedicationImages extends Command
 
         if ($isDryRun) {
             $this->newLine();
-            $this->warn("💡 This was a dry run. No files were actually modified.");
-            $this->warn("   Run without --dry-run to apply the optimizations.");
+            $this->warn('💡 This was a dry run. No files were actually modified.');
+            $this->warn('   Run without --dry-run to apply the optimizations.');
         } else {
             $this->newLine();
-            $this->info("✅ Image optimization completed successfully!");
+            $this->info('✅ Image optimization completed successfully!');
         }
 
         return self::SUCCESS;
@@ -146,6 +149,7 @@ class OptimizeMedicationImages extends Command
         try {
             $process = new Process(['convert', '-version']);
             $process->run();
+
             return $process->isSuccessful();
         } catch (\Exception $e) {
             return false;
@@ -177,13 +181,13 @@ class OptimizeMedicationImages extends Command
     {
         $originalSize = filesize($imagePath);
         $originalSizeKB = $originalSize / 1024;
-        
+
         // Skip if already under target size and not forced
-        if (!$force && $originalSizeKB <= $maxSizeKB) {
+        if (! $force && $originalSizeKB <= $maxSizeKB) {
             return [
                 'original_size' => $originalSize,
                 'optimized_size' => $originalSize,
-                'skipped' => true
+                'skipped' => true,
             ];
         }
 
@@ -191,7 +195,7 @@ class OptimizeMedicationImages extends Command
         $imageInfo = $this->getImageInfo($imagePath);
         $originalWidth = $imageInfo['width'];
         $originalHeight = $imageInfo['height'];
-        
+
         // Calculate new dimensions if needed
         $needsResize = false;
         $newWidth = $originalWidth;
@@ -200,7 +204,7 @@ class OptimizeMedicationImages extends Command
         if ($originalWidth > $maxDimension || $originalHeight > $maxDimension) {
             // Calculate aspect ratio
             $aspectRatio = $originalWidth / $originalHeight;
-            
+
             if ($originalWidth > $originalHeight) {
                 // Landscape or square
                 $newWidth = min($originalWidth, $maxDimension);
@@ -210,18 +214,18 @@ class OptimizeMedicationImages extends Command
                 $newHeight = min($originalHeight, $maxDimension);
                 $newWidth = $newHeight * $aspectRatio;
             }
-            
+
             $needsResize = true;
         }
 
         if ($isDryRun) {
             // For dry run, estimate optimized size
             $estimatedOptimizedSize = $this->estimateOptimizedSize($imagePath, $newWidth, $newHeight, $needsResize, $maxSizeKB);
-            
+
             return [
                 'original_size' => $originalSize,
                 'optimized_size' => $estimatedOptimizedSize,
-                'skipped' => false
+                'skipped' => false,
             ];
         }
 
@@ -231,7 +235,7 @@ class OptimizeMedicationImages extends Command
         return [
             'original_size' => $originalSize,
             'optimized_size' => $optimizedSize,
-            'skipped' => false
+            'skipped' => false,
         ];
     }
 
@@ -243,15 +247,15 @@ class OptimizeMedicationImages extends Command
         $process = new Process(['identify', '-format', '{"width": %w, "height": %h, "format": "%m"}', $imagePath]);
         $process->run();
 
-        if (!$process->isSuccessful()) {
+        if (! $process->isSuccessful()) {
             throw new ProcessFailedException($process);
         }
 
         $output = $process->getOutput();
         $info = json_decode($output, true);
 
-        if (!$info) {
-            throw new \Exception("Failed to parse image information");
+        if (! $info) {
+            throw new \Exception('Failed to parse image information');
         }
 
         return $info;
@@ -263,8 +267,8 @@ class OptimizeMedicationImages extends Command
     private function estimateOptimizedSize($imagePath, $newWidth, $newHeight, $needsResize, $maxSizeKB)
     {
         $originalSize = filesize($imagePath);
-        
-        if (!$needsResize) {
+
+        if (! $needsResize) {
             // If no resize needed, estimate based on quality reduction
             return min($originalSize * 0.6, $maxSizeKB * 1024);
         }
@@ -274,10 +278,10 @@ class OptimizeMedicationImages extends Command
         $originalPixels = $imageInfo['width'] * $imageInfo['height'];
         $newPixels = $newWidth * $newHeight;
         $resizeRatio = $newPixels / $originalPixels;
-        
+
         // Estimate: resize reduction + quality reduction
         $estimatedSize = $originalSize * $resizeRatio * 0.6;
-        
+
         // Cap at maximum target size
         return min($estimatedSize, $maxSizeKB * 1024);
     }
@@ -288,20 +292,20 @@ class OptimizeMedicationImages extends Command
     private function optimizeImageWithImageMagick($imagePath, $newWidth, $newHeight, $needsResize, $maxSizeKB)
     {
         $extension = strtolower(pathinfo($imagePath, PATHINFO_EXTENSION));
-        
+
         // Create temporary file for optimization
-        $tempPath = tempnam(sys_get_temp_dir(), 'img_opt_') . '.' . $extension;
-        
+        $tempPath = tempnam(sys_get_temp_dir(), 'img_opt_').'.'.$extension;
+
         try {
             // Build ImageMagick command
             $command = ['convert', $imagePath];
-            
+
             // Resize if needed
             if ($needsResize) {
                 $command[] = '-resize';
                 $command[] = sprintf('%dx%d', $newWidth, $newHeight);
             }
-            
+
             // Optimize based on format
             switch ($extension) {
                 case 'jpg':
@@ -332,14 +336,14 @@ class OptimizeMedicationImages extends Command
                     $command[] = 'Plane';
                     break;
             }
-            
+
             $command[] = $tempPath;
-            
+
             // Execute the command
             $process = new Process($command);
             $process->run();
 
-            if (!$process->isSuccessful()) {
+            if (! $process->isSuccessful()) {
                 throw new ProcessFailedException($process);
             }
 
@@ -375,19 +379,19 @@ class OptimizeMedicationImages extends Command
     {
         $quality = 80;
         $step = 5;
-        
+
         while ($quality > 20) {
-            $tempPath = tempnam(sys_get_temp_dir(), 'img_compress_') . '.' . $extension;
-            
+            $tempPath = tempnam(sys_get_temp_dir(), 'img_compress_').'.'.$extension;
+
             try {
                 $command = ['convert', $imagePath];
-                
+
                 switch ($extension) {
                     case 'jpg':
                     case 'jpeg':
                     case 'webp':
                         $command[] = '-quality';
-                        $command[] = (string)$quality;
+                        $command[] = (string) $quality;
                         break;
                     case 'png':
                         // For PNG, we'll use different compression methods
@@ -395,28 +399,28 @@ class OptimizeMedicationImages extends Command
                         $command[] = '8';
                         break;
                 }
-                
+
                 $command[] = $tempPath;
-                
+
                 $process = new Process($command);
                 $process->run();
 
-                if (!$process->isSuccessful()) {
+                if (! $process->isSuccessful()) {
                     throw new ProcessFailedException($process);
                 }
 
                 $compressedSize = filesize($tempPath) / 1024;
-                
+
                 if ($compressedSize <= $maxSizeKB) {
                     // If this compression level works, replace the file
                     copy($tempPath, $imagePath);
                     unlink($tempPath);
                     break;
                 }
-                
+
                 unlink($tempPath);
                 $quality -= $step;
-                
+
             } catch (\Exception $e) {
                 if (file_exists($tempPath)) {
                     unlink($tempPath);

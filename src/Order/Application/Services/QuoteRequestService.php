@@ -4,20 +4,47 @@ namespace Src\Order\Application\Services;
 
 class QuoteRequestService
 {
-    private const SESSION_KEY_PREFIX = 'quote_requested.';
+    private const SESSION_PREFIX = 'quote_requested_';
 
-    public function markAsRequested(string $productUrl): void
+    private const COOLDOWN_MINUTES = 60;
+
+    /**
+     * Mark a product as having been requested using its unique identifier.
+     *
+     * @param  string|null  $uniqueId  e.g., 'pharmacy::123' or 'scraped::abc'
+     */
+    public function markAsRequested(?string $uniqueId): void
     {
-        session([self::SESSION_KEY_PREFIX.md5($productUrl) => true]);
+        if ($uniqueId) {
+            session([self::SESSION_PREFIX.$uniqueId => now()]);
+        }
     }
 
-    public function unmarkAsRequested(string $productUrl): void
+    /**
+     * Remove a product's "requested" flag from the session.
+     */
+    public function unmarkAsRequested(?string $uniqueId): void
     {
-        session()->forget(self::SESSION_KEY_PREFIX.md5($productUrl));
+        if ($uniqueId) {
+            session()->forget(self::SESSION_PREFIX.$uniqueId);
+        }
     }
 
-    public function isRecentlyRequested(string $productUrl): bool
+    /**
+     * Check if a product is currently in the cooldown period.
+     */
+    public function isRecentlyRequested(?string $uniqueId): bool
     {
-        return session()->has(self::SESSION_KEY_PREFIX.md5($productUrl));
+        if (! $uniqueId) {
+            return false;
+        }
+
+        $requestTime = session(self::SESSION_PREFIX.$uniqueId);
+
+        if (! $requestTime) {
+            return false;
+        }
+
+        return now()->diffInMinutes($requestTime) < self::COOLDOWN_MINUTES;
     }
 }

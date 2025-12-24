@@ -3,10 +3,10 @@
 namespace Src\User\Application\Actions;
 
 use App\Mail\PatientWelcomeMail;
-use Src\Shared\Domain\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Src\Shared\Domain\Models\User;
 use Src\User\Domain\Events\UserSignedUp;
 
 class RegisterUserAction

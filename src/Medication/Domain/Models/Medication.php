@@ -33,6 +33,19 @@ class Medication extends Model
         return $this->hasMany(MedicationVariant::class);
     }
 
+    /**
+     * The medications that are clinically or functionally similar to this one.
+     */
+    public function similarMedications(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Medication::class,
+            'medication_similarity',
+            'medication_id',
+            'similar_medication_id'
+        ); // Remove ->select('medications.*')
+    }
+
     // Add this relationship
     public function creator(): BelongsTo
     {

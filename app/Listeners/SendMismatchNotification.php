@@ -3,7 +3,6 @@
 namespace App\Listeners;
 
 use App\Events\ProductNafdacMismatch;
-use App\Filament\Pharmacy\Resources\PharmacyProducts\PharmacyProductResource;
 use App\Mail\NafdacMismatchMail;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
@@ -27,7 +26,7 @@ class SendMismatchNotification implements ShouldQueue
 
         // The URL for the pharmacist to directly edit the problematic product
         $url = route('filament.pharmacy.resources.pharmacy-products.edit', ['record' => $product]);
-        
+
         // --- 1. Send Filament Notification to the Pharmacist ---
         Notification::make()
             ->title('NAFDAC Verification Failed')
