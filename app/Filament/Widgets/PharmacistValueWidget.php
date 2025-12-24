@@ -90,13 +90,13 @@ class PharmacistValueWidget extends TableWidget
                     ->money('NGN')
                     ->state(function (User $record): int {
                         return $record->assignedPatients
-                            ->sum('numeric_monthly_spend')/100;
+                            ->sum('numeric_monthly_spend') / 100;
                     })
                     ->sortable(),
 
                 /**
-             * REALIZED REVENUE (ALL TIME)
-             */
+                 * REALIZED REVENUE (ALL TIME)
+                 */
                 TextColumn::make('realized_revenue')
                     ->label('Realized Revenue (All Time)')
                     ->money('NGN')
@@ -113,8 +113,8 @@ class PharmacistValueWidget extends TableWidget
                     ->money('NGN'),
             ])
             ->filters([
-            SelectFilter::make('pharmacy')
+                SelectFilter::make('pharmacy')
                     ->relationship('pharmacy', 'name'),
-        ]);
+            ]);
     }
 }
