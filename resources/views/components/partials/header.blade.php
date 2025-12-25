@@ -47,12 +47,23 @@
             @endunless
 
             <div class="pt-2 pb-4 space-y-2">
-                <a href="{{ route('products.browse') }}" class="block px-3 py-2 text-sm font-semibold text-slate-600 rounded hover:bg-slate-100">Shop</a>
-                <a href="{{ route('public.wishlists') }}" class="block px-3 py-2 text-sm font-semibold text-slate-600 rounded hover:bg-slate-100">Wishlists</a>
+                <a href="{{ route('products.browse') }}"
+                class="flex items-center gap-3 px-3 py-2 text-sm font-semibold text-slate-600 rounded hover:bg-slate-100">
+                    <x-heroicon-o-shopping-bag class="w-5 h-5 text-slate-500" />
+                    <span>Shop</span>
+                </a>
+
+                <a href="{{ route('public.wishlists') }}"
+                class="flex items-center gap-3 px-3 py-2 text-sm font-semibold text-slate-600 rounded hover:bg-slate-100">
+                    <x-heroicon-o-heart class="w-5 h-5 text-slate-500" />
+                    <span>Wishlists</span>
+                </a>
+
                 <div class="border-t pt-4 mt-4 space-y-2">
-                     @include('partials.header-auth-mobile')
+                    @include('partials.header-auth-mobile')
                 </div>
             </div>
+
         </div>
     </nav>
 </header>
