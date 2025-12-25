@@ -153,6 +153,16 @@ HTML
                     ->color('success')
                     ->url(fn (Patient $record): string => "https://wa.me/{$record->phone}", shouldOpenInNewTab: true)
                     ->visible(fn (Patient $record): bool => ! empty($record->phone)),
+                Action::make('assign_to_me')
+                    ->label('Assign to Me')
+                    ->icon('heroicon-o-user-plus')
+                    ->color('success')
+                    ->requiresConfirmation()
+                    ->action(function (Patient $record) {
+                        $record->update(['pharmacist_id' => auth()->id()]);
+                    })
+                  // Only show this button for unassigned patients
+                    ->visible(fn (Patient $record) => is_null($record->pharmacist_id)),
                 ViewAction::make(),
                 EditAction::make(),
             ])
