@@ -18,36 +18,53 @@ class PharmacyProductObserver
     ) {}
 
     /**
-     * Auto-generate a unique slug for the pharmacy product.
-     */
-    public function creating(PharmacyProduct $pharmacyProduct): void
-    {
-        $medicationName = $pharmacyProduct->medicationVariant->medication->name;
-        $baseSlug = Str::slug($medicationName);
-        $slug = $baseSlug;
-        $count = 1;
-
-        while (
-            PharmacyProduct::where('pharmacy_id', $pharmacyProduct->pharmacy_id)
-                ->where('slug', $slug)
-                ->exists()
-        ) {
-            $slug = $baseSlug.'-'.++$count;
-        }
-
-        $pharmacyProduct->slug = $slug;
-    }
-
-    /**
-     * Run before saving the model (either create or update).
-     * Handles NAFDAC verification logic.
+     * Runs before create OR update.
+     * Handles:
+     * 1. Slug generation (robust for updates)
+     * 2. NAFDAC verification logic
      */
     public function saving(PharmacyProduct $pharmacyProduct): void
     {
-        // Verify only if NAFDAC number changed, or if product is new with no status yet
+        /*
+        |--------------------------------------------------------------------------
+        | 1. SLUG GENERATION (CREATE + UPDATE SAFE)
+        |--------------------------------------------------------------------------
+        */
+        if ($pharmacyProduct->isDirty('medication_variant_id') || empty($pharmacyProduct->slug)) {
+            $medicationName = $pharmacyProduct->medicationVariant->medication->name;
+            $baseSlug = Str::slug($medicationName);
+            $slug = $baseSlug;
+            $count = 1;
+
+            $query = PharmacyProduct::where('pharmacy_id', $pharmacyProduct->pharmacy_id)
+                ->where('slug', $slug);
+
+            if ($pharmacyProduct->exists) {
+                $query->where('id', '!=', $pharmacyProduct->id);
+            }
+
+            while ($query->exists()) {
+                $slug = $baseSlug.'-'.++$count;
+
+                $query = PharmacyProduct::where('pharmacy_id', $pharmacyProduct->pharmacy_id)
+                    ->where('slug', $slug);
+
+                if ($pharmacyProduct->exists) {
+                    $query->where('id', '!=', $pharmacyProduct->id);
+                }
+            }
+
+            $pharmacyProduct->slug = $slug;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | 2. NAFDAC VERIFICATION LOGIC
+        |--------------------------------------------------------------------------
+        */
         if (
             $pharmacyProduct->isDirty('nafdac_number') ||
-            ($pharmacyProduct->exists === false && empty($pharmacyProduct->verification_status))
+            (! $pharmacyProduct->exists && empty($pharmacyProduct->verification_status))
         ) {
             if (empty($pharmacyProduct->nafdac_number)) {
                 $pharmacyProduct->verification_status = NafdacVerificationStatus::UNVERIFIED;
@@ -55,7 +72,6 @@ class PharmacyProductObserver
                 return;
             }
 
-            // Perform the verification
             $result = $this->verificationService->verify(
                 productName: $pharmacyProduct->name,
                 nafdacNumber: $pharmacyProduct->nafdac_number
@@ -63,7 +79,6 @@ class PharmacyProductObserver
 
             $pharmacyProduct->verification_status = $result->status;
 
-            // Dispatch mismatch event if needed
             if ($result->status === NafdacVerificationStatus::MISMATCHED) {
                 ProductNafdacMismatch::dispatch($pharmacyProduct, $result->reason);
             }
@@ -71,57 +86,57 @@ class PharmacyProductObserver
     }
 
     /**
-     * Run after the product is first created.
-     * If verified, award gamification points and send Telegram notification.
+     * Runs after initial creation.
+     * Awards points + sends Telegram notification if verified.
      */
     public function created(PharmacyProduct $pharmacyProduct): void
     {
-        if ($pharmacyProduct->verification_status === NafdacVerificationStatus::VERIFIED) {
-            $user = $pharmacyProduct->user;
-            $taskKey = 'PHARMACIST_NEW_PRODUCT_VERIFIED';
+        if ($pharmacyProduct->verification_status !== NafdacVerificationStatus::VERIFIED) {
+            return;
+        }
 
-            // 1️⃣ Award gamification points
-            $this->awardPointsAction->execute($user, $taskKey, $pharmacyProduct);
+        $this->rewardVerifiedProduct($pharmacyProduct, isNew: true);
+    }
 
-            // 2️⃣ Send Telegram message
-            $taskDefinition = \Src\Gamification\Domain\Models\TaskDefinition::where('key', $taskKey)->first();
-
-            if ($taskDefinition && $user?->telegram_chat_id) {
-                $message = "✅ *Product Verified & Reward Earned!*\n\n".
-                    "Your new product listing for *'{$pharmacyProduct->name}'* has been successfully verified against the NAFDAC registry.\n\n".
-                    "You've been awarded *{$taskDefinition->points} points* for contributing to the Careflux catalog!";
-
-                SendTelegramMessage::dispatch($user->telegram_chat_id, $message);
-            }
+    /**
+     * Runs after update.
+     * Rewards ONLY when transitioning to VERIFIED.
+     */
+    public function updated(PharmacyProduct $pharmacyProduct): void
+    {
+        if (
+            $pharmacyProduct->wasChanged('verification_status') &&
+            $pharmacyProduct->verification_status === NafdacVerificationStatus::VERIFIED &&
+            $pharmacyProduct->getOriginal('verification_status') !== NafdacVerificationStatus::VERIFIED
+        ) {
+            $this->rewardVerifiedProduct($pharmacyProduct, isNew: false);
         }
     }
 
     /**
-     * Optional: Handle product updates (e.g., re-verification after edit).
-     * Triggers reward only the first time a product transitions from unverified → verified.
+     * Shared reward + notification logic.
      */
-    public function updated(PharmacyProduct $pharmacyProduct): void
+    private function rewardVerifiedProduct(PharmacyProduct $pharmacyProduct, bool $isNew): void
     {
-        if ($pharmacyProduct->wasChanged('verification_status') &&
-            $pharmacyProduct->verification_status === NafdacVerificationStatus::VERIFIED &&
-            $pharmacyProduct->getOriginal('verification_status') !== NafdacVerificationStatus::VERIFIED
-        ) {
-            $user = $pharmacyProduct->user;
-            $taskKey = 'PHARMACIST_NEW_PRODUCT_VERIFIED';
+        $user = $pharmacyProduct->user;
+        $taskKey = 'PHARMACIST_NEW_PRODUCT_VERIFIED';
 
-            // Award points only once per verified transition
-            $this->awardPointsAction->execute($user, $taskKey, $pharmacyProduct);
+        $this->awardPointsAction->execute($user, $taskKey, $pharmacyProduct);
 
-            // Notify user
-            $taskDefinition = \Src\Gamification\Domain\Models\TaskDefinition::where('key', $taskKey)->first();
+        $taskDefinition = \Src\Gamification\Domain\Models\TaskDefinition::where('key', $taskKey)->first();
 
-            if ($taskDefinition && $user?->telegram_chat_id) {
-                $message = "✅ *Product Now Verified!*\n\n".
-                    "Your existing product *'{$pharmacyProduct->name}'* has just been verified against the NAFDAC registry.\n\n".
-                    "You've earned *{$taskDefinition->points} points* for keeping the Careflux catalog accurate!";
-
-                SendTelegramMessage::dispatch($user->telegram_chat_id, $message);
-            }
+        if (! $taskDefinition || ! $user?->telegram_chat_id) {
+            return;
         }
+
+        $message = $isNew
+            ? "✅ *Product Verified & Reward Earned!*\n\n".
+              "Your new product listing for *'{$pharmacyProduct->name}'* has been successfully verified against the NAFDAC registry.\n\n".
+              "You've been awarded *{$taskDefinition->points} points* for contributing to the Careflux catalog!"
+            : "✅ *Product Now Verified!*\n\n".
+              "Your existing product *'{$pharmacyProduct->name}'* has just been verified against the NAFDAC registry.\n\n".
+              "You've earned *{$taskDefinition->points} points* for keeping the Careflux catalog accurate!";
+
+        SendTelegramMessage::dispatch($user->telegram_chat_id, $message);
     }
 }
