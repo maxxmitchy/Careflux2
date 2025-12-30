@@ -141,7 +141,7 @@
                                 Other Available Options
                             </h2>
 
-                            <div class="mt-4 space-y-3 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                            <div class="mt-4 space-y-3 grid grid-cols-2 sm:grid-cols-3 gap-4">
                                 @foreach($promotionalContent as $item)
                                     @if($item instanceof \App\Models\PromotionalBanner)
                                         <x-in-feed-banner-card :banner="$item" />
