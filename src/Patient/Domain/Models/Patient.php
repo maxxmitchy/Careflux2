@@ -51,6 +51,7 @@ class Patient extends Model
             'expectations_from_pharmacist' => 'array',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
+            'last_interacted_at' => 'datetime',
         ];
     }
 
