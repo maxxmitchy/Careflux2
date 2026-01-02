@@ -10,8 +10,6 @@ use Filament\Schemas\Components\Group;
 use Filament\Support\Enums\FontWeight;
 use Filament\Schemas\Components\Section;
 use Src\Gamification\Domain\Models\Task;
-use Filament\Tables\Columns\Layout\Split;
-use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\RepeatableEntry;
 
@@ -21,102 +19,88 @@ class TeamTaskInfolist
     {
         return $infolist
             ->schema([
-                Split::make([
-                    // LEFT COLUMN: Main Task Details
-                    Group::make([
-                        Section::make('Task Details')
-                            ->schema([
-                                TextEntry::make('taskDefinition.name')
-                                    ->label('Task Name')
-                                    ->weight(FontWeight::Bold),
+                // Use a 3-column Grid to create a "2/3 + 1/3" layout
+                Grid::make(['default' => 1, 'md' => 3]) 
+                    ->schema([
+                        // LEFT COLUMN: Takes up 2 columns out of 3
+                        Group::make([
+                            Section::make('Task Details')
+                                ->schema([
+                                    TextEntry::make('taskDefinition.name')
+                                        ->label('Task Name')
+                                        ->weight(FontWeight::Bold),
+                                        // ->size(TextEntry\TextEntrySize::Large),
 
-                                TextEntry::make('taskDefinition.description')
-                                    ->label('Instructions')
-                                    ->markdown()
-                                    ->prose(),
+                                    TextEntry::make('taskDefinition.description')
+                                        ->label('Instructions')
+                                        ->markdown()
+                                        ->prose(),
 
-                                TextEntry::make('subjects_description')
-                                    ->label('Assigned Subject(s)')
-                                    ->helperText('The specific products or patient this task targeted.')
-                                    ->placeholder('General Task')
-                                    ->columnSpanFull(),
-                            ]),
+                                    TextEntry::make('subjects_description')
+                                        ->label('Assigned Subject(s)')
+                                        ->columnSpanFull(),
+                                ]),
 
-                        // DYNAMIC SECTION: RESULTS
-                        // This section only shows if there is data in the 'results' JSON column
-                        // Perfect for "Identify 10 New Products"
-                        Section::make('Submission Results')
-                            ->icon('heroicon-m-clipboard-document-check')
-                            ->color(Color::Emerald)
-                            ->visible(fn (Task $record) => ! empty($record->results))
-                            ->schema([
-                                RepeatableEntry::make('results')
-                                    ->label('Data Submitted by Technician')
-                                    ->schema([
-                                        Grid::make(2)->schema([
-                                            TextEntry::make('product_name')
-                                                ->label('Product')
-                                                ->icon('heroicon-m-cube'),
-                                            TextEntry::make('supplier')
-                                                ->label('Supplier')
-                                                ->placeholder('N/A'),
-                                        ]),
-                                    ])
-                                    ->columns(2)
-                                    ->grid(1),
-                            ]),
+                            Section::make('Submission Results')
+                                ->icon('heroicon-m-clipboard-document-check')
+                                ->iconColor(Color::Emerald)
+                                ->visible(fn (Task $record) => ! empty($record->results))
+                                ->schema([
+                                    RepeatableEntry::make('results')
+                                        ->label('Data Submitted')
+                                        ->schema([
+                                            Grid::make(2)->schema([
+                                                TextEntry::make('product_name')
+                                                    ->label('Product'),
+                                                TextEntry::make('supplier')
+                                                    ->label('Supplier')
+                                                    ->placeholder('N/A'),
+                                            ]),
+                                        ])
+                                        ->grid(2)
+                                        ->columnSpanFull(),
+                                ]),
+                        ])
+                        ->columnSpan(['md' => 2]), // <--- This creates the main content area
+
+                        // RIGHT COLUMN: Takes up 1 column out of 3
+                        Group::make([
+                            Section::make('Status & Assignment')
+                                ->schema([
+                                    TextEntry::make('status')
+                                        ->badge()
+                                        ->color(fn (string $state): string => match ($state) {
+                                            'pending' => 'warning',
+                                            'completed' => 'success',
+                                            'overdue' => 'danger',
+                                            default => 'gray',
+                                        }),
+
+                                    TextEntry::make('taskDefinition.points')
+                                        ->label('Points')
+                                        ->numeric()
+                                        ->suffix(' pts')
+                                        ->weight(FontWeight::Bold),
+
+                                    TextEntry::make('assignee.name')
+                                        ->label('Assigned Staff'),
+
+                                    TextEntry::make('due_at')
+                                        ->label('Due Date')
+                                        ->date()
+                                        ->color(fn (Task $record) => $record->isOverdue() ? 'danger' : 'gray'),
+                                ]),
+
+                            Section::make('Metadata')
+                                ->visible(fn (Task $record) => $record->status === 'completed')
+                                ->schema([
+                                    TextEntry::make('completed_at')
+                                        ->label('Completed On')
+                                        ->dateTime(),
+                                ]),
+                        ])
+                        ->columnSpan(['md' => 1]), // <--- This creates the sidebar
                     ]),
-
-                    // RIGHT COLUMN: Meta Data & Status
-                    Group::make([
-                        Section::make('Status & Assignment')
-                            ->schema([
-                                TextEntry::make('status')
-                                    ->badge()
-                                    ->color(fn (string $state): string => match ($state) {
-                                        'pending' => 'warning',
-                                        'completed' => 'success',
-                                        'overdue' => 'danger',
-                                        default => 'gray',
-                                    }),
-
-                                TextEntry::make('taskDefinition.points')
-                                    ->label('Points Value')
-                                    ->numeric()
-                                    ->suffix(' pts')
-                                    ->color('primary')
-                                    ->weight(FontWeight::Bold),
-
-                                TextEntry::make('assignee.name')
-                                    ->label('Assigned Staff')
-                                    ->icon('heroicon-m-user-circle'),
-
-                                TextEntry::make('created_at')
-                                    ->label('Assigned On')
-                                    ->date(),
-
-                                TextEntry::make('due_at')
-                                    ->label('Due Date')
-                                    ->date()
-                                    ->color(fn (Task $record) => $record->isOverdue() ? 'danger' : 'gray'),
-                            ]),
-
-                        Section::make('Completion Metadata')
-                            ->visible(fn (Task $record) => $record->status === 'completed')
-                            ->schema([
-                                TextEntry::make('completed_at')
-                                    ->label('Completed On')
-                                    ->dateTime(),
-
-                                TextEntry::make('completion_duration')
-                                    ->label('Turnaround Time')
-                                    ->state(fn (Task $record) => $record->completed_at && $record->created_at
-                                        ? $record->created_at->diffForHumans($record->completed_at, true) . ' after assignment'
-                                        : 'N/A'
-                                    ),
-                            ])->grow(false),
-                    ])->grow(false), // Keep right column tight
-                ])->from('md'), // Split view only on medium screens and up
             ]);
     }
 }
