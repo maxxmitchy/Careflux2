@@ -6,7 +6,7 @@ use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Actions\ViewAction;
+use Filament\Actions\ReplicateAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Repeater;
@@ -14,6 +14,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
+use Filament\Support\Enums\FontWeight;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -30,22 +31,76 @@ class TeamTasksTable
     public static function configure(Table $table): Table
     {
         return $table
+            // 1. GROUP BY USER: This organizes the view by staff member
+            ->groups([
+                'assignee.name',
+                'status',
+            ])
+            ->defaultGroup('assignee.name')
             ->columns([
-                TextColumn::make('taskDefinition.name')->label('Task')->searchable()->wrap(),
-                TextColumn::make('assignee.name')->label('Assigned To')->searchable(), // <-- CORRECT RELATIONSHIP NAME
-                TextColumn::make('subjects_description')->label('Subject(s)')->wrap(),
-                TextColumn::make('status')->badge(),
-                TextColumn::make('due_at')->date()->sortable(),
+                TextColumn::make('taskDefinition.name')
+                    ->label('Task')
+                    ->weight(FontWeight::Bold)
+                    ->description(fn (Task $record) => $record->taskDefinition->description)
+                    ->searchable()
+                    ->wrap(),
+
+                // We don't need "Assigned To" column if we are grouping by it,
+                // but keep it toggleable or visible if grouping is turned off.
+                TextColumn::make('assignee.name')
+                    ->label('Assigned To')
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('subjects_description')
+                    ->label('Subject(s)')
+                    ->limit(50)
+                    ->wrap(),
+
+                TextColumn::make('due_at')
+                    ->date('M j, Y') // Cleaner date format
+                    ->description(fn (Task $record) => $record->due_at->diffForHumans())
+                    ->sortable()
+                    ->color(fn ($record) => $record->isOverdue() ? 'danger' : 'gray'),
+
+                TextColumn::make('status')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'pending' => 'warning',
+                        'completed' => 'success',
+                        'overdue' => 'danger',
+                        default => 'gray',
+                    }),
             ])
             ->filters([
                 SelectFilter::make('assigned_to_user_id')
-                    ->label('Filter by Staff')
-                    ->options(fn () => User::where('pharmacy_id', Auth::user()->pharmacy_id)->pluck('name', 'id')),
+                    ->label('Staff Member')
+                    ->relationship('assignee', 'name'), // Cleaner filter definition
                 SelectFilter::make('status')
                     ->options(['pending' => 'Pending', 'completed' => 'Completed']),
             ])
             ->recordActions([
-                ViewAction::make(),
+                // 2. REPLICATE ACTION: Maximum efficiency for the manager
+                // Allows cloning a task to assign the same job to someone else quickly
+                ReplicateAction::make()
+                    ->label('Clone')
+                    ->excludeAttributes(['status', 'completed_at', 'results'])
+                    ->modalHeading('Duplicate Task')
+                    ->schema([
+                        // Allow changing the assignee immediately when cloning
+                        \Filament\Forms\Components\Select::make('assigned_to_user_id')
+                            ->relationship('assignee', 'name')
+                            ->label('Assign Clone To')
+                            ->required(),
+                        \Filament\Forms\Components\DatePicker::make('due_at')
+                            ->default(now())
+                            ->required(),
+                    ])
+                    ->beforeReplicaSaved(function (Task $replica, array $data) {
+                        $replica->assigned_to_user_id = $data['assigned_to_user_id'];
+                        $replica->due_at = $data['due_at'];
+                        $replica->status = 'pending';
+                    }),
+
                 EditAction::make(),
                 Action::make('complete_task')
                     ->label('Complete')

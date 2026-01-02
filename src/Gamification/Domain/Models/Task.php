@@ -126,4 +126,9 @@ class Task extends Model
             }
         );
     }
+
+    public function isOverdue(): bool
+    {
+        return $this->status === 'pending' && $this->due_at < now();
+    }
 }

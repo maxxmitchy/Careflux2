@@ -31,14 +31,36 @@ class TeamTaskForm
                     ->required()->searchable()->preload()->live()
                     ->createOptionForm([
                         TextInput::make('name')->required()->placeholder('e.g., Conduct weekly stock count'),
+                        Select::make('type_preset')
+                            ->label('Task Template')
+                            ->options([
+                                'standard' => 'Standard (Generic)',
+                                'discovery' => 'New Product Discovery (Requires 10 items)',
+                            ])
+                            ->default('standard')
+                            ->live(),
                         Textarea::make('description')->rows(2)->placeholder('e.g., A weekly check of all high-value medications.'),
                         TextInput::make('points')->numeric()->required()->default(5),
                     ])
                     ->createOptionUsing(function (array $data) use ($user): int {
+                        // Determine the Key based on selection
+                        $keyPrefix = match ($data['type_preset'] ?? 'standard') {
+                            'discovery' => 'TECHNICIAN_NEW_PRODUCT_DISCOVERY',
+                            default => 'CUSTOM',
+                        };
+
+                        // Ensure uniqueness if it's custom
+                        $key = $keyPrefix === 'CUSTOM'
+                            ? 'CUSTOM-'.$user->pharmacy_id.'-'.Str::upper(Str::random(6))
+                            : $keyPrefix.'-'.$user->pharmacy_id;
+
                         $newTaskDef = TaskDefinition::create([
-                            'key' => 'CUSTOM-'.$user->pharmacy_id.'-'.Str::upper(Str::random(6)),
-                            'name' => $data['name'], 'description' => $data['description'], 'points' => $data['points'],
-                            'is_custom' => true, 'pharmacy_id' => $user->pharmacy_id,
+                            'key' => $key,
+                            'name' => $data['name'],
+                            'description' => $data['description'],
+                            'points' => $data['points'],
+                            'is_custom' => true,
+                            'pharmacy_id' => $user->pharmacy_id,
                         ]);
 
                         return $newTaskDef->id;

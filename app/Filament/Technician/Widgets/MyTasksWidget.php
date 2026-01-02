@@ -109,6 +109,27 @@ class MyTasksWidget extends BaseWidget
                             ];
                         }
 
+                        // 1. ADD NEW LOGIC HERE
+                        // We use str_contains because the key might be suffixed with pharmacy ID if custom
+                        if (str_contains($taskKey, 'TECHNICIAN_NEW_PRODUCT_DISCOVERY')) {
+                            return [
+                                Forms\Components\Repeater::make('discovered_products')
+                                    ->label('Identify 10 New Products')
+                                    ->helperText('List products supplied that we did not have before.')
+                                    ->schema([
+                                        TextInput::make('product_name')
+                                            ->required()
+                                            ->label('Product Name'),
+                                        TextInput::make('supplier')
+                                            ->label('Supplier (Optional)'),
+                                    ])
+                                    ->minItems(5) // Enforce the rule of 10
+                                    ->defaultItems(1)
+                                    ->columns(2)
+                                    ->grid(1),
+                            ];
+                        }
+
                         if (str_starts_with($record->taskDefinition->key, 'TECHNICIAN_EXPIRY_LOG')) {
                             $products = $record->pharmacyProducts()->with('medicationVariant.medication')->get();
 
@@ -177,6 +198,13 @@ class MyTasksWidget extends BaseWidget
                             ]);
                         }
 
+                        if (str_contains($taskKey, 'TECHNICIAN_NEW_PRODUCT_DISCOVERY')) {
+                            // We save the repeater array directly to the new 'results' JSON column
+                            $record->update([
+                                'results' => $data['discovered_products'] ?? [],
+                            ]);
+                        }
+
                         // --- UNIVERSAL COMPLETION LOGIC ---
                         $record->update([
                             'status' => 'completed',
@@ -193,7 +221,6 @@ class MyTasksWidget extends BaseWidget
                     })
                     ->modalHeading(fn (Task $record) => $record->taskDefinition->name)
                     ->modalWidth('lg'),
-                // --- END OF FIX ---
             ])
             ->defaultSort('due_at', 'asc');
     }
