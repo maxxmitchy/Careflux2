@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('tasks', function (Blueprint $table) {
             // Adjust 'after' if you want them placed somewhere else
-            $table->string('title')->nullable()->after('id'); 
+            $table->string('title')->nullable()->after('id');
             $table->text('description')->nullable()->after('title');
         });
     }

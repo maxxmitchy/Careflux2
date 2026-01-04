@@ -19,9 +19,10 @@ use Filament\Support\Enums\FontWeight;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 // use Filament\Tables\Actions\DeleteBulkAction;
+use Illuminate\Support\Facades\DB;
 use Src\Gamification\Application\Actions\AwardPointsAction;
 use Src\Gamification\Domain\Models\Task;
 use Src\Patient\Domain\Models\Patient;
@@ -73,7 +74,14 @@ class TeamTasksTable
             ->filters([
                 SelectFilter::make('assigned_to_user_id')
                     ->label('Staff Member')
-                    ->relationship('assignee', 'name'),
+                    ->relationship('assignee', 'name', modifyQueryUsing: function (Builder $query) {
+                        // We use a closure (grouped where) here to handle the OR logic safely
+                        return $query->where(function (Builder $q) {
+                            $q->where('is_pharmacist', true)
+                                ->orWhere('is_technician', true)
+                                ->orWhere('is_manager', true);
+                        });
+                    }),
                 SelectFilter::make('status')
                     ->options(['pending' => 'Pending', 'completed' => 'Completed']),
             ])
