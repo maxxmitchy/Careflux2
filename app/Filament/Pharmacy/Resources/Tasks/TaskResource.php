@@ -238,8 +238,7 @@ class TaskResource extends Resource
                                     ->schema([
                                         TextEntry::make('instructions')
                                             ->hiddenLabel()
-                                            ->state($record->instructions)
-                                            ->prose(),
+                                            ->state($record->instructions),
                                     ]),
 
                                 Forms\Components\CheckboxList::make('confirmation')
