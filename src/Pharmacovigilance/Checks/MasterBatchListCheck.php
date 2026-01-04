@@ -2,10 +2,10 @@
 
 namespace Src\Pharmacovigilance\Checks;
 
-use App\Models\ProductAlert;
 use Illuminate\Support\Facades\DB;
-use Src\Pharmacovigilance\Contracts\PharmacovigilanceCheckInterface;
+use src\Pharmacovigilance\Domain\Models\ProductAlert;
 use Src\Pharmacovigilance\Domain\Models\MasterBatchList;
+use Src\Pharmacovigilance\Contracts\PharmacovigilanceCheckInterface;
 
 class MasterBatchListCheck implements PharmacovigilanceCheckInterface
 {

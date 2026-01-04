@@ -2,18 +2,18 @@
 
 namespace App\Jobs;
 
-use App\Filament\Pharmacy\Resources\Tasks\TaskResource;
-use App\Models\ProductAlert;
 use Filament\Actions\Action;
-use Filament\Notifications\Notification;
 use Illuminate\Bus\Queueable;
+use Illuminate\Queue\SerializesModels;
+use Filament\Notifications\Notification;
+use Illuminate\Queue\InteractsWithQueue;
+use Src\Gamification\Domain\Models\Task;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
-use Src\Gamification\Domain\Models\Task;
-use Src\Gamification\Domain\Models\TaskDefinition;
 use Src\Pharmacy\Domain\Models\PharmacyProduct;
+use Src\Gamification\Domain\Models\TaskDefinition;
+use src\Pharmacovigilance\Domain\Models\ProductAlert;
+use App\Filament\Pharmacy\Resources\Tasks\TaskResource;
 use Src\Shared\Infrastructure\Services\TelegramService;
 
 class DispatchAlertTasksJob implements ShouldQueue

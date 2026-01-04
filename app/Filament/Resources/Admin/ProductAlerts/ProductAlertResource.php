@@ -2,17 +2,17 @@
 
 namespace App\Filament\Resources\Admin\ProductAlerts;
 
-use App\Filament\Resources\Admin\ProductAlerts\Pages\CreateProductAlert;
+use BackedEnum;
+use Filament\Tables\Table;
+use Filament\Schemas\Schema;
+use Filament\Resources\Resource;
+use Filament\Support\Icons\Heroicon;
+use src\Pharmacovigilance\Domain\Models\ProductAlert;
 use App\Filament\Resources\Admin\ProductAlerts\Pages\EditProductAlert;
 use App\Filament\Resources\Admin\ProductAlerts\Pages\ListProductAlerts;
+use App\Filament\Resources\Admin\ProductAlerts\Pages\CreateProductAlert;
 use App\Filament\Resources\Admin\ProductAlerts\Schemas\ProductAlertForm;
 use App\Filament\Resources\Admin\ProductAlerts\Tables\ProductAlertsTable;
-use App\Models\ProductAlert;
-use BackedEnum;
-use Filament\Resources\Resource;
-use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
-use Filament\Tables\Table;
 
 class ProductAlertResource extends Resource
 {
