@@ -7,7 +7,7 @@
         When you find a product on our search page from a non-partner store, you can use the "Request Availability" button. Those items will appear here for you to confirm.
     </p>
     <div class="mt-6">
-        <a href="{{ route('public.products') }}" class="inline-flex items-center px-4 py-2 bg-amber-100 text-amber-600ibold rounded text-xs sm:text-sm hover:bg-emerald-700 transition">
+        <a href="{{ route('public.products') }}" class="inline-flex items-center px-4 py-2 bg-amber-100 text-amber-600 font-semibold text-xs sm:text-sm hover:bg-emerald-700 transition">
             Start a Search
         </a>
     </div>
