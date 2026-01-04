@@ -3,7 +3,7 @@
 namespace Src\Pharmacovigilance\Checks;
 
 use Src\Medication\Domain\Models\Medication;
-use src\Pharmacovigilance\Domain\Models\ProductAlert;
+use Src\Pharmacovigilance\Domain\Models\ProductAlert;
 use Src\Pharmacovigilance\Contracts\PharmacovigilanceCheckInterface;
 
 class BatchNumberVerificationCheck implements PharmacovigilanceCheckInterface

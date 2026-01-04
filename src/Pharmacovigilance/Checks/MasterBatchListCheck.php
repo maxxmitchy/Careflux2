@@ -3,7 +3,7 @@
 namespace Src\Pharmacovigilance\Checks;
 
 use Illuminate\Support\Facades\DB;
-use src\Pharmacovigilance\Domain\Models\ProductAlert;
+use Src\Pharmacovigilance\Domain\Models\ProductAlert;
 use Src\Pharmacovigilance\Domain\Models\MasterBatchList;
 use Src\Pharmacovigilance\Contracts\PharmacovigilanceCheckInterface;
 

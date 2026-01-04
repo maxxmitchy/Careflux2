@@ -8,7 +8,7 @@ use Filament\Actions\EditAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Tables\Columns\TextColumn;
-use src\Pharmacovigilance\Domain\Models\ProductAlert;
+use Src\Pharmacovigilance\Domain\Models\ProductAlert;
 
 class ProductAlertsTable
 {
