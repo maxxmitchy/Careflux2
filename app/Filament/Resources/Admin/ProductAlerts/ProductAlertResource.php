@@ -18,7 +18,7 @@ class ProductAlertResource extends Resource
 {
     protected static ?string $model = ProductAlert::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::Megaphone;
 
     protected static ?string $recordTitleAttribute = 'type';
 
