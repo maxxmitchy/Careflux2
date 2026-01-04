@@ -7,7 +7,7 @@
         Browse our partner pharmacies or search for products to add items to your cart.
     </p>
     <div class="mt-6">
-        <a href="{{ route('products.browse') }}" class="flex items-center px-4 py-2 bg-emerald-600 text-white font-semibold rounded text-xs sm:text-sm hover:bg-emerald-700 transition">
+        <a href="{{ route('products.browse') }}" class="inline-flex items-center px-4 py-2 bg-emerald-600 text-white font-semibold rounded text-xs sm:text-sm hover:bg-emerald-700 transition">
             Continue Shopping
         </a>
     </div>
