@@ -2,28 +2,28 @@
 
 namespace App\Filament\Pharmacy\Resources\Tasks;
 
-use App\Filament\Pharmacy\Resources\Patients\PatientResource;
-use App\Filament\Pharmacy\Resources\Tasks\Pages\ManageTasks;
-use App\Models\PharmacistActionLog;
 use BackedEnum;
+use Filament\Forms;
+use Filament\Tables;
+use Filament\Tables\Table;
 use Filament\Actions\Action;
 use Filament\Facades\Filament;
-use Filament\Forms;
-use Filament\Forms\Components\Textarea;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
-use Filament\Tables;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Src\Gamification\Application\Actions\AwardPointsAction;
-use Src\Gamification\Domain\Models\Task;
+use Illuminate\Support\Facades\Auth;
 use Src\Patient\Domain\Models\Patient;
-use Src\Pharmacy\Domain\Models\PharmacyProduct;
+use Filament\Forms\Components\Textarea;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Notifications\Notification;
+use Src\Gamification\Domain\Models\Task;
+use Illuminate\Database\Eloquent\Builder;
+use Filament\Infolists\Components\TextEntry;
 use Src\Pharmacy\Domain\Models\PriceHistory;
+use Src\Pharmacy\Domain\Models\PharmacyProduct;
+use Src\Audit\Domain\Models\PharmacistActionLog;
+use Src\Gamification\Application\Actions\AwardPointsAction;
+use App\Filament\Pharmacy\Resources\Tasks\Pages\ManageTasks;
+use App\Filament\Pharmacy\Resources\Patients\PatientResource;
 
 class TaskResource extends Resource
 {
@@ -270,7 +270,7 @@ class TaskResource extends Resource
                     })
                     ->modalHeading(fn (Task $record) => $record->taskDefinition->name),
             ])
-            ->defaultSort('due_at', 'asc');
+            ->defaultSort('due_at', 'desc');
     }
 
     public static function getPages(): array
