@@ -1,6 +1,6 @@
 <?php
 
-namespace src\Pharmacovigilance\Domain\Models;
+namespace Src\Pharmacovigilance\Domain\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
