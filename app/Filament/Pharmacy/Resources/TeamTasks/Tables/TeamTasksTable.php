@@ -8,6 +8,7 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ReplicateAction;
 use Filament\Actions\ViewAction;
+use Filament\Facades\Filament;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Repeater;
@@ -20,8 +21,8 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Auth;
 // use Filament\Tables\Actions\DeleteBulkAction;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Src\Gamification\Application\Actions\AwardPointsAction;
 use Src\Gamification\Domain\Models\Task;
@@ -75,12 +76,18 @@ class TeamTasksTable
                 SelectFilter::make('assigned_to_user_id')
                     ->label('Staff Member')
                     ->relationship('assignee', 'name', modifyQueryUsing: function (Builder $query) {
-                        // We use a closure (grouped where) here to handle the OR logic safely
-                        return $query->where(function (Builder $q) {
-                            $q->where('is_pharmacist', true)
-                                ->orWhere('is_technician', true)
-                                ->orWhere('is_manager', true);
-                        });
+                        $user = Filament::auth()->user();
+
+                        return $query
+                            // 1. Only show users in the SAME pharmacy as the logged-in user
+                            ->where('pharmacy_id', $user->pharmacy_id)
+
+                            // 2. Only show specific staff roles (Grouped logic)
+                            ->where(function (Builder $q) {
+                                $q->where('is_pharmacist', true)
+                                    ->orWhere('is_technician', true)
+                                    ->orWhere('is_manager', true);
+                            });
                     }),
                 SelectFilter::make('status')
                     ->options(['pending' => 'Pending', 'completed' => 'Completed']),
