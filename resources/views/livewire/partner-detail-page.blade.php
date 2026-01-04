@@ -41,7 +41,15 @@
                     <div class="text-center">
                         <img src="{{ $pharmacist->avatar_url ? asset('storage/' . $pharmacist->avatar_url) : 'https://ui-avatars.com/api/?name=' . urlencode($pharmacist->name) . '&background=E0F2F1&color=0D9488' }}" alt="{{ $pharmacist->name }}" class="h-16 w-16 rounded-full mx-auto shadow-md">
                         <p class="mt-2 text-xs font-semibold text-gray-800">{{ $pharmacist->name }}</p>
-                        <p class="text-xs text-gray-500">Lead Pharmacist</p>
+                        <p class="text-xs text-gray-500">
+                            @if($pharmacist->is_manager)
+                                Manager
+                            @elseif($pharmacist->is_technician)
+                                Nurse/Technician
+                            @else
+                                Pharmacist
+                            @endif
+                        </p>
                     </div>
                 @endforeach
             </div>
