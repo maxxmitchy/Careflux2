@@ -10,12 +10,15 @@ use Filament\Actions\Action;
 use Filament\Facades\Filament;
 use Filament\Resources\Resource;
 use Illuminate\Support\Facades\DB;
+use Filament\Tables\Filters\Filter;
 use Illuminate\Support\Facades\Auth;
 use Src\Patient\Domain\Models\Patient;
 use Filament\Forms\Components\Textarea;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Notifications\Notification;
+use Filament\Schemas\Components\Section;
 use Src\Gamification\Domain\Models\Task;
+use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Infolists\Components\TextEntry;
 use Src\Pharmacy\Domain\Models\PriceHistory;
@@ -45,232 +48,300 @@ class TaskResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->poll('30s') // Auto-refresh for new tasks
             ->columns([
-                Tables\Columns\TextColumn::make('taskDefinition.name')
-                    ->label('Task')->searchable()->wrap(),
-
+                // 1. Task Information (Name & Description)
                 TextColumn::make('taskDefinition.name')
-                    ->color(fn (Task $record) => $record->taskDefinition->key === 'PRODUCT_INTEGRITY_CHECK' ? 'danger' : null)
-                    ->weight(fn (Task $record) => $record->taskDefinition->key === 'PRODUCT_INTEGRITY_CHECK' ? 'bold' : null),
+                    ->label('Task Details')
+                    ->searchable()
+                    ->sortable()
+                    ->weight(fn (Task $record) => $record->taskDefinition->key === 'PRODUCT_INTEGRITY_CHECK' ? 'bold' : 'medium')
+                    ->color(fn (Task $record) => $record->taskDefinition->key === 'PRODUCT_INTEGRITY_CHECK' ? 'danger' : 'primary')
+                    ->description(fn (Task $record) => str($record->description)->limit(50))
+                    ->wrap(),
 
-                Tables\Columns\TextColumn::make('subjects_description')
-                    ->label('Subject(s)')->wrap()
+                // 2. Subject (Patient/Product link)
+                TextColumn::make('subjects_description')
+                    ->label('Subject / Patient')
+                    ->wrap()
+                    ->icon('heroicon-m-user')
                     ->url(function (Task $record): ?string {
                         if ($record->subjectable instanceof Patient) {
                             return PatientResource::getUrl('view', ['record' => $record->subjectable]);
                         }
-
                         return null;
+                    })
+                    ->color('gray'),
+
+                // 3. Due Date
+                TextColumn::make('due_at')
+                    ->label('Deadline')
+                    ->date('M j, Y H:i')
+                    ->description(fn (Task $record) => $record->due_at ? $record->due_at->diffForHumans() : null)
+                    ->sortable()
+                    ->color(fn (Task $record) => $record->due_at && $record->due_at->isPast() && $record->status === 'pending' ? 'danger' : 'gray'),
+
+                // 4. Reward Points
+                TextColumn::make('taskDefinition.points')
+                    ->label('Points')
+                    ->badge()
+                    ->color('success')
+                    ->icon('heroicon-s-star'),
+
+                // 5. Status
+                TextColumn::make('status')
+                    ->badge()
+                    ->formatStateUsing(fn (string $state): string => ucfirst($state))
+                    ->color(fn (string $state): string => match ($state) {
+                        'pending' => 'warning',
+                        'completed' => 'success',
+                        'failed' => 'danger',
+                        default => 'gray',
+                    })
+                    ->icon(fn (string $state): string => match ($state) {
+                        'pending' => 'heroicon-o-clock',
+                        'completed' => 'heroicon-o-check-circle',
+                        default => 'heroicon-o-question-mark-circle',
                     }),
+            ])
+            ->filters([
+                SelectFilter::make('status')
+                    ->options([
+                        'pending' => 'Pending',
+                        'completed' => 'Completed',
+                    ])
+                    ->default('pending'),
 
-                Tables\Columns\TextColumn::make('taskDefinition.points')
-                    ->label('Points')->icon('heroicon-s-star'),
-
-                Tables\Columns\TextColumn::make('due_at')
-                    ->label('Due')->since()->sortable(),
-
-                Tables\Columns\TextColumn::make('status')->badge(),
+                Filter::make('overdue')
+                    ->label('Overdue Tasks')
+                    ->query(fn (Builder $query) => $query->where('status', 'pending')->where('due_at', '<', now()))
+                    ->toggle(),
             ])
             ->recordActions([
+                // ACTION 1: Send WhatsApp (Patient Counseling)
                 Action::make('send_and_complete')
                     ->label('Review & Send')
-                    ->icon('heroicon-o-paper-airplane')
+                    ->icon('heroicon-o-chat-bubble-left-right')
                     ->color('success')
                     ->visible(fn (Task $record): bool => $record->status === 'pending' && $record->taskDefinition->key === 'PATIENT_COUNSELING_FOLLOW_UP')
                     ->modalHeading('Send Counseling Message')
-                    ->modalDescription('Review the message. Clicking "Open WhatsApp" will prepare it to be sent from your device. You must then return here to confirm completion.')
+                    ->modalDescription('Review the message below. "Open WhatsApp" prepares the text on your device. Confirm completion afterwards.')
                     ->schema([
                         Forms\Components\Textarea::make('message_to_send')
                             ->label('Message Content')
                             ->rows(6)
                             ->default(fn (Task $record) => $record->description)
-                            ->disabled(),
+                            ->disabled()
+                            ->columnSpanFull(),
                     ])
                     ->modalFooterActions(function (Task $record) {
                         $patient = $record->subjectable;
                         if (! $patient instanceof Patient || ! $patient->phone) {
-                            return [Action::make('close')->label('Close: Patient has no phone number')->modalClose()->color('danger')];
+                            return [Action::make('close')->label('Error: Patient missing phone number')->modalClose()->color('danger')];
                         }
 
-                        $message = $record->description;
-                        $whatsappUrl = 'https://wa.me/'.$patient->phone.'?text='.urlencode($message);
+                        $whatsappUrl = 'https://wa.me/'.$patient->phone.'?text='.urlencode($record->description);
 
                         return [
                             Action::make('open_whatsapp')
-                                ->label('Open WhatsApp & Prepare Message')
+                                ->label('1. Open WhatsApp')
                                 ->icon('heroicon-s-paper-airplane')
-                                ->url($whatsappUrl, shouldOpenInNewTab: true),
+                                ->url($whatsappUrl, shouldOpenInNewTab: true)
+                                ->color('info'),
 
                             Action::make('confirm_completion')
-                                ->label('I Have Sent It')
+                                ->label('2. Confirm Sent')
                                 ->color('success')
+                                ->icon('heroicon-s-check')
                                 ->action(function (Task $record, AwardPointsAction $awardPoints) {
                                     $user = Auth::user();
-                                    $patient = $record->subjectable;
-
+                                    
                                     PharmacistActionLog::create([
                                         'user_id' => $user->id,
                                         'task_id' => $record->id,
-                                        'subjectable_id' => $patient->id,
-                                        'subjectable_type' => $patient->getMorphClass(),
+                                        'subjectable_id' => $record->subjectable->id,
+                                        'subjectable_type' => $record->subjectable->getMorphClass(),
                                         'action_type' => 'PATIENT_COUNSELING_SENT',
-                                        'description' => "Logged sending of counseling message for '{$record->title}'.",
+                                        'description' => "Counseling message sent for '{$record->title}'",
                                         'metadata' => ['message_sent' => $record->description],
                                     ]);
 
                                     $record->update(['status' => 'completed', 'completed_at' => now()]);
                                     $awardPoints->execute($user, $record->taskDefinition->key, $record);
-                                    Notification::make()->title('Task Completed!')->body("You earned {$record->taskDefinition->points} points.")->success()->send();
+                                    
+                                    Notification::make()->title('Task Completed')->body("+{$record->taskDefinition->points} Points")->success()->send();
                                 })
-                                ->requiresConfirmation()
-                                ->modalHeading('Confirm Task Completion')
-                                ->modalDescription('Are you sure you have sent the message to the patient? This will complete the task and award you points.'),
+                                ->requiresConfirmation(),
                         ];
                     })
                     ->modalSubmitAction(false)
-                    ->modalCancelActionLabel('Cancel'),
+                    ->modalCancelActionLabel('Close'),
+
+                // ACTION 2: General Completion (Dynamic Form)
                 Action::make('complete_task')
-                    ->label('Complete')
+                    ->label('Complete Task')
                     ->icon('heroicon-o-check-circle')
-                    ->color('success')
+                    ->color('primary')
                     ->hidden(fn (Task $record): bool => $record->taskDefinition->key === 'PATIENT_COUNSELING_FOLLOW_UP')
                     ->visible(fn (Task $record): bool => $record->status === 'pending')
-
-                    // --- THE DEFINITIVE DYNAMIC FORM ---
+                    ->modalWidth(fn (Task $record) => $record->taskDefinition->key === 'TECHNICIAN_PRICE_VERIFY' ? '4xl' : 'lg')
+                    
+                    // --- Dynamic Form Schema ---
                     ->schema(function (Task $record): array {
                         $taskKey = $record->taskDefinition->key;
 
+                        // Case A: Patient Follow Up
                         if (str_starts_with($taskKey, 'PATIENT_FOLLOW_UP')) {
                             return [
                                 Textarea::make('notes')
                                     ->required()
-                                    ->label('Follow-up Notes')
+                                    ->label('Follow-up Outcome / Notes')
+                                    ->placeholder('Enter details about the interaction...')
                                     ->rows(4),
                             ];
                         }
 
-                        // --- BATCH EDITING FORM LOGIC ---
+                        // Case B: Technician Price Verification
                         if ($taskKey === 'TECHNICIAN_PRICE_VERIFY') {
                             $products = $record->pharmacyProducts()
                                 ->with('medicationVariant.medication')
                                 ->get();
 
                             return [
-                                Forms\Components\Repeater::make('products')
+                                Section::make('Update Product Prices')
+                                    ->description('Review and update prices below. Prices will be updated immediately upon confirmation.')
                                     ->schema([
-                                        Forms\Components\Hidden::make('id'),
-                                        TextEntry::make('name')->label('Product'),
-                                        Forms\Components\TextInput::make('new_price')
-                                            ->numeric()
-                                            ->required()
-                                            ->prefix('₦')
-                                            ->label('New Price'),
-                                    ])
-                                    ->columns(2)
-                                    ->addable(false)
-                                    ->deletable(false)
-                                    ->default(
-                                        $products->map(fn ($p) => [
-                                            'id' => $p->id,
-                                            'name' => $p->name,
-                                        ])->all()
-                                    ),
+                                        Forms\Components\Repeater::make('products')
+                                            ->label('Product List')
+                                            ->schema([
+                                                Forms\Components\Hidden::make('id'),
+                                                Forms\Components\TextInput::make('name')
+                                                    ->label('Product Name')
+                                                    ->disabled()
+                                                    ->dehydrated(false), // Don't send name back
+                                                Forms\Components\TextInput::make('new_price')
+                                                    ->numeric()
+                                                    ->required()
+                                                    ->prefix('₦')
+                                                    ->label('New Price'),
+                                            ])
+                                            ->columns(2)
+                                            ->addable(false)
+                                            ->deletable(false)
+                                            ->reorderable(false)
+                                            ->default($products->map(fn ($p) => [
+                                                'id' => $p->id,
+                                                'name' => $p->name,
+                                                'new_price' => $p->price / 100, // Show formatted price if needed, assuming stored in kobo
+                                            ])->all()),
+                                    ]),
                             ];
                         }
-                        // --- END BATCH EDITING LOGIC ---
 
+                        // Case C: Integrity Check
                         if ($taskKey === 'PRODUCT_INTEGRITY_CHECK') {
                             $products = $record->pharmacyProducts()->with('medicationVariant.medication')->get();
 
                             return [
-                                TextEntry::make('instructions')
-                                    ->label('Instructions')
-                                    ->state($record->description),
+                                Section::make('Instructions')
+                                    ->schema([
+                                        TextEntry::make('instructions')
+                                            ->hiddenLabel()
+                                            ->state($record->description)
+                                            ->prose(),
+                                    ]),
 
                                 Forms\Components\CheckboxList::make('confirmation')
-                                    ->label('Confirmation Checklist')
-                                    ->options(
-                                        $products->mapWithKeys(fn ($p) => [$p->id => $p->name])
-                                    )
-                                    ->helperText('Please check the box for each product to confirm you have completed the required action.')
+                                    ->label('Checklist Confirmation')
+                                    ->options($products->mapWithKeys(fn ($p) => [$p->id => $p->name]))
+                                    ->helperText('Check each box to confirm the integrity action was performed.')
                                     ->required()
+                                    ->bulkToggleable()
                                     ->rules(['array', function ($attribute, $value, $fail) use ($products) {
                                         if (count($value) !== $products->count()) {
-                                            $fail('You must confirm the action for all listed products.');
+                                            $fail('You must verify all listed products.');
                                         }
                                     }]),
                             ];
                         }
 
-                        return []; // Default for simple confirmation tasks
+                        return [
+                            TextEntry::make('confirmation_text')
+                                ->content('Are you sure you want to mark this task as completed?'),
+                        ];
                     })
-
-                    ->requiresConfirmation()
+                    
+                    // --- Action Logic ---
                     ->action(function (Task $record, array $data, AwardPointsAction $awardPoints) {
                         $taskKey = $record->taskDefinition->key;
                         $user = Auth::user();
 
-                        if ($taskKey === 'PRODUCT_INTEGRITY_CHECK') {
-                            $confirmedProducts = PharmacyProduct::find(array_keys($data['confirmation']));
-
-                            PharmacistActionLog::create([
-                                'user_id' => $user->id,
-                                'subjectable_id' => $record->id,
-                                'subjectable_type' => $record->getMorphClass(),
-                                'action_type' => 'PRODUCT_INTEGRITY_CHECK_CONFIRMED',
-                                'description' => "Confirmed completion of product integrity check: '{$record->title}'.",
-                                'metadata' => [
-                                    'alert_title' => $record->title,
-                                    'confirmed_product_ids' => $confirmedProducts->pluck('id')->all(),
-                                ],
-                            ]);
-                        }
-
-                        if (str_starts_with($taskKey, 'PATIENT_FOLLOW_UP')) {
-                            if ($record->subjectable instanceof Patient) {
-                                $record->subjectable->interactions()->create([
+                        DB::transaction(function () use ($record, $data, $user, $taskKey, $awardPoints) {
+                            
+                            // Logic: Integrity Check
+                            if ($taskKey === 'PRODUCT_INTEGRITY_CHECK') {
+                                $confirmedProducts = PharmacyProduct::find(array_keys($data['confirmation']));
+                                PharmacistActionLog::create([
                                     'user_id' => $user->id,
-                                    'type' => $record->taskDefinition->name,
-                                    'notes' => $data['notes'],
+                                    'subjectable_id' => $record->id,
+                                    'subjectable_type' => $record->getMorphClass(),
+                                    'action_type' => 'PRODUCT_INTEGRITY_CHECK_CONFIRMED',
+                                    'description' => "Confirmed integrity check: '{$record->title}'",
+                                    'metadata' => [
+                                        'confirmed_ids' => $confirmedProducts->pluck('id')->all(),
+                                    ],
                                 ]);
                             }
-                        } elseif ($taskKey === 'TECHNICIAN_PRICE_VERIFY') {
-                            // --- BATCH UPDATE ACTION LOGIC ---
-                            DB::transaction(function () use ($data, $user) {
+
+                            // Logic: Patient Follow Up
+                            if (str_starts_with($taskKey, 'PATIENT_FOLLOW_UP')) {
+                                if ($record->subjectable instanceof Patient) {
+                                    $record->subjectable->interactions()->create([
+                                        'user_id' => $user->id,
+                                        'type' => $record->taskDefinition->name,
+                                        'notes' => $data['notes'],
+                                    ]);
+                                }
+                            } 
+                            
+                            // Logic: Price Verify
+                            elseif ($taskKey === 'TECHNICIAN_PRICE_VERIFY') {
                                 foreach ($data['products'] as $productData) {
                                     $product = PharmacyProduct::find($productData['id']);
                                     if ($product) {
                                         $newPriceInKobo = (int) ($productData['new_price'] * 100);
-                                        $product->update(['price' => $newPriceInKobo]);
-
-                                        PriceHistory::create([
-                                            'pharmacy_product_id' => $product->id,
-                                            'price' => $newPriceInKobo,
-                                            'updated_by_user_id' => $user->id,
-                                        ]);
+                                        // Only update if changed
+                                        if ($product->price !== $newPriceInKobo) {
+                                            $product->update(['price' => $newPriceInKobo]);
+                                            PriceHistory::create([
+                                                'pharmacy_product_id' => $product->id,
+                                                'price' => $newPriceInKobo,
+                                                'updated_by_user_id' => $user->id,
+                                            ]);
+                                        }
                                     }
                                 }
-                            });
-                            // --- END BATCH UPDATE LOGIC ---
-                        }
+                            }
 
-                        // --- UNIVERSAL COMPLETION LOGIC ---
-                        $record->update([
-                            'status' => 'completed',
-                            'completed_at' => now(),
-                        ]);
+                            // Finalize Task
+                            $record->update([
+                                'status' => 'completed',
+                                'completed_at' => now(),
+                            ]);
 
-                        $awardPoints->execute($user, $taskKey, $record);
+                            $awardPoints->execute($user, $taskKey, $record);
+                        });
 
                         Notification::make()
-                            ->title('Task Completed!')
-                            ->body("You earned {$record->taskDefinition->points} points.")
+                            ->title('Task Completed')
+                            ->body("You earned {$record->taskDefinition->points} points!")
                             ->success()
                             ->send();
                     })
                     ->modalHeading(fn (Task $record) => $record->taskDefinition->name),
             ])
-            ->defaultSort('due_at', 'desc');
+            ->defaultSort('due_at', 'asc') // Sort by nearest due date first
+            ->toolbarActions([]); // Disable bulk actions for safety
     }
 
     public static function getPages(): array
