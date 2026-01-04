@@ -2,16 +2,15 @@
 
 namespace App\Filament\Pharmacy\Resources\TeamTasks\Schemas;
 
-use Filament\Schemas\Schema;
-use Filament\Infolists\Infolist;
-use Filament\Support\Colors\Color;
+use Filament\Infolists\Components\RepeatableEntry;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Group;
-use Filament\Support\Enums\FontWeight;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
+use Filament\Support\Colors\Color;
+use Filament\Support\Enums\FontWeight;
 use Src\Gamification\Domain\Models\Task;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Components\RepeatableEntry;
 
 class TeamTaskInfolist
 {
@@ -20,7 +19,7 @@ class TeamTaskInfolist
         return $infolist
             ->schema([
                 // Use a 3-column Grid to create a "2/3 + 1/3" layout
-                Grid::make(['default' => 1, 'md' => 3]) 
+                Grid::make(['default' => 1, 'md' => 3])
                     ->schema([
                         // LEFT COLUMN: Takes up 2 columns out of 3
                         Group::make([
@@ -29,7 +28,7 @@ class TeamTaskInfolist
                                     TextEntry::make('taskDefinition.name')
                                         ->label('Task Name')
                                         ->weight(FontWeight::Bold),
-                                        // ->size(TextEntry\TextEntrySize::Large),
+                                    // ->size(TextEntry\TextEntrySize::Large),
 
                                     TextEntry::make('taskDefinition.description')
                                         ->label('Instructions')
@@ -61,7 +60,7 @@ class TeamTaskInfolist
                                         ->columnSpanFull(),
                                 ]),
                         ])
-                        ->columnSpan(['md' => 2]), // <--- This creates the main content area
+                            ->columnSpan(['md' => 2]), // <--- This creates the main content area
 
                         // RIGHT COLUMN: Takes up 1 column out of 3
                         Group::make([
@@ -99,7 +98,7 @@ class TeamTaskInfolist
                                         ->dateTime(),
                                 ]),
                         ])
-                        ->columnSpan(['md' => 1]), // <--- This creates the sidebar
+                            ->columnSpan(['md' => 1]), // <--- This creates the sidebar
                     ]),
             ]);
     }

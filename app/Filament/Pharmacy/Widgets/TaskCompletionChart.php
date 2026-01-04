@@ -22,7 +22,26 @@ class TaskCompletionChart extends ChartWidget
             ->map(fn ($group) => $group->count());
 
         return [
-            'datasets' => [['label' => 'Tasks', 'data' => $data->values()->all()]],
+            'datasets' => [
+                [
+                    'label' => 'Tasks',
+                    'data' => $data->values()->all(),
+                    // Define an array of colors here.
+                    // Chart.js will assign them in order to your data points.
+                    'backgroundColor' => [
+                        '#3b82f6', // Blue
+                        '#ef4444', // Red
+                        '#22c55e', // Green
+                        '#eab308', // Yellow
+                        '#a855f7', // Purple
+                        '#f97316', // Orange
+                        '#06b6d4', // Cyan
+                        '#ec4899', // Pink
+                    ],
+                    'borderColor' => '#ffffff', // Optional: Adds a white border between segments
+                    'borderWidth' => 2,
+                ],
+            ],
             'labels' => $data->keys()->all(),
         ];
     }

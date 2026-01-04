@@ -1,7 +1,7 @@
 <section class="relative py-20 overflow-hidden bg-gray-50">
     <!-- Subtle radial background glow (Stripe style) -->
     <div class="absolute inset-0 -z-10">
-        <div class="absolute top-1/2 left-1/2 w-[120%] h-[120%] bg-gradient-to-b from-emerald-50/30 via-white to-gray-50 blur-3xl rounded-full transform -translate-x-1/2 -translate-y-1/2"></div>
+        <div class="absolute top-1/2 left-1/2 w-[120%] h-[120%] bg-linear-to-b from-emerald-50/30 via-white to-gray-50 blur-3xl rounded-full transform -translate-x-1/2 -translate-y-1/2"></div>
     </div>
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

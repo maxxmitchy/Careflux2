@@ -67,12 +67,12 @@
             <div x-show="$wire.step === 'select_options'" x-transition.opacity>
 
                 <div class="flex flex-col sm:flex-row items-start gap-4 sm:gap-6 pb-6 mb-3">
-                    <div class="flex-shrink-0 w-24 h-24 sm:w-28 sm:h-28 bg-gray-100 rounded-lg border flex items-center justify-center p-2">
+                    <div class="shrink-0 w-24 h-24 sm:w-28 sm:h-28 bg-gray-100 rounded-lg border flex items-center justify-center p-2">
                         <img src="{{ $product->image ? asset('storage/' . $product->image) : asset('/images/placeholderimg.jpeg') }}"
                              alt="{{ $product->medicationVariant->medication->name }}"
                              class="max-h-full max-w-full object-contain">
                     </div>
-                    <div class="flex-grow">
+                    <div class="grow">
                         <h1 class="text-base sm:text-lg font-bold text-gray-900 leading-tight">
                             Verify Prescription for <br> {{ $product->medicationVariant->medication->name }}
                         </h1>

@@ -7,10 +7,10 @@
         <!-- Header Section -->
         <header class="bg-white rounded-xl border border-gray-200 p-6 sm:p-8">
             <div class="flex flex-col sm:flex-row items-start gap-6">
-                <div class="flex-shrink-0">
+                <div class="shrink-0">
                     <img src="{{ asset('storage/' . $pharmacy->logo) }}" alt="{{ $pharmacy->name }} Logo" class="h-40 w-full rounded-lg bg-gray-100 p-2 border">
                 </div>
-                <div class="flex-grow">
+                <div class="grow">
                     <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-xs font-semibold text-emerald-800">
                         <x-heroicon-s-check-badge class="h-4 w-4"/>
                         Verified Careflux Partner

@@ -102,7 +102,7 @@
                             alt="{{ $item->productable->product_name }}"
                         >
 
-                        <div class="flex-grow flex flex-col justify-between">
+                        <div class="grow flex flex-col justify-between">
                             {{-- Product Name --}}
                             <p class="text-xs sm:text-sm font-semibold text-gray-800">{{ $item->productable->product_name }}</p>
 

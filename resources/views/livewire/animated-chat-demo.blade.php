@@ -25,7 +25,7 @@
     class="w-full max-w-lg mx-auto bg-white rounded-3xl shadow-sm overflow-hidden border border-gray-100 font-sans"
 >
     <!-- Header -->
-    <header class="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white p-4 flex items-center justify-between shadow-md">
+    <header class="bg-linear-to-r from-emerald-600 to-emerald-700 text-white p-4 flex items-center justify-between shadow-md">
         <div class="flex items-center space-x-3">
             <img src="https://ui-avatars.com/api/?name=Sarah+Chen&background=E0F2F1&color=0D9488"
                  alt="Dr. Sarah Chen"

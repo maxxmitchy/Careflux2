@@ -24,7 +24,7 @@
 
         @if($row1->isNotEmpty())
             {{-- This main container uses a mask to fade out the edges for a seamless look --}}
-            <div class="relative [mask-image:linear-gradient(to_right,transparent,white_10%,white_90%,transparent)]">
+            <div class="relative [mask:linear-gradient(to_right,transparent,white_10%,white_90%,transparent)]">
                 <div class="space-y-4">
 
                     <!-- Row 1: Scrolls Left -->

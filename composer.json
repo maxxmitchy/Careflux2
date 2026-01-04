@@ -17,6 +17,7 @@
         "laravel/tinker": "^2.10.1",
         "livewire/flux": "^2.1.1",
         "livewire/volt": "^1.7.0",
+        "panphp/pan": "^0.1.8",
         "pxlrbt/filament-excel": "^3.1",
         "setasign/fpdf": "^1.8",
         "spatie/browsershot": "^5.0",

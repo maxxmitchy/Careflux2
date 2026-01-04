@@ -2,27 +2,27 @@
 
 namespace App\Filament\Technician\Resources\Tasks\Tables;
 
-use Filament\Tables\Table;
 use Filament\Actions\Action;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Auth;
-use Filament\Actions\BulkActionGroup;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Hidden;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Support\Enums\FontWeight;
-use Src\Patient\Domain\Models\Patient;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Textarea;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
-use Src\Gamification\Domain\Models\Task;
-use Filament\Forms\Components\DatePicker;
+use Filament\Support\Enums\FontWeight;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
-use Src\Pharmacy\Domain\Models\ProductExpiry;
+use Filament\Tables\Table;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Src\Gamification\Application\Actions\AwardPointsAction;
+use Src\Gamification\Domain\Models\Task;
+use Src\Patient\Domain\Models\Patient;
+use Src\Pharmacy\Domain\Models\ProductExpiry;
 
 class TasksTable
 {
@@ -66,14 +66,14 @@ class TasksTable
             ])
             ->recordActions([
                 ViewAction::make(),
-                
+
                 // --- MAIN COMPLETION ACTION ---
                 Action::make('complete_task')
                     ->label('Complete')
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
                     ->visible(fn (Task $record): bool => $record->status === 'pending')
-                    ->modalHeading(fn (Task $record) => 'Complete: ' . $record->taskDefinition->name)
+                    ->modalHeading(fn (Task $record) => 'Complete: '.$record->taskDefinition->name)
                     ->modalWidth('lg')
                     ->schema(function (Task $record): array {
                         $taskKey = $record->taskDefinition->key;
@@ -113,8 +113,8 @@ class TasksTable
                                     ->addable(false)
                                     ->deletable(false)
                                     ->default($products->map(fn ($p) => [
-                                        'id' => $p->id, 
-                                        'name_display' => $p->name
+                                        'id' => $p->id,
+                                        'name_display' => $p->name,
                                     ])->all()),
                             ];
                         }
@@ -122,6 +122,7 @@ class TasksTable
                         // 3. Expiry Log
                         if (str_starts_with($taskKey, 'TECHNICIAN_EXPIRY_LOG')) {
                             $products = $record->pharmacyProducts()->with('medicationVariant.medication')->get();
+
                             return [
                                 Repeater::make('products')
                                     ->schema([
@@ -143,8 +144,8 @@ class TasksTable
                                     ->addable(false)
                                     ->deletable(false)
                                     ->default($products->map(fn ($p) => [
-                                        'id' => $p->id, 
-                                        'name_display' => $p->name
+                                        'id' => $p->id,
+                                        'name_display' => $p->name,
                                     ])->all()),
                             ];
                         }
@@ -170,14 +171,14 @@ class TasksTable
                         }
 
                         // Default for generic tasks
-                        return []; 
+                        return [];
                     })
                     ->action(function (Task $record, array $data, AwardPointsAction $awardPoints) {
                         $taskKey = $record->taskDefinition->key;
                         $user = Auth::user();
 
                         DB::transaction(function () use ($record, $data, $taskKey, $user, $awardPoints) {
-                            
+
                             // Save Patient Interaction
                             if (str_starts_with($taskKey, 'PATIENT_FOLLOW_UP') && $record->subjectable instanceof Patient) {
                                 $record->subjectable->interactions()->create([

@@ -32,7 +32,7 @@
                     }
                 }"
                 x-init="start()"
-                class="relative bg-slate-800 rounded-2xl p-10 border border-slate-700 shadow-2xl flex flex-col justify-center items-center min-h-[26rem]"
+                class="relative bg-slate-800 rounded-2xl p-10 border border-slate-700 shadow-2xl flex flex-col justify-center items-center min-h-104"
             >
                 <!-- Connection Nodes -->
                 <div class="absolute inset-0 flex items-center justify-between px-10 pointer-events-none">
@@ -87,7 +87,7 @@
                             x-transition:enter-start="opacity-0 translate-y-4"
                             x-transition:enter-end="opacity-100 translate-y-0"
                             class="absolute inset-0 flex items-center justify-center gap-3 text-center px-2">
-                            <x-heroicon-o-sparkles class="h-6 w-6 flex-shrink-0"
+                            <x-heroicon-o-sparkles class="h-6 w-6 shrink-0"
                                 x-bind:class="step.status === 'mismatched' ? 'text-red-400' : 'text-emerald-400'"/>
                             <div>
                                 <p class="text-left text-sm font-bold text-white" x-text="step.title"></p>

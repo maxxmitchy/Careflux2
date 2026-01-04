@@ -24,12 +24,12 @@
                  alt="A smiling patient receiving a consultation"
                  class="absolute inset-0 w-full h-full object-cover">
 
-            <div class="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-emerald-50/20 via-transparent to-transparent"></div>
+            <div class="absolute inset-0 bg-linear-to-t md:bg-linear-to-r from-emerald-50/20 via-transparent to-transparent"></div>
 
             {{-- UI Snippet 1: Refill Request --}}
             <div class="absolute top-4 left-4 sm:left-auto sm:right-4 max-w-xs w-full animate-fade-in-up" style="animation-delay: 200ms;">
                 <div class="p-3 rounded-lg shadow-xl bg-white/80 backdrop-blur-md flex items-center gap-3">
-                    <img src="https://ui-avatars.com/api/?name=Jane+Doe&background=0D9488&color=fff" alt="Pharmacist" class="h-8 w-8 rounded-full flex-shrink-0">
+                    <img src="https://ui-avatars.com/api/?name=Jane+Doe&background=0D9488&color=fff" alt="Pharmacist" class="h-8 w-8 rounded-full shrink-0">
                     <p class="text-xs sm:text-sm text-gray-700">Hey Olivia, we've received your refill request!</p>
                 </div>
             </div>

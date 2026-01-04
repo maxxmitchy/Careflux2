@@ -14,7 +14,7 @@
                         <ul role="list" class="-my-4 divide-y divide-gray-100">
                             @foreach ($this->cartItems() as $item)
                                 <li wire:key="{{ $item->cartKey }}" class="flex py-4 items-center">
-                                    <div class="h-16 w-16 flex-shrink-0 rounded border border-gray-200 overflow-hidden">
+                                    <div class="h-16 w-16 shrink-0 rounded border border-gray-200 overflow-hidden">
                                         <img src="{{ $item->imageUrl ? asset('/storage/' . $item->imageUrl) : asset('/images/placeholderimg.jpeg') }}"
                                             alt="{{ $item->productName }}" class="h-full w-full object-contain">
                                     </div>

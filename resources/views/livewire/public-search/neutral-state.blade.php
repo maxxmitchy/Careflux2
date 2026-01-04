@@ -80,7 +80,7 @@
             <div class="mt-4 -mx-4 px-4 sm:mx-0 sm:px-0 flex gap-4 overflow-x-auto pb-4 custom-scrollbar">
                 {{-- --- THIS IS THE DEFINITIVE FIX --- --}}
                 @foreach($this->popularProductsShowcase as $product)
-                    <div class="flex-shrink-0 w-48 sm:w-56"> {{-- Fixed width for carousel items --}}
+                    <div class="shrink-0 w-48 sm:w-56"> {{-- Fixed width for carousel items --}}
                         @php
                             // Transform the Eloquent model into the standardized object for the component
                             $productData = (object) [

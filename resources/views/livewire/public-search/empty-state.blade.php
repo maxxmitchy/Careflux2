@@ -1,6 +1,6 @@
-<div class="relative py-16 px-4 bg-gradient-to-b from-white to-emerald-50/40 rounded border border-gray-100 shadow-sm overflow-hidden">
+<div class="relative py-16 px-4 bg-linear-to-b from-white to-emerald-50/40 rounded border border-gray-100 shadow-sm overflow-hidden">
     <div class="text-center max-w-xl mx-auto">
-        {{-- ✨ Icon & Title --}}
+        {{-- ✨ Icon & Title --}}   
         <div class="flex flex-col items-center">
             <x-heroicon-o-magnifying-glass class="h-14 w-14 text-emerald-500 opacity-80" />
             <h3 class="mt-4 text-base font-semibold text-gray-900">No Results Found</h3>
@@ -17,11 +17,11 @@
     <div class="mt-8 pt-10">
         @if(($emptyStateBanners && $emptyStateBanners->isNotEmpty()) || $this->popularProductsShowcase->isNotEmpty())
             <div class="relative flex items-center justify-center mb-10">
-                <div class="flex-grow border-t border-gray-300"></div>
+                <div class="grow border-t border-gray-300"></div>
                 <span class="mx-4 text-xs sm:text-sm font-semibold text-gray-600 uppercase tracking-wider">
                     You might like these instead
                 </span>
-                <div class="flex-grow border-t border-gray-300"></div>
+                <div class="grow border-t border-gray-300"></div>
             </div>
         @endif
 

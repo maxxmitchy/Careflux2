@@ -44,8 +44,8 @@
                             @endif
                             {{-- --- END OF FIX --- --}}
                         </div>
-                        <div class="p-3 flex-grow flex flex-col">
-                            <h3 class="text-xs font-semibold text-gray-800 line-clamp-2 flex-grow">{{ $productObject->name ?? 'Unnamed Product' }}</h3>
+                        <div class="p-3 grow flex flex-col">
+                            <h3 class="text-xs font-semibold text-gray-800 line-clamp-2 grow">{{ $productObject->name ?? 'Unnamed Product' }}</h3>
                             <p class="mt-2 text-sm font-bold text-gray-900">₦{{ number_format(($productObject->price ?? 0) / 100, 2) }}</p>
                         </div>
                         <div class="p-3 border-t">
@@ -69,7 +69,7 @@
                                 </span>
 
                                 {{-- Spinner while loading --}}
-                                <span wire:loading wire:target="addToCart({{ $productObject->product_id }})" class="inline-flex flex items-center gap-2">
+                                <span wire:loading wire:target="addToCart({{ $productObject->product_id }})" class="flex items-center gap-2">
                                     <svg class="inline-flex animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                         <path class="opacity-75" fill="currentColor"

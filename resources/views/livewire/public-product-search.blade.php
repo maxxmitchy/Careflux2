@@ -58,11 +58,11 @@
                             </select>
                         </div>
                         <div class="mt-3 flex gap-2 overflow-x-auto pb-2 custom-scrollbar">
-                             <label class="flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded cursor-pointer transition-colors" :class="$wire.verifiedOnly ? 'bg-emerald-50 border-emerald-200' : 'bg-white border-gray-300'">
+                             <label class="shrink-0 flex items-center gap-2 px-3 py-2 rounded cursor-pointer transition-colors" :class="$wire.verifiedOnly ? 'bg-emerald-50 border-emerald-200' : 'bg-white border-gray-300'">
                                 <input wire:model.live="verifiedOnly" type="checkbox" class="h-4 w-4 rounded-full text-emerald-600 focus:ring-emerald-500">
                                 <span class="text-xs font-semibold text-gray-800 flex items-center gap-1"><x-heroicon-s-check-badge class="h-4 w-4 text-emerald-600" /> Verified Partners</span>
                             </label>
-                             <label class="flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded cursor-pointer transition-colors" :class="$wire.otcOnly ? 'bg-blue-50 border-blue-200' : 'bg-white border-gray-300'">
+                             <label class="shrink-0 flex items-center gap-2 px-3 py-2 rounded cursor-pointer transition-colors" :class="$wire.otcOnly ? 'bg-blue-50 border-blue-200' : 'bg-white border-gray-300'">
                                 <input wire:model.live="otcOnly" type="checkbox" class="h-4 w-4 rounded-full text-blue-600 focus:ring-blue-500">
                                 <span class="text-xs font-semibold text-gray-800">OTC Only</span>
                             </label>

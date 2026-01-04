@@ -26,7 +26,7 @@
             <div class="flex items-center justify-between">
                 <span class="text-sm font-semibold text-gray-800 tracking-wide">Max Price</span>
                 <span
-                    class="text-lg font-bold bg-gradient-to-r from-emerald-600 to-emerald-600 bg-clip-text text-transparent">
+                    class="text-lg font-bold bg-linear-to-r from-emerald-600 to-emerald-600 bg-clip-text text-transparent">
                     ₦{{ number_format($max_price ?? 100000) }}
                 </span>
             </div>

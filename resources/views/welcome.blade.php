@@ -251,7 +251,7 @@
                                     }, 3500);
                                 }
                             }"
-                            class="relative bg-gray-900/80 backdrop-blur-xl rounded-2xl p-6 border border-white/10 shadow-2xl shadow-black/20 min-h-[20rem] flex flex-col justify-center"
+                            class="relative bg-gray-900/80 backdrop-blur-xl rounded-2xl p-6 border border-white/10 shadow-2xl shadow-black/20 min-h-80 flex flex-col justify-center"
                         >
                             <!-- Background Glow -->
                             <div class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-40 bg-emerald-500/10 rounded-full blur-3xl opacity-50"></div>
@@ -259,7 +259,7 @@
                             <div class="relative z-10">
                                 <!-- Animated Step Text -->
                                 <div class="flex items-start gap-4">
-                                    <div class="relative w-12 h-12 flex-shrink-0">
+                                    <div class="relative w-12 h-12 shrink-0">
                                         <template x-for="(step, index) in steps" :key="index">
                                             <div x-show="currentIndex === index"
                                                 x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 scale-75" x-transition:enter-end="opacity-100 scale-100"
@@ -310,7 +310,7 @@
         <!-- Pharmacist Earning Showcase -->
         @if($earningShowcase)
         <section class="py-20 bg-white">
-                <small class="text-xs flex justify-center mb-4 font-extrabold bg-gradient-to-r from-emerald-600 to-emerald-500 bg-clip-text text-transparent uppercase">
+                <small class="text-xs flex justify-center mb-4 font-extrabold bg-linear-to-r from-emerald-600 to-emerald-500 bg-clip-text text-transparent uppercase">
                 FOR PHARMACISTS & CUSTOMERS
                 </small>
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -333,7 +333,7 @@
                                 }
                             }"
                             x-init="startAnimation()"
-                            class="relative bg-gray-900 rounded-2xl p-6 h-[24rem] flex flex-col justify-between border border-gray-700 shadow-2xl"
+                            class="relative bg-gray-900 rounded-2xl p-6 h-96 flex flex-col justify-between border border-gray-700 shadow-2xl"
                         >
                             <!-- Header with Wallet -->
                             <div class="flex justify-between items-center">
@@ -360,7 +360,7 @@
                                         x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0"
                                         x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
                                         class="absolute inset-0 flex items-center gap-4">
-                                        <div class="flex-shrink-0 h-10 w-10 bg-gray-800 rounded-full flex items-center justify-center border border-gray-700">
+                                        <div class="shrink-0 h-10 w-10 bg-gray-800 rounded-full flex items-center justify-center border border-gray-700">
                                             <x-heroicon-o-sparkles class="h-5 w-5 text-emerald-400" />
                                         </div>
                                         <div>
