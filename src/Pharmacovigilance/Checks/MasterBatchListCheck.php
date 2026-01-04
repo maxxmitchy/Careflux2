@@ -3,9 +3,9 @@
 namespace Src\Pharmacovigilance\Checks;
 
 use Illuminate\Support\Facades\DB;
-use Src\Pharmacovigilance\Domain\Models\ProductAlert;
-use Src\Pharmacovigilance\Domain\Models\MasterBatchList;
 use Src\Pharmacovigilance\Contracts\PharmacovigilanceCheckInterface;
+use Src\Pharmacovigilance\Domain\Models\MasterBatchList;
+use Src\Pharmacovigilance\Domain\Models\ProductAlert;
 
 class MasterBatchListCheck implements PharmacovigilanceCheckInterface
 {

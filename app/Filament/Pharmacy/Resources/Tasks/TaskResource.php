@@ -2,31 +2,29 @@
 
 namespace App\Filament\Pharmacy\Resources\Tasks;
 
+use App\Filament\Pharmacy\Resources\Patients\PatientResource;
+use App\Filament\Pharmacy\Resources\Tasks\Pages\ManageTasks;
 use BackedEnum;
-use Filament\Forms;
-use Filament\Tables;
-use Filament\Tables\Table;
 use Filament\Actions\Action;
 use Filament\Facades\Filament;
-use Filament\Resources\Resource;
-use Illuminate\Support\Facades\DB;
-use Filament\Tables\Filters\Filter;
-use Illuminate\Support\Facades\Auth;
-use Src\Patient\Domain\Models\Patient;
+use Filament\Forms;
 use Filament\Forms\Components\Textarea;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Notifications\Notification;
-use Filament\Schemas\Components\Section;
-use Src\Gamification\Domain\Models\Task;
-use Filament\Tables\Filters\SelectFilter;
-use Illuminate\Database\Eloquent\Builder;
 use Filament\Infolists\Components\TextEntry;
-use Src\Pharmacy\Domain\Models\PriceHistory;
-use Src\Pharmacy\Domain\Models\PharmacyProduct;
+use Filament\Notifications\Notification;
+use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Src\Audit\Domain\Models\PharmacistActionLog;
 use Src\Gamification\Application\Actions\AwardPointsAction;
-use App\Filament\Pharmacy\Resources\Tasks\Pages\ManageTasks;
-use App\Filament\Pharmacy\Resources\Patients\PatientResource;
+use Src\Gamification\Domain\Models\Task;
+use Src\Patient\Domain\Models\Patient;
+use Src\Pharmacy\Domain\Models\PharmacyProduct;
+use Src\Pharmacy\Domain\Models\PriceHistory;
 
 class TaskResource extends Resource
 {
@@ -40,17 +38,20 @@ class TaskResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        return static::getModel()::where('assigned_to_user_id', Auth::id())
+        return static::getModel()::query()
+            ->where('assigned_to_user_id', Auth::id())
             ->where('status', 'pending')
+            // Only count tasks that are NOT overdue
+            ->where(fn (Builder $query) => $query->whereNull('due_at')->orWhere('due_at', '>=', now()))
             ->count();
     }
 
     public static function table(Table $table): Table
     {
         return $table
-            ->poll('30s') // Auto-refresh for new tasks
+            ->poll('30s')
             ->columns([
-                // 1. Task Information (Name & Description)
+                // 1. Task Information
                 TextColumn::make('taskDefinition.name')
                     ->label('Task Details')
                     ->searchable()
@@ -60,7 +61,7 @@ class TaskResource extends Resource
                     ->description(fn (Task $record) => str($record->description)->limit(50))
                     ->wrap(),
 
-                // 2. Subject (Patient/Product link)
+                // 2. Subject
                 TextColumn::make('subjects_description')
                     ->label('Subject / Patient')
                     ->wrap()
@@ -69,6 +70,7 @@ class TaskResource extends Resource
                         if ($record->subjectable instanceof Patient) {
                             return PatientResource::getUrl('view', ['record' => $record->subjectable]);
                         }
+
                         return null;
                     })
                     ->color('gray'),
@@ -78,10 +80,9 @@ class TaskResource extends Resource
                     ->label('Deadline')
                     ->date('M j, Y H:i')
                     ->description(fn (Task $record) => $record->due_at ? $record->due_at->diffForHumans() : null)
-                    ->sortable()
-                    ->color(fn (Task $record) => $record->due_at && $record->due_at->isPast() && $record->status === 'pending' ? 'danger' : 'gray'),
+                    ->sortable(),
 
-                // 4. Reward Points
+                // 4. Points
                 TextColumn::make('taskDefinition.points')
                     ->label('Points')
                     ->badge()
@@ -111,14 +112,9 @@ class TaskResource extends Resource
                         'completed' => 'Completed',
                     ])
                     ->default('pending'),
-
-                Filter::make('overdue')
-                    ->label('Overdue Tasks')
-                    ->query(fn (Builder $query) => $query->where('status', 'pending')->where('due_at', '<', now()))
-                    ->toggle(),
             ])
             ->recordActions([
-                // ACTION 1: Send WhatsApp (Patient Counseling)
+                // ACTION 1: Send WhatsApp
                 Action::make('send_and_complete')
                     ->label('Review & Send')
                     ->icon('heroicon-o-chat-bubble-left-right')
@@ -155,7 +151,7 @@ class TaskResource extends Resource
                                 ->icon('heroicon-s-check')
                                 ->action(function (Task $record, AwardPointsAction $awardPoints) {
                                     $user = Auth::user();
-                                    
+
                                     PharmacistActionLog::create([
                                         'user_id' => $user->id,
                                         'task_id' => $record->id,
@@ -168,7 +164,7 @@ class TaskResource extends Resource
 
                                     $record->update(['status' => 'completed', 'completed_at' => now()]);
                                     $awardPoints->execute($user, $record->taskDefinition->key, $record);
-                                    
+
                                     Notification::make()->title('Task Completed')->body("+{$record->taskDefinition->points} Points")->success()->send();
                                 })
                                 ->requiresConfirmation(),
@@ -177,7 +173,7 @@ class TaskResource extends Resource
                     ->modalSubmitAction(false)
                     ->modalCancelActionLabel('Close'),
 
-                // ACTION 2: General Completion (Dynamic Form)
+                // ACTION 2: General Completion
                 Action::make('complete_task')
                     ->label('Complete Task')
                     ->icon('heroicon-o-check-circle')
@@ -185,12 +181,9 @@ class TaskResource extends Resource
                     ->hidden(fn (Task $record): bool => $record->taskDefinition->key === 'PATIENT_COUNSELING_FOLLOW_UP')
                     ->visible(fn (Task $record): bool => $record->status === 'pending')
                     ->modalWidth(fn (Task $record) => $record->taskDefinition->key === 'TECHNICIAN_PRICE_VERIFY' ? '4xl' : 'lg')
-                    
-                    // --- Dynamic Form Schema ---
                     ->schema(function (Task $record): array {
                         $taskKey = $record->taskDefinition->key;
 
-                        // Case A: Patient Follow Up
                         if (str_starts_with($taskKey, 'PATIENT_FOLLOW_UP')) {
                             return [
                                 Textarea::make('notes')
@@ -201,7 +194,6 @@ class TaskResource extends Resource
                             ];
                         }
 
-                        // Case B: Technician Price Verification
                         if ($taskKey === 'TECHNICIAN_PRICE_VERIFY') {
                             $products = $record->pharmacyProducts()
                                 ->with('medicationVariant.medication')
@@ -218,7 +210,7 @@ class TaskResource extends Resource
                                                 Forms\Components\TextInput::make('name')
                                                     ->label('Product Name')
                                                     ->disabled()
-                                                    ->dehydrated(false), // Don't send name back
+                                                    ->dehydrated(false),
                                                 Forms\Components\TextInput::make('new_price')
                                                     ->numeric()
                                                     ->required()
@@ -232,13 +224,12 @@ class TaskResource extends Resource
                                             ->default($products->map(fn ($p) => [
                                                 'id' => $p->id,
                                                 'name' => $p->name,
-                                                'new_price' => $p->price / 100, // Show formatted price if needed, assuming stored in kobo
+                                                'new_price' => $p->price / 100,
                                             ])->all()),
                                     ]),
                             ];
                         }
 
-                        // Case C: Integrity Check
                         if ($taskKey === 'PRODUCT_INTEGRITY_CHECK') {
                             $products = $record->pharmacyProducts()->with('medicationVariant.medication')->get();
 
@@ -270,15 +261,11 @@ class TaskResource extends Resource
                                 ->content('Are you sure you want to mark this task as completed?'),
                         ];
                     })
-                    
-                    // --- Action Logic ---
                     ->action(function (Task $record, array $data, AwardPointsAction $awardPoints) {
                         $taskKey = $record->taskDefinition->key;
                         $user = Auth::user();
 
                         DB::transaction(function () use ($record, $data, $user, $taskKey, $awardPoints) {
-                            
-                            // Logic: Integrity Check
                             if ($taskKey === 'PRODUCT_INTEGRITY_CHECK') {
                                 $confirmedProducts = PharmacyProduct::find(array_keys($data['confirmation']));
                                 PharmacistActionLog::create([
@@ -287,13 +274,10 @@ class TaskResource extends Resource
                                     'subjectable_type' => $record->getMorphClass(),
                                     'action_type' => 'PRODUCT_INTEGRITY_CHECK_CONFIRMED',
                                     'description' => "Confirmed integrity check: '{$record->title}'",
-                                    'metadata' => [
-                                        'confirmed_ids' => $confirmedProducts->pluck('id')->all(),
-                                    ],
+                                    'metadata' => ['confirmed_ids' => $confirmedProducts->pluck('id')->all()],
                                 ]);
                             }
 
-                            // Logic: Patient Follow Up
                             if (str_starts_with($taskKey, 'PATIENT_FOLLOW_UP')) {
                                 if ($record->subjectable instanceof Patient) {
                                     $record->subjectable->interactions()->create([
@@ -302,15 +286,11 @@ class TaskResource extends Resource
                                         'notes' => $data['notes'],
                                     ]);
                                 }
-                            } 
-                            
-                            // Logic: Price Verify
-                            elseif ($taskKey === 'TECHNICIAN_PRICE_VERIFY') {
+                            } elseif ($taskKey === 'TECHNICIAN_PRICE_VERIFY') {
                                 foreach ($data['products'] as $productData) {
                                     $product = PharmacyProduct::find($productData['id']);
                                     if ($product) {
                                         $newPriceInKobo = (int) ($productData['new_price'] * 100);
-                                        // Only update if changed
                                         if ($product->price !== $newPriceInKobo) {
                                             $product->update(['price' => $newPriceInKobo]);
                                             PriceHistory::create([
@@ -323,12 +303,7 @@ class TaskResource extends Resource
                                 }
                             }
 
-                            // Finalize Task
-                            $record->update([
-                                'status' => 'completed',
-                                'completed_at' => now(),
-                            ]);
-
+                            $record->update(['status' => 'completed', 'completed_at' => now()]);
                             $awardPoints->execute($user, $taskKey, $record);
                         });
 
@@ -340,8 +315,8 @@ class TaskResource extends Resource
                     })
                     ->modalHeading(fn (Task $record) => $record->taskDefinition->name),
             ])
-            ->defaultSort('due_at', 'asc') // Sort by nearest due date first
-            ->toolbarActions([]); // Disable bulk actions for safety
+            ->defaultSort('due_at', 'asc')
+            ->toolbarActions([]);
     }
 
     public static function getPages(): array
@@ -360,7 +335,14 @@ class TaskResource extends Resource
                 'subjectable',
                 'pharmacyProducts.medicationVariant.medication',
             ])
-            ->where('assigned_to_user_id', Filament::auth()->id());
+            ->where('assigned_to_user_id', Filament::auth()->id())
+            // Logic: Hide Pending Overdue Tasks.
+            // Show if: Status is NOT pending (i.e., completed) OR Due Date is in the future (or null)
+            ->where(function (Builder $query) {
+                $query->where('status', '!=', 'pending')
+                    ->orWhereNull('due_at')
+                    ->orWhere('due_at', '>=', now());
+            });
     }
 
     public static function canCreate(): bool

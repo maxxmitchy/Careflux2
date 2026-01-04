@@ -2,13 +2,13 @@
 
 namespace App\Filament\Resources\Admin\ProductAlerts\Tables;
 
-use Filament\Tables\Table;
-use Filament\Actions\Action;
-use Filament\Actions\EditAction;
 use App\Jobs\DispatchAlertTasksJob;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 use Src\Pharmacovigilance\Domain\Models\ProductAlert;
 
 class ProductAlertsTable
