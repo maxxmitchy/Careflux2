@@ -238,7 +238,7 @@ class TaskResource extends Resource
                                     ->schema([
                                         TextEntry::make('instructions')
                                             ->hiddenLabel()
-                                            ->state($record->description)
+                                            ->state($record->instructions)
                                             ->prose(),
                                     ]),
 
