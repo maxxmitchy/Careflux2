@@ -14,7 +14,7 @@ class ProductAlertForm
     {
         return $schema
             ->components([
-                Select::make('medication_id')->relationship('medication', 'name')->required()->searchable(),
+                Select::make('medication_id')->relationship('medication', 'name')->required()->searchable()->preload(),
                 Select::make('type')->options(['recall' => 'Product Recall', 'batch_verification' => 'Batch Verification'])->required(),
                 Select::make('severity')->options(['low' => 'Low', 'medium' => 'Medium', 'high' => 'High', 'critical' => 'Critical'])->required(),
                 TextInput::make('title')->required(),
