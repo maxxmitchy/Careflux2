@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Admin\ProductAlerts\Tables;
 use Filament\Tables\Table;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
+use App\Jobs\DispatchAlertTasksJob;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Tables\Columns\TextColumn;
@@ -34,7 +35,7 @@ class ProductAlertsTable
                     ->color('warning')
                     ->requiresConfirmation()
                     ->action(function (ProductAlert $record) {
-                        // DispatchAlertTasksJob::dispatch($record);
+                        DispatchAlertTasksJob::dispatch($record);
                         $record->update(['dispatched_at' => now()]);
                     })
                     ->visible(fn (ProductAlert $record) => is_null($record->dispatched_at)),
