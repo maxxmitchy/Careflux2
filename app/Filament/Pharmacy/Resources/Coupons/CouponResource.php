@@ -28,7 +28,7 @@ class CouponResource extends Resource
 
     protected static ?int $navigationSort = 4;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Pharmacy Management';
+    protected static string|UnitEnum|null $navigationGroup = 'Inventory & Stock';
 
     public static function form(Schema $schema): Schema
     {

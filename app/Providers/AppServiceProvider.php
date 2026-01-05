@@ -8,6 +8,7 @@ use App\Observers\MarketingAssetObserver;
 use App\Observers\MedicationObserver;
 use App\Observers\PatientInteractionObserver;
 use App\Observers\PharmacyProductObserver;
+use App\Observers\ProductBatchObserver;
 use App\Observers\ScrapedProductObserver;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Fortify\Contracts\LoginViewResponse as LoginViewResponseContract;
@@ -16,6 +17,7 @@ use Src\Medication\Domain\Models\Medication;
 use Src\Order\Domain\Models\Invoice;
 use Src\Patient\Domain\Models\PatientInteraction;
 use Src\Pharmacy\Domain\Models\PharmacyProduct;
+use Src\Pharmacy\Domain\Models\ProductBatch;
 use Src\Scraping\Domain\Models\ScrapedProduct;
 
 class AppServiceProvider extends ServiceProvider
@@ -41,5 +43,7 @@ class AppServiceProvider extends ServiceProvider
         Medication::observe(MedicationObserver::class);
 
         Invoice::observe(InvoiceObserver::class);
+
+        ProductBatch::observe(ProductBatchObserver::class);
     }
 }

@@ -17,6 +17,7 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use UnitEnum;
 
 class PharmacistReportResource extends Resource
 {
@@ -28,7 +29,9 @@ class PharmacistReportResource extends Resource
 
     protected static ?string $navigationLabel = 'Weekly Reports';
 
-    protected static ?int $navigationSort = 5;
+    protected static string|UnitEnum|null $navigationGroup = 'Management & Reporting';
+
+    protected static ?int $navigationSort = 2;
 
     public static function form(Schema $schema): Schema
     {

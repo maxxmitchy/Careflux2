@@ -14,13 +14,15 @@ class KnowledgeBase extends Page
 {
     use WithPagination; // 👈 Enable pagination support
 
-    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-question-mark-circle';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-book-open';
 
     protected string $view = 'filament.pharmacy.pages.knowledge-base';
 
     protected static ?string $navigationLabel = 'Message Playbook';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Resources';
+    protected static string|UnitEnum|null $navigationGroup = 'Patient Care';
+
+    protected static ?int $navigationSort = 5; // Places it at the bottom of the care tools
 
     public string $search = '';
 

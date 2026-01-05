@@ -17,14 +17,19 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Src\Order\Domain\Models\Invoice;
+use UnitEnum;
 
 class OrderResource extends Resource
 {
     protected static ?string $model = Invoice::class;
 
+    protected static ?string $navigationLabel = 'Orders';
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::ShoppingBag;
 
     protected static ?string $recordTitleAttribute = 'invoice_number';
+
+    protected static string|UnitEnum|null $navigationGroup = 'Daily Operations  ';
 
     protected static ?int $navigationSort = 1; // High priority in the sidebar
 

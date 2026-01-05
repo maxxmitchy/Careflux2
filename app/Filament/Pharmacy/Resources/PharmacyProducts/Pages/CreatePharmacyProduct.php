@@ -5,7 +5,10 @@ namespace App\Filament\Pharmacy\Resources\PharmacyProducts\Pages;
 use App\Events\ProductCreated;
 use App\Filament\Pharmacy\Resources\PharmacyProducts\PharmacyProductResource;
 use Filament\Facades\Filament;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\Textarea;
@@ -78,9 +81,70 @@ class CreatePharmacyProduct extends CreateRecord
                         return $variant->id;
                     }),
                 TextInput::make('price')->required()->numeric()->prefix('₦')->hint('Price per unit in Kobo, that is ₦100 = 10000 Kobo. So if a product is sold for ₦150, enter 15000 here.'),
-                TextInput::make('stock')->required()->numeric()->integer(),
+                // Hidden::make('stock')->required()->numeric()->integer(),
                 TextInput::make('nafdac_number')->label('NAFDAC Number'),
-                TagsInput::make('batch_numbers')->label('Batch Numbers')->placeholder('Enter batch numbers for this stock'),
+                // TagsInput::make('batch_numbers')->label('Batch Numbers')->placeholder('Enter batch numbers for this stock'),
+                Repeater::make('batches')
+                    ->relationship()
+                    ->schema([
+                        TextInput::make('batch_number')
+                            ->label('Batch #'),
+
+                        DatePicker::make('expiry_date')
+                            ->label('Expiry Date')
+                            ->required()
+                            ->native(false),
+
+                        TextInput::make('quantity')
+                            ->label('Qty')
+                            ->integer() // Change numeric() to integer() for whole numbers
+                            ->required()
+                            ->minValue(0)
+    // FIX 1: Sanitize the input before saving or processing
+                            ->dehydrateStateUsing(fn ($state) => (int) preg_replace('/[^0-9]/', '', $state))
+    // FIX 2: If this is inside the Repeater with calculations, sanitize live
+                            ->live(onBlur: true)
+                            ->afterStateUpdated(function ($state, callable $set) {
+                                // Immediately strip non-digits if the user types them
+                                $cleanValue = (int) preg_replace('/[^0-9]/', '', $state);
+
+                                // Only update if it actually changed to prevent loops
+                                if ($state !== $cleanValue) {
+                                    $set('quantity', $cleanValue);
+                                }
+                            }),
+
+                        TextInput::make('cost_price')
+                            ->label('Cost Price (Unit)')
+                            ->prefix('₦')
+                            ->helperText('Required to calculate your profit share.')
+                            ->required()
+                            ->integer() // Change numeric() to integer() for whole numbers
+                            ->minValue(500)
+                            // FIX 1: Sanitize the input before saving or processing
+                            ->dehydrateStateUsing(fn ($state) => (int) preg_replace('/[^0-9]/', '', $state))
+                            // FIX 2: If this is inside the Repeater with calculations, sanitize live
+                            ->live(onBlur: true)
+                            ->afterStateUpdated(function ($state, callable $set) {
+                                // Immediately strip non-digits if the user types them
+                                $cleanValue = (int) preg_replace('/[^0-9]/', '', $state);
+
+                                // Only update if it actually changed to prevent loops
+                                if ($state !== $cleanValue) {
+                                    $set('cost_price', $cleanValue);
+                                }
+                            }),
+
+                    ])
+                    ->columns(4)
+                    ->defaultItems(1)
+                    ->addActionLabel('Add Another Batch')
+                    ->live()
+                    ->afterStateUpdated(function ($state, callable $set, $get) {
+                        // Optional: Update the hidden stock field dynamically for UI feedback
+                        $total = collect($state)->sum('quantity');
+                        $set('stock', $total);
+                    }),
             ]);
     }
 

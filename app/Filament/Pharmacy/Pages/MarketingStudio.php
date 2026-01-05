@@ -26,6 +26,7 @@ use Src\Marketing\Application\Actions\CreateMarketingAssetAction;
 use Src\Marketing\Domain\DTOs\MarketingAssetData;
 use Src\Marketing\Domain\Models\MarketingAsset;
 use Src\Pharmacy\Domain\Models\PharmacyProduct;
+use UnitEnum;
 
 class MarketingStudio extends Page implements HasForms, HasTable
 {
@@ -36,6 +37,10 @@ class MarketingStudio extends Page implements HasForms, HasTable
     protected string $view = 'filament.pharmacy.pages.marketing-studio';
 
     protected static ?string $navigationLabel = 'Marketing Studio';
+
+    protected static string|UnitEnum|null $navigationGroup = 'Growth & Earnings';
+
+    protected static ?int $navigationSort = 2; // High priority in the sidebar
 
     public ?array $data = [];
 

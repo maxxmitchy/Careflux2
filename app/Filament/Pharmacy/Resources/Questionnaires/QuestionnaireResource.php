@@ -26,7 +26,9 @@ class QuestionnaireResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::DocumentText;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Pharmacy Management';
+    protected static string|UnitEnum|null $navigationGroup = 'Patient Care';
+
+    protected static ?int $navigationSort = 2; // High priority in the sidebar
 
     protected static ?string $recordTitleAttribute = 'title';
 

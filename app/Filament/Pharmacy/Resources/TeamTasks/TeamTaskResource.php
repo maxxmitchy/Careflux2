@@ -30,7 +30,7 @@ class TeamTaskResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Team Tasks';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Team Management';
+    protected static string|UnitEnum|null $navigationGroup = 'Management & Reporting';
 
     public static function form(Schema $schema): Schema
     {

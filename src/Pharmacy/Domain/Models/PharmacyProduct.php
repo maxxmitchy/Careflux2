@@ -47,6 +47,22 @@ class PharmacyProduct extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function batches(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        // Order by expiry date so earliest expire first (FEFO - First Expired First Out)
+        return $this->hasMany(ProductBatch::class)->orderBy('expiry_date', 'asc');
+    }
+
+    /**
+     * Recalculate and save the total stock based on batches.
+     * This keeps the 'stock' column on this table accurate for fast queries.
+     */
+    public function syncStockFromBatches(): void
+    {
+        $total = $this->batches()->sum('quantity');
+        $this->update(['stock' => $total]);
+    }
+
     // ACCESSORS to pull data from the global catalog for clean presentation
     // public function getNameAttribute(): string
     // {

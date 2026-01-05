@@ -17,6 +17,7 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Src\Pharmacy\Domain\Models\PrescriptionVerification;
+use UnitEnum;
 
 class PrescriptionVerificationResource extends Resource
 {
@@ -26,7 +27,9 @@ class PrescriptionVerificationResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'reference_code';
 
-    protected static ?int $navigationSort = 2;
+    protected static string|UnitEnum|null $navigationGroup = 'Daily Operations  ';
+
+    protected static ?int $navigationSort = 3; // High priority in the sidebar
 
     public static function getNavigationBadge(): ?string
     {

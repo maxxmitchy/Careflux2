@@ -25,6 +25,7 @@ use Src\Gamification\Domain\Models\Task;
 use Src\Patient\Domain\Models\Patient;
 use Src\Pharmacy\Domain\Models\PharmacyProduct;
 use Src\Pharmacy\Domain\Models\PriceHistory;
+use UnitEnum;
 
 class TaskResource extends Resource
 {
@@ -34,7 +35,9 @@ class TaskResource extends Resource
 
     protected static ?string $navigationLabel = 'My Tasks';
 
-    protected static ?int $navigationSort = 2;
+    protected static string|UnitEnum|null $navigationGroup = 'Daily Operations  ';
+
+    protected static ?int $navigationSort = 2; // High priority in the sidebar
 
     public static function getNavigationBadge(): ?string
     {

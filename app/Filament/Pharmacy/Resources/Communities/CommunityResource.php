@@ -16,6 +16,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Src\Pharmacy\Domain\Models\Community;
 use Src\Shared\Domain\Models\User;
+use UnitEnum;
 
 class CommunityResource extends Resource
 {
@@ -26,6 +27,8 @@ class CommunityResource extends Resource
     protected static ?string $recordTitleAttribute = 'name';
 
     protected static ?int $navigationSort = 3;
+
+    protected static string|UnitEnum|null $navigationGroup = 'Patient Care';
 
     public static function getEloquentQuery(): Builder
     {

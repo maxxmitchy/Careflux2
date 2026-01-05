@@ -23,7 +23,7 @@ class PharmacyProductResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::ArchiveBox;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Pharmacy Management';
+    protected static string|UnitEnum|null $navigationGroup = 'Inventory & Stock';
 
     protected static ?string $modelLabel = 'My Product';
 

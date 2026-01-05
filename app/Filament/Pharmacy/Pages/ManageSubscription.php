@@ -10,6 +10,7 @@ use Illuminate\Support\Collection;
 use Src\Order\Application\Actions\VerifyTransactionAction;
 use Src\Subscription\Application\Actions\LogTransactionAction;
 use Src\Subscription\Domain\Models\Plan;
+use UnitEnum;
 
 class ManageSubscription extends Page
 {
@@ -17,7 +18,9 @@ class ManageSubscription extends Page
 
     protected string $view = 'filament.pharmacy.pages.manage-subscription';
 
-    protected static ?int $navigationSort = 10; // Place it lower in the sidebar
+    protected static ?int $navigationSort = 3; // Place it lower in the sidebar
+
+    protected static string|UnitEnum|null $navigationGroup = 'Management & Reporting';
 
     public Collection $plans;
 

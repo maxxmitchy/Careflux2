@@ -20,9 +20,9 @@ class AssistGuest extends Page implements HasForms
 
     protected string $view = 'filament.pharmacy.pages.assist-guest';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Patients';
+    protected static string|UnitEnum|null $navigationGroup = 'Patient Care';
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 4; // Low priority in the sidebar
 
     public ?array $data = [];
 

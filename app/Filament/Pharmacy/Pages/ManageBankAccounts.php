@@ -27,7 +27,7 @@ class ManageBankAccounts extends Page implements HasForms, HasTable
 
     protected static ?string $navigationLabel = 'Bank Accounts';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Financials';
+    protected static string|UnitEnum|null $navigationGroup = 'Management & Reporting';
 
     protected static ?int $navigationSort = 11;
 

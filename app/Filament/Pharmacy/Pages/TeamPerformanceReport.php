@@ -24,7 +24,7 @@ class TeamPerformanceReport extends Page implements HasForms
 
     protected static ?string $navigationLabel = 'Team Performance';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Reports';
+    protected static string|UnitEnum|null $navigationGroup = 'Management & Reporting';
 
     /** Pharmacists only */
     public ?Collection $pharmacistPerformanceData = null;

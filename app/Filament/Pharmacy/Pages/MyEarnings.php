@@ -10,6 +10,8 @@ use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Illuminate\Contracts\Pagination\Paginator;
+use Illuminate\Support\Facades\Auth;
+use UnitEnum;
 
 class MyEarnings extends Page
 {
@@ -17,13 +19,15 @@ class MyEarnings extends Page
 
     protected string $view = 'filament.pharmacy.pages.my-earnings';
 
-    protected static ?int $navigationSort = 6;
-
     protected static ?string $title = 'My Earnings';
+
+    protected static string|UnitEnum|null $navigationGroup = 'Growth & Earnings';
+
+    protected static ?int $navigationSort = 3; // High priority in the sidebar
 
     protected function getHeaderActions(): array
     {
-        $user = auth()->user();
+        $user = Auth::user();
 
         return [
             Action::make('requestPayout')
