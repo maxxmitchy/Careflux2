@@ -4,25 +4,33 @@ namespace App\Filament\Pharmacy\Pages;
 
 use BackedEnum;
 use Filament\Facades\Filament;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Forms\Contracts\HasForms;
 use Filament\Pages\Page;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Carbon;
 use Src\Shared\Domain\Models\User;
 use UnitEnum;
 
-class TeamPerformanceReport extends Page
+class TeamPerformanceReport extends Page implements HasForms
 {
+    use InteractsWithForms;
+
     protected string $view = 'filament.pharmacy.pages.team-performance-report';
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-chart-bar-square';
-
     protected static ?string $navigationLabel = 'Team Performance';
-
     protected static string|UnitEnum|null $navigationGroup = 'Reports';
 
     public ?Collection $performanceData = null;
 
+    /** Selected date used to determine the week */
+    public ?string $selectedDate = null;
+
     /**
-     * This method is the security gate. The navigation item will only appear for managers.
+     * Navigation gate — only managers see this page.
      */
     public static function shouldRegisterNavigation(): bool
     {
@@ -30,14 +38,45 @@ class TeamPerformanceReport extends Page
     }
 
     /**
-     * This is the second security gate. It prevents non-managers from accessing the URL directly.
+     * Route-level security + default date
      */
     public function mount(): void
     {
         abort_unless(Filament::auth()->user()->is_manager, 403);
+
+        $this->form->fill([
+            'selectedDate' => now()->format('Y-m-d'),
+        ]);
+
         $this->loadReportData();
     }
 
+    /**
+     * Date filter form
+     */
+    protected function getFormSchema(): array
+    {
+        return [
+            DatePicker::make('selectedDate')
+                ->label('Select a Week')
+                ->native(false)
+                ->closeOnDateSelection()
+                ->default(now())
+                ->reactive(),
+        ];
+    }
+
+    /**
+     * Auto-refresh report when date changes
+     */
+    public function updatedSelectedDate(): void
+    {
+        $this->loadReportData();
+    }
+
+    /**
+     * Core report query (week-scoped)
+     */
     protected function loadReportData(): void
     {
         $manager = Filament::auth()->user();
@@ -45,21 +84,41 @@ class TeamPerformanceReport extends Page
 
         if (! $pharmacyId) {
             $this->performanceData = collect();
-
             return;
         }
 
-        // This is the single, high-performance query to get all data.
+        $date = Carbon::parse($this->selectedDate);
+        $startOfWeek = $date->copy()->startOfWeek();
+        $endOfWeek   = $date->copy()->endOfWeek();
+
         $this->performanceData = User::query()
             ->where('pharmacy_id', $pharmacyId)
-            ->where('is_pharmacist', true) // Only show pharmacists, not techs or other managers
+            ->where('is_pharmacist', true)
             ->withCount([
-                'tasks as completed_tasks_count' => fn ($query) => $query->where('status', 'completed'),
-                'tasks as pending_tasks_count' => fn ($query) => $query->where('status', 'pending'),
-                'interactions as interactions_count',
+                'tasks as completed_tasks_count' => fn (Builder $query) =>
+                    $query->where('status', 'completed')
+                          ->whereBetween('completed_at', [$startOfWeek, $endOfWeek]),
+
+                'tasks as pending_tasks_count' => fn (Builder $query) =>
+                    $query->where('status', 'pending'),
+
+                'interactions as interactions_count' => fn (Builder $query) => $query->whereBetween('patient_interactions.created_at', [$startOfWeek, $endOfWeek]),
             ])
-            ->withSum('gamificationLedgerEntries as total_points_earned', 'points_awarded')
-            ->with('latestPharmacistReport') // We will add this relationship to the User model
-            ->get();
+            ->withSum([
+                'gamificationLedgerEntries as total_points_earned' => fn (Builder $query) =>
+                    $query->whereBetween('created_at', [$startOfWeek, $endOfWeek]),
+            ], 'points_awarded')
+            ->with([
+                'pharmacistReports' => function ($query) use ($startOfWeek, $endOfWeek) {
+                    $query->whereBetween('week_ending_date', [$startOfWeek, $endOfWeek])
+                          ->latest();
+                },
+            ])
+            ->get()
+            ->map(function ($user) {
+                // Attach a single report for easy Blade access
+                $user->report_for_week = $user->pharmacistReports->first();
+                return $user;
+            });
     }
 }

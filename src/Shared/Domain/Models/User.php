@@ -198,6 +198,14 @@ class User extends Authenticatable implements CanResetPassword, FilamentUser
         return $this->hasMany(Questionnaire::class, 'created_by_user_id');
     }
 
+    /**
+     * Get all of the weekly reports submitted by this user.
+     */
+    public function pharmacistReports(): HasMany
+    {
+        return $this->hasMany(PharmacistReport::class);
+    }
+
     public function latestPharmacistReport(): HasOne
     {
         return $this->hasOne(PharmacistReport::class)->latestOfMany();
