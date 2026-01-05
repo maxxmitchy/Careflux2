@@ -33,6 +33,7 @@ class AwardPointsAction
                 'subjectable_type' => $subjectable->getMorphClass(),
                 'points_awarded' => $taskDefinition->points,
             ]);
+
             $newPointsBalance = $user->points_balance + $taskDefinition->points;
 
             $user->increment('points_balance', $taskDefinition->points);
