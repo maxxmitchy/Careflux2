@@ -2,13 +2,13 @@
 
 namespace App\Filament\Resources\TaskDefinitions\Schemas;
 
-use Illuminate\Support\Str;
-use Filament\Schemas\Schema;
-use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Set;
+use Filament\Schemas\Schema;
+use Illuminate\Support\Str;
 use Src\Gamification\Domain\Models\TaskDefinition;
 
 class TaskDefinitionForm
@@ -42,7 +42,7 @@ class TaskDefinitionForm
                         Textarea::make('description')
                             ->maxLength(65535)
                             ->columnSpanFull(),
-                        
+
                         Toggle::make('is_active')
                             ->default(true)
                             ->helperText('Inactive tasks cannot be assigned or completed.'),

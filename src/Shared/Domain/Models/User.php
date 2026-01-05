@@ -4,32 +4,32 @@ declare(strict_types=1);
 
 namespace Src\Shared\Domain\Models;
 
-use Filament\Panel;
 use App\Models\PharmacistReport;
-use Src\Wallet\Domain\Models\Wallet;
-use Src\Patient\Domain\Models\Patient;
-use Illuminate\Notifications\Notifiable;
-use Src\Gamification\Domain\Models\Task;
-use Src\Pharmacy\Domain\Models\Pharmacy;
-use Src\Pharmacy\Domain\Models\Community;
-use Src\Wallet\Domain\Concerns\HasWallet;
 use Filament\Models\Contracts\FilamentUser;
-use Illuminate\Contracts\Auth\CanResetPassword;
-use Src\Patient\Domain\Models\PatientInteraction;
-use Illuminate\Database\Eloquent\Relations\HasOne;
-use Src\Gamification\Domain\Enums\PharmacistLevel;
-use Src\Questionnaire\Domain\Models\Questionnaire;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\MorphOne;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
-use Src\Subscription\Domain\Concerns\HasSubscription;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Database\Eloquent\Relations\HasManyThrough;
-use Src\Gamification\Domain\Models\GamificationLedgerEntry;
-use Src\User\Domain\Notifications\ResetPasswordNotification;
+use Filament\Panel;
 use Illuminate\Auth\Passwords\CanResetPassword as CanResetPasswordTrait;
+use Illuminate\Contracts\Auth\CanResetPassword;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use Src\Gamification\Domain\Enums\PharmacistLevel;
+use Src\Gamification\Domain\Models\GamificationLedgerEntry;
+use Src\Gamification\Domain\Models\Task;
+use Src\Patient\Domain\Models\Patient;
+use Src\Patient\Domain\Models\PatientInteraction;
+use Src\Pharmacy\Domain\Models\Community;
+use Src\Pharmacy\Domain\Models\Pharmacy;
+use Src\Questionnaire\Domain\Models\Questionnaire;
+use Src\Subscription\Domain\Concerns\HasSubscription;
+use Src\User\Domain\Notifications\ResetPasswordNotification;
+use Src\Wallet\Domain\Concerns\HasWallet;
+use Src\Wallet\Domain\Models\Wallet;
 
 class User extends Authenticatable implements CanResetPassword, FilamentUser
 {
